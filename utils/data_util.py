@@ -66,9 +66,10 @@ def get_dataset(dataset='mnist'):
     return train_dataset, test_dataset
 
 def split_data(dataset):
-    data_lib = dict()
-    for _, (data, label) in enumerate(dataset):
-        if
+    labels = set(dataset.train_labels.numpy().tolist())
+    data_lib = dict.fromkeys(labels, list())
+    for _, data in enumerate(dataset):
+        data_lib[data[1]].append(data)
 
 
 
