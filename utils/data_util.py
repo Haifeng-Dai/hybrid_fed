@@ -99,6 +99,7 @@ def split_idx_evenly(idxs, num_set):
     idx_set = idx_set_matrix.tolist()
     return idx_set
 
+
 def split_idx_proportion(idx, proportion):
     '''
     把给定指标集按给定比例分割
@@ -120,39 +121,9 @@ def split_idx_proportion(idx, proportion):
     return idx_sets
 
 
-def idx_split(dataset, mode='iid', n_dataset=1, n_data_each_set=1):
+def idx_to_dataset(dataset, idx):
     '''
-    分割数据集
+    返回对应指标集的数据子集
     '''
-    targets_list = dataset.targets.tolist()
-    all_targets = set(targets_list)
-    idx_target = dict()
-    for target in all_targets:
-        idx_target[target] = list()
-        for idx, target_in_list in enumerate(targets_list):
-            if target_in_list == target:
-                idx_target[target] += [idx]
-    # 独立同分布
-    if mode == 'iid':
-        if n_dataset * n_data_each_set > len(dataset):
-            raise ValueError(
-                f'number of client ({n_dataset}) times number of data of each client ({n_data_each_set}) no more than number of total data ({len(dataset)})')
-        n_each_set = dict()
-        for target in all_targets:
-            n_each_set[target] = int(
-                len(idx_target[target]) / len(targets_list) * n_data_each_set)
-        dataset_splited = dict()
-        left_idx_target = idx_target
-        for i in range(n_dataset):
-            dataset_splited[i] = list()
-            for target in all_targets:
-                choiced_idx = numpy.random.choice(
-                    left_idx_target[target],
-                    n_each_set[target],
-                    replace=False)
-                dataset_splited[i] += list(choiced_idx)
-                left_idx_target[target] = list(
-                    set(left_idx_target[target]) - set(dataset_splited[i]))
-        return dataset_splited
-    elif mode == 'partial-iid':
-        print('TO DO.')
+    dataset_idex = dataset[idx]
+    return dataset_idex
