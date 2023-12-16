@@ -1,9 +1,17 @@
 import numpy
 import torchvision
 
-a = numpy.random.random([32, 34])
+raw_data = './data/raw-data'
+train_dataset = torchvision.datasets.MNIST(
+    root=raw_data,
+    train=True,
+    transform=torchvision.transforms.ToTensor(),
+    download=True
+)
+test_dataset = torchvision.datasets.MNIST(
+    root=raw_data,
+    train=False,
+    transform=torchvision.transforms.ToTensor()
+)
 
-b = torchvision.transforms.ToTensor()(a)
-
-print(a, a.shape)
-print(b, b.shape)
+print(train_dataset.train_labels)
