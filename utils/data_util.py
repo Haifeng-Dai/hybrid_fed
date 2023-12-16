@@ -65,12 +65,17 @@ def get_dataset(dataset='mnist'):
         raise ValueError('dataset error.')
     return train_dataset, test_dataset
 
-# 把训练数据集按照标签进行划分
+def split_data(dataset):
+    data_lib = dict()
+    for _, (data, label) in enumerate(dataset):
+        if
 
-# 根据标签分割数据集
 
 
 def idx_split(dataset, mode='iid', n_dataset=1, n_data_each_set=1):
+    '''
+    根据标签分割数据集
+    '''
     labels_list = dataset.targets.tolist()
     all_labels = set(labels_list)
     idx_label = dict()
