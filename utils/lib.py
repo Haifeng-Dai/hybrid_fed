@@ -1,6 +1,7 @@
 import torch
 import numpy
 import copy
+import torchvision
 
 from torch.utils.data import Dataset, DataLoader
 
@@ -14,30 +15,46 @@ class Loss(torch.nn.Module):
 
 
 class Server:
+    '''
+    服务器聚合策略
+    '''
+
     def __init__(self, model, client_params):
         self.model = copy.deepcopy(model)
-        self.client_params = client_params
+        self.client_params = copy.deepcopy(client_params)
         self.num_client = len(self.client_params)
-        self.parameters = self.client_params[0]
 
-        self.fed_avg()
-        self.model.load_state_dict(self.parameters)
-
-    def fed_avg(self):
+    # 平均
+    def average(self):
+        model = copy.deepcopy(self.model)
+        parameters = copy.deepcopy(self.client_params[0])
         for client in range(1, self.num_client):
-            for key in self.parameters:
-                new_params = self.client_params[client][key]
-                # print(new_params.equal(self.server_params[key]), end=' | ')
-                self.parameters[key] = self.parameters[key].add(
-                    new_params)
-                # tmp_1 = copy.deepcopy(new_params)
-                # tmp_2 = copy.deepcopy(self.parameters[key])
-                # print(new_params.equal(tmp_2.div(2)))
-        for key in self.parameters:
-            self.parameters[key] = self.parameters[key].div(2)
+            for key in parameters:
+                parameters[key] += self.client_params[client][key]
+        for key in parameters:
+            parameters[key] /= self.num_client
+        model.load_state_dict(parameters)
+        return model
+
+    # 加权平均
+    def weighted_average(self, weight):
+        model = copy.deepcopy(self.model)
+        parameters = copy.deepcopy(self.client_params[0])
+        for key in parameters:
+            parameters[key] *= weight[0]
+        for client in range(1, self.num_client):
+            for key in parameters:
+                parameters[key] += self.client_params[client][key] * \
+                    weight[client]
+        model.load_state_dict(parameters)
+        return model
 
 
 class DealDataset(Dataset):
+    '''
+    根据给定的指标集返回一个Dataset类，即数据集
+    '''
+
     def __init__(self, dataset, idx):
         self.dataset = dataset
         self.idx = idx
@@ -51,6 +68,50 @@ class DealDataset(Dataset):
         return img, target
 
 
+# 获取数据集
+def get_dataset(dataset='mnist'):
+    if dataset == 'mnist':
+        train_dataset = torchvision.datasets.MNIST(
+            root='./data',
+            train=True,
+            transform=torchvision.transforms.ToTensor(),
+            download=True
+        )
+        test_dataset = torchvision.datasets.MNIST(
+            root='./data',
+            train=False,
+            transform=torchvision.transforms.ToTensor()
+        )
+    elif dataset == 'cifar10':
+        train_dataset = torchvision.datasets.CIFAR10(
+            root='./data',
+            train=True,
+            transform=torchvision.transforms.ToTensor(),
+            download=True
+        )
+        test_dataset = torchvision.datasets.CIFAR10(
+            root='./data',
+            train=False,
+            transform=torchvision.transforms.ToTensor()
+        )
+    elif dataset == 'cifar100':
+        train_dataset = torchvision.datasets.CIFAR100(
+            root='./data',
+            train=True,
+            transform=torchvision.transforms.ToTensor(),
+            download=True
+        )
+        test_dataset = torchvision.datasets.CIFAR100(
+            root='./data',
+            train=False,
+            transform=torchvision.transforms.ToTensor()
+        )
+    else:
+        raise ValueError('dataset error.')
+    return train_dataset, test_dataset
+
+
+# 根据标签分割数据集
 def idx_split(dataset, mode='iid', n_dataset=1, n_data_each_set=1):
     labels_list = dataset.targets.tolist()
     all_labels = set(labels_list)
@@ -60,7 +121,7 @@ def idx_split(dataset, mode='iid', n_dataset=1, n_data_each_set=1):
         for idx, label_in_list in enumerate(labels_list):
             if label_in_list == label:
                 idx_label[label] += [idx]
-
+    # 独立同分布
     if mode == 'iid':
         if n_dataset * n_data_each_set > len(dataset):
             raise ValueError(
@@ -85,8 +146,8 @@ def idx_split(dataset, mode='iid', n_dataset=1, n_data_each_set=1):
     elif mode == 'partial-iid':
         print('TO DO.')
 
-
-def train_model(model, dataset, device='cpu', epochs=1, tqdm_position=0):
+# 训练模型
+def train_model(model, dataset, device='cpu', epochs=1):
     trained_model = copy.deepcopy(model).to(device)
     trained_model.train()
     train_dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
@@ -99,15 +160,9 @@ def train_model(model, dataset, device='cpu', epochs=1, tqdm_position=0):
             loss = criterion(output, label.to(device))
             loss.backward()
             optimizer.step()
-
-        #     if (i+1) % 100 == 0:
-        #         print('\r', end='')
-        #         print(
-        #             f'step [{i+1}/{len(train_dataloader)}], loss: {loss.item():.4f}', end='')
-        # print(f'\nepoch {epoch+1}/{epochs} down.')
     return trained_model
 
-
+# 评估模型
 def eval_model(model, dataset, device):
     server_model = copy.deepcopy(model)
     server_model.eval()
