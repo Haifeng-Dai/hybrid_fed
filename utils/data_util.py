@@ -70,6 +70,7 @@ def split_data(dataset):
     data_lib = dict.fromkeys(labels, list())
     for _, data in enumerate(dataset):
         data_lib[data[1]].append(data)
+    return data_lib
 
 
 
