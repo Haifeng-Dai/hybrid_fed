@@ -14,7 +14,7 @@ class Loss(torch.nn.Module):
         return torch.nn.functional.cross_entropy(input, target)
 
 
-class Server:
+class EdgeServer:
     '''
     边缘服务器聚合
     '''
@@ -50,36 +50,39 @@ class Server:
         return model
 
 
-
-
-# 训练模型
 def train_model(model, dataset, device='cpu', epochs=1):
+    '''
+    训练模型
+    '''
     trained_model = copy.deepcopy(model).to(device)
     trained_model.train()
     train_dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(trained_model.parameters())
     for epoch in range(epochs):
-        for i, (data, label) in enumerate(train_dataloader):
+        for i, (data, target) in enumerate(train_dataloader):
             optimizer.zero_grad()
             output = trained_model(data.to(device))
-            loss = criterion(output, label.to(device))
+            loss = criterion(output, target.to(device))
             loss.backward()
             optimizer.step()
     return trained_model
 
-# 评估模型
+
 def eval_model(model, dataset, device):
+    '''
+    评估模型
+    '''
     server_model = copy.deepcopy(model)
     server_model.eval()
     server_model.to(device)
     with torch.no_grad():
         correct = 0
         total = 0
-        data_loader = DataLoader(dataset, batch_size=32, shuffle=True)
-        for images, labels in data_loader:
+        data_loader = DataLoader(dataset, batch_size=32, shuffle=False)
+        for images, targets in data_loader:
             outputs = server_model(images.to(device))
             _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels.to(device)).sum().item()
+            total += targets.size(0)
+            correct += (predicted == targets.to(device)).sum().item()
         print('Test Accuracy: {:.2f}%'.format(100 * correct / total))

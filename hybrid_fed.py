@@ -4,7 +4,7 @@ import numpy
 import copy
 import tqdm
 
-from utils.model import LeNet5
+from utils.model_util import LeNet5
 from utils.lib import *
 
 torch.backends.cudnn.enabled = True
