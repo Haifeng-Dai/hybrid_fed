@@ -1,12 +1,10 @@
 import torch
-import numpy
-import copy
-import torchvision
 
+from copy import deepcopy
 from torch.utils.data import Dataset, DataLoader
 
 
-class loss_without_distillation(torch.nn.Module):
+class LossWithoutDistillation(torch.nn.Module):
     def __init__(self):
         super().__init__()
 
@@ -16,7 +14,7 @@ class loss_without_distillation(torch.nn.Module):
         return total_loss
 
 
-class loss_with_distillation(torch.nn.Module):
+class LossWithDistillation(torch.nn.Module):
     def __init__(self, alpha, beta):
         super().__init__()
         self.alpha = alpha
@@ -35,15 +33,22 @@ class EdgeServer:
     边缘服务器聚合
     '''
 
-    def __init__(self, model, client_params):
-        self.model = copy.deepcopy(model)
-        self.client_params = copy.deepcopy(client_params)
-        self.num_client = len(self.client_params)
+    def __init__(self, client_model):
+        self.model = deepcopy(client_model[0])
+        self.num_client = len(client_model)
+
+        self.client_params = []
+        for client in range(self.num_client):
+            self.client_params.append([])
+        i = 0
+        for client in client_model:
+            self.client_params[i] = client.state_dict()
+            i += 1
 
     # 平均
     def average(self):
-        model = copy.deepcopy(self.model)
-        parameters = copy.deepcopy(self.client_params[0])
+        model = deepcopy(self.model)
+        parameters = deepcopy(self.client_params[0])
         for client in range(1, self.num_client):
             for key in parameters:
                 parameters[key] += self.client_params[client][key]
@@ -54,8 +59,8 @@ class EdgeServer:
 
     # 加权平均
     def weighted_average(self, weight):
-        model = copy.deepcopy(self.model)
-        parameters = copy.deepcopy(self.client_params[0])
+        model = deepcopy(self.model)
+        parameters = deepcopy(self.client_params[0])
         for key in parameters:
             parameters[key] *= weight[0]
         for client in range(1, self.num_client):
@@ -70,7 +75,7 @@ def train_model(model, dataset, criterion, device='cpu', epochs=1):
     '''
     训练模型
     '''
-    trained_model = copy.deepcopy(model).to(device)
+    trained_model = deepcopy(model).to(device)
     trained_model.train()
     train_dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
     # criterion = torch.nn.CrossEntropyLoss()
@@ -89,15 +94,15 @@ def eval_model(model, dataset, device):
     '''
     评估模型
     '''
-    server_model = copy.deepcopy(model)
-    server_model.eval()
-    server_model.to(device)
+    model_copy = deepcopy(model)
+    model_copy.eval()
+    model_copy.to(device)
     with torch.no_grad():
         correct = 0
         total = 0
-        data_loader = DataLoader(dataset, batch_size=32, shuffle=False)
+        data_loader = DataLoader(dataset, batch_size=32)
         for images, targets in data_loader:
-            outputs = server_model(images.to(device))
+            outputs = model_copy(images.to(device))
             _, predicted = torch.max(outputs.data, 1)
             total += targets.size(0)
             correct += (predicted == targets.to(device)).sum().item()

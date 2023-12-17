@@ -1,8 +1,8 @@
-import copy
 import random
 import torchvision
 import numpy
 
+from copy import deepcopy
 from torch.utils.data import Dataset
 
 
@@ -85,7 +85,7 @@ def split_idx_evenly(idxs, num_set):
     input: index list
     out put: a list with indexes of each set
     '''
-    idxs_copy = copy.deepcopy(idxs)
+    idxs_copy = deepcopy(idxs)
     random.shuffle(idxs_copy)
     idx_cut = idxs_copy[:len(idxs_copy)//num_set * num_set]
     idx_numpy = numpy.array(idx_cut)
@@ -104,7 +104,7 @@ def split_idx_proportion(idx, proportion):
     num_idx_set = list()
     for set in range(num_set):
         num_idx_set.append(round(len(idx) * proportion[set]))
-    idx_copy = copy.deepcopy(idx)
+    idx_copy = deepcopy(idx)
     random.shuffle(idx_copy)
     idx_sets = []
     idx_left = idx_copy
@@ -115,24 +115,44 @@ def split_idx_proportion(idx, proportion):
     return idx_sets
 
 
-def train_data_split(dataset_splited, all_client):
-    num_all_client = len(all_client)
-    all_target = dataset_splited.keys()
-    idx_client_target = []
-    for client in all_client:
-        idx_client_target.append([])
-    for target in all_target:
-        num_idx_dataset_target = len(dataset_splited[target])
-        idxs_dataset_target = [i for i in range(num_idx_dataset_target)]
-        idx_target_client = split_idx_evenly(
-            idxs_dataset_target, num_all_client)
+def train_data_split(dataset_splited, all_client, mode='iid', proportion=None):
+    '''
+    把数据集分配给所以客户端
+    '''
+    if mode == 'iid':
+        num_all_client = len(all_client)
+        all_target = dataset_splited.keys()
+        idx_client_target = []
         for client in all_client:
-            idx_client_target[client].append(idx_target_client[client])
-    return idx_client_target
+            idx_client_target.append([])
+        for target in all_target:
+            num_idx_dataset_target = len(dataset_splited[target])
+            idxs_dataset_target = [i for i in range(num_idx_dataset_target)]
+            idx_target_client = split_idx_evenly(
+                idxs_dataset_target, num_all_client)
+            for client in all_client:
+                idx_client_target[client].append(idx_target_client[client])
+        return idx_client_target
+    if mode == 'proportion':
+        if proportion == None:
+            raise ValueError('proportion is required.')
+        num_all_client = len(all_client)
+        all_target = dataset_splited.keys()
+        idx_client_target = []
+        for client in all_client:
+            idx_client_target.append([])
+        for target in all_target:
+            num_idx_dataset_target = len(dataset_splited[target])
+            idxs_dataset_target = [i for i in range(num_idx_dataset_target)]
+            idx_target_client = split_idx_proportion(
+                idxs_dataset_target, proportion)
+            for client in all_client:
+                idx_client_target[client].append(idx_target_client[client])
+        return idx_client_target
 
 
-def idx_to_dataset(dataset, idxs):
-    '''
-    返回对应指标集的数据子集
-    '''
-    return [dataset[idx] for idx in idxs]
+# def idx_to_dataset(dataset, idxs):
+#     '''
+#     返回对应指标集的数据子集
+#     '''
+#     return [dataset[idx] for idx in idxs]
