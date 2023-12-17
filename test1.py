@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from utils.model_util import LeNet5
 from utils.data_util import *
-from utils.lib import eval_model
+from utils.train_util import eval_model
 
 
 class Loss1(torch.nn.Module):

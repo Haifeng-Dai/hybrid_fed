@@ -34,37 +34,31 @@ def get_dataset(dataset='mnist'):
             root=raw_data,
             train=True,
             transform=torchvision.transforms.ToTensor(),
-            download=True
-        )
+            download=True)
         test_dataset = torchvision.datasets.MNIST(
             root=raw_data,
             train=False,
-            transform=torchvision.transforms.ToTensor()
-        )
+            transform=torchvision.transforms.ToTensor())
     elif dataset == 'cifar10':
         train_dataset = torchvision.datasets.CIFAR10(
             root=raw_data,
             train=True,
             transform=torchvision.transforms.ToTensor(),
-            download=True
-        )
+            download=True)
         test_dataset = torchvision.datasets.CIFAR10(
             root=raw_data,
             train=False,
-            transform=torchvision.transforms.ToTensor()
-        )
+            transform=torchvision.transforms.ToTensor())
     elif dataset == 'cifar100':
         train_dataset = torchvision.datasets.CIFAR100(
             root=raw_data,
             train=True,
             transform=torchvision.transforms.ToTensor(),
-            download=True
-        )
+            download=True)
         test_dataset = torchvision.datasets.CIFAR100(
             root=raw_data,
             train=False,
-            transform=torchvision.transforms.ToTensor()
-        )
+            transform=torchvision.transforms.ToTensor())
     else:
         raise ValueError('dataset error.')
     return train_dataset, test_dataset
@@ -121,9 +115,24 @@ def split_idx_proportion(idx, proportion):
     return idx_sets
 
 
-def idx_to_dataset(dataset, idx):
+def train_data_split(dataset_splited, all_client):
+    num_all_client = len(all_client)
+    all_target = dataset_splited.keys()
+    idx_client_target = []
+    for client in all_client:
+        idx_client_target.append([])
+    for target in all_target:
+        num_idx_dataset_target = len(dataset_splited[target])
+        idxs_dataset_target = [i for i in range(num_idx_dataset_target)]
+        idx_target_client = split_idx_evenly(
+            idxs_dataset_target, num_all_client)
+        for client in all_client:
+            idx_client_target[client].append(idx_target_client[client])
+    return idx_client_target
+
+
+def idx_to_dataset(dataset, idxs):
     '''
     返回对应指标集的数据子集
     '''
-    dataset_idex = dataset[idx]
-    return dataset_idex
+    return [dataset[idx] for idx in idxs]

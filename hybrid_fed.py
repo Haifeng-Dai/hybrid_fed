@@ -6,7 +6,7 @@ import tqdm
 
 from utils.model_util import LeNet5
 from utils.data_util import *
-from utils.lib import *
+from utils.train_util import *
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True

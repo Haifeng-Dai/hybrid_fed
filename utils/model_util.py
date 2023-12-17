@@ -6,7 +6,7 @@ from torch import nn
 
 class LeNet5(nn.Module):
     '''
-    LeNet5 模型
+    修改后的LeNet5模型
     '''
 
     def __init__(self, l, w, h, num_classes):
@@ -17,20 +17,17 @@ class LeNet5(nn.Module):
         self.conv1 = nn.Sequential(
             nn.Conv2d(h, 6, kernel_size=5),
             nn.ReLU(inplace=True),
-            nn.AvgPool2d(kernel_size=2, stride=2)
-        )
+            nn.AvgPool2d(kernel_size=2, stride=2))
         self.conv2 = nn.Sequential(
             nn.Conv2d(6, 16, kernel_size=5),
             nn.ReLU(inplace=True),
-            nn.AvgPool2d(kernel_size=2, stride=2)
-        )
+            nn.AvgPool2d(kernel_size=2, stride=2))
         l_conv, w_conv = self.len_s()
         self.full_con = nn.Sequential(
             nn.Linear(16 * l_conv * w_conv, 120),
             nn.ReLU(inplace=True),
             nn.Linear(120, 84),
-            nn.ReLU(inplace=True)
-        )
+            nn.ReLU(inplace=True))
         self.output = nn.Linear(84, num_classes)
 
     # 卷积/核池化后特征数量计算公式
@@ -71,14 +68,12 @@ class MLP(nn.Module):
 
         self.input = nn.Sequential(
             nn.Linear(num_input, num_hidden),
-            nn.ReLU(inplace=True)
-        )
+            nn.ReLU(inplace=True))
         self.hidden = nn.Sequential(
             nn.Linear(num_hidden, num_hidden),
             nn.ReLU(inplace=True),
             nn.Linear(num_hidden, num_hidden),
-            nn.ReLU(inplace=True),
-        )
+            nn.ReLU(inplace=True))
         self.output = nn.Linear(num_hidden, num_output)
 
     def forward(self, x):

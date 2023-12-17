@@ -6,12 +6,28 @@ import torchvision
 from torch.utils.data import Dataset, DataLoader
 
 
-class Loss(torch.nn.Module):
+class loss_without_distillation(torch.nn.Module):
     def __init__(self):
         super().__init__()
 
     def forward(self, input, target):
-        return torch.nn.functional.cross_entropy(input, target)
+        ce_loss = torch.nn.CrossEntropyLoss()
+        total_loss = ce_loss(input, target)
+        return total_loss
+
+
+class loss_with_distillation(torch.nn.Module):
+    def __init__(self, alpha, beta):
+        super().__init__()
+        self.alpha = alpha
+        self.beta = beta
+
+    def forward(self, input, target, logit):
+        ce_loss = torch.nn.CrossEntropyLoss()
+        kl_loss = torch.nn.KLDivLoss(reduction='batchmean')
+        total_loss = self.alpha * \
+            ce_loss(input, target) + self.beta * kl_loss(input, logit)
+        return total_loss
 
 
 class EdgeServer:
@@ -50,14 +66,14 @@ class EdgeServer:
         return model
 
 
-def train_model(model, dataset, device='cpu', epochs=1):
+def train_model(model, dataset, criterion, device='cpu', epochs=1):
     '''
     训练模型
     '''
     trained_model = copy.deepcopy(model).to(device)
     trained_model.train()
     train_dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-    criterion = torch.nn.CrossEntropyLoss()
+    # criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(trained_model.parameters())
     for epoch in range(epochs):
         for i, (data, target) in enumerate(train_dataloader):
