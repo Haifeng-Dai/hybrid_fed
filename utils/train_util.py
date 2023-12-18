@@ -4,27 +4,33 @@ from copy import deepcopy
 from torch.utils.data import Dataset, DataLoader
 
 
-class LossWithoutDistillation(torch.nn.Module):
+class LWoD(torch.nn.Module):
+    '''
+    Loss Without Distillation
+    '''
     def __init__(self):
         super().__init__()
 
-    def forward(self, input, target):
+    def forward(self, input, target, logits):
         ce_loss = torch.nn.CrossEntropyLoss()
         total_loss = ce_loss(input, target)
         return total_loss
 
 
-class LossWithDistillation(torch.nn.Module):
+class LWD(torch.nn.Module):
+    '''
+    Loss With Distillation
+    '''
     def __init__(self, alpha, beta):
         super().__init__()
         self.alpha = alpha
         self.beta = beta
 
-    def forward(self, input, target, logit):
+    def forward(self, input, target, logits):
         ce_loss = torch.nn.CrossEntropyLoss()
         kl_loss = torch.nn.KLDivLoss(reduction='batchmean')
         total_loss = self.alpha * \
-            ce_loss(input, target) + self.beta * kl_loss(input, logit)
+            ce_loss(input, target) + self.beta * kl_loss(input, logits)
         return total_loss
 
 
@@ -89,6 +95,26 @@ def train_model(model, dataset, criterion, device='cpu', epochs=1):
             optimizer.step()
     return trained_model
 
+def train_model_disti(model, server_models, weight, dataset, criterion, device='cpu', epochs=1):
+    '''
+    训练模型
+    '''
+    trained_model = deepcopy(model).to(device)
+    trained_model.train()
+    train_dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+    # criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(trained_model.parameters())
+    for epoch in range(epochs):
+        for i, (data, target) in enumerate(train_dataloader):
+            optimizer.zero_grad()
+            logits = 0
+            for server_model in server_models:
+                logits += server_model[data] * weight
+            output = trained_model(data.to(device))
+            loss = criterion(output, target.to(device))
+            loss.backward()
+            optimizer.step()
+    return trained_model
 
 def eval_model(model, dataset, device):
     '''

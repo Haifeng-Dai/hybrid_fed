@@ -1,19 +1,27 @@
+import math
 import torch
 import torchvision
 
 from torch import nn
 
 
-def conv_cal(c, kernel_size, stride=1, padding=0):
+def conv_cal(c, kernel_size, stride=None, padding=0, operation='conv'):
     '''
-    卷积/核池化后特征数量计算公式
+    卷积/池化操作后特征数量计算
     '''
+    if stride == None:
+        if operation == 'conv':
+            stride = 1
+        else:
+            stride = kernel_size
     l_return = (c - kernel_size + 2 * padding) / stride + 1
-    if l_return % 1 == 0:
-        return int(l_return)
-    else:
-        raise ValueError(
-            'kernel size, stride or padding need to be adjusted.')
+    # print(stride, operation)
+    if operation == 'conv':
+        # print('cov', math.ceil(l_return))
+        return math.ceil(l_return)
+    if operation == 'pool':
+        # print('pool', math.floor(l_return))
+        return math.floor(l_return)
 
 
 class LeNet5(nn.Module):
@@ -21,21 +29,22 @@ class LeNet5(nn.Module):
     修改后的LeNet5模型
     '''
 
-    def __init__(self, c, w, h, num_classes):
+    def __init__(self, h, w, c, num_classes):
         super(LeNet5, self).__init__()
-        self.c = c
+        self.h = h
         self.w = w
         self.conv1 = nn.Sequential(
-            nn.Conv2d(h, 6, 5),
+            nn.Conv2d(c, 6, 5),
             nn.ReLU(inplace=True),
-            nn.AvgPool2d(kernel_size=2, stride=2))
+            nn.AvgPool2d(kernel_size=2))
         self.conv2 = nn.Sequential(
             nn.Conv2d(6, 16, kernel_size=5),
             nn.ReLU(inplace=True),
-            nn.AvgPool2d(kernel_size=2, stride=2))
-        c_conv, w_conv = self.len_s()
+            nn.AvgPool2d(kernel_size=2))
+        h_conv, w_conv = self.len_s()
+        # print(16 * h_conv * w_conv)
         self.full_con = nn.Sequential(
-            nn.Linear(16 * c_conv * w_conv, 120),
+            nn.Linear(16 * h_conv * w_conv, 120),
             nn.ReLU(inplace=True),
             nn.Linear(120, 84),
             nn.ReLU(inplace=True))
@@ -51,24 +60,24 @@ class LeNet5(nn.Module):
 
     # 计算卷积/池化层后的特征数
     def len_s(self):
-        c_conv = conv_cal(self.c, 5)
-        c_conv = conv_cal(c_conv, 2, 2)
-        c_conv = conv_cal(c_conv, 5)
-        c_conv = conv_cal(c_conv, 2, 2)
-        w_conv = conv_cal(self.w, 5)
-        w_conv = conv_cal(w_conv, 2, 2)
-        w_conv = conv_cal(w_conv, 5)
-        w_conv = conv_cal(w_conv, 2, 2)
-        return c_conv, w_conv
+        h_conv = conv_cal(self.h, kernel_size=5)
+        h_conv = conv_cal(h_conv, kernel_size=2, operation='pool')
+        h_conv = conv_cal(h_conv, kernel_size=5)
+        h_conv = conv_cal(h_conv, kernel_size=2, operation='pool')
+        w_conv = conv_cal(self.w, kernel_size=5)
+        w_conv = conv_cal(w_conv, kernel_size=2, operation='pool')
+        w_conv = conv_cal(w_conv, kernel_size=5)
+        w_conv = conv_cal(w_conv, kernel_size=2, operation='pool')
+        return h_conv, w_conv
 
 
 class MLP(nn.Module):
 
-    def __init__(self, c, w, h, num_hidden=200, num_classes=10):
+    def __init__(self, h, w, c, num_hidden=200, num_classes=10):
         super(MLP, self).__init__()
 
         self.input = nn.Sequential(
-            nn.Linear(c * w * h, num_hidden),
+            nn.Linear(h * w * c, num_hidden),
             nn.ReLU(inplace=True))
         self.hidden = nn.Sequential(
             nn.Linear(num_hidden, num_hidden),
@@ -85,21 +94,21 @@ class MLP(nn.Module):
 
 class CNN(nn.Module):
 
-    def __init__(self, c, w, h, num_classes):
+    def __init__(self, h, w, c, num_classes):
         super(CNN, self).__init__()
-        self.c = c
+        self.h = h
         self.w = w
         self.conv1 = nn.Sequential(
-            nn.Conv2d(h, 6, 3),
+            nn.Conv2d(c, 6, kernel_size=3),
             nn.ReLU(inplace=True),
-            nn.AvgPool2d(2))
+            nn.AvgPool2d(kernel_size=2))
         self.conv2 = nn.Sequential(
-            nn.Conv2d(6, 16, 3),
+            nn.Conv2d(6, 16, kernel_size=3),
             nn.ReLU(inplace=True),
-            nn.AvgPool2d(2))
-        c_conv, w_conv = self.len_s()
+            nn.AvgPool2d(kernel_size=2))
+        h_conv, w_conv = self.len_s()
         self.full_con = nn.Sequential(
-            nn.Linear(16 * c_conv * w_conv, 64),
+            nn.Linear(16 * h_conv * w_conv, 64),
             nn.ReLU(inplace=True))
         self.output = nn.Linear(64, num_classes)
 
@@ -113,12 +122,12 @@ class CNN(nn.Module):
 
     # 计算卷积/池化层后的特征数
     def len_s(self):
-        c_conv = conv_cal(self.c, 3)
-        c_conv = conv_cal(c_conv, 2)
-        c_conv = conv_cal(c_conv, 3)
-        c_conv = conv_cal(c_conv, 2)
-        w_conv = conv_cal(self.w, 3)
-        w_conv = conv_cal(w_conv, 2)
-        w_conv = conv_cal(w_conv, 3)
-        c_conv = conv_cal(c_conv, 2)
-        return c_conv, w_conv
+        h_conv = conv_cal(self.h, kernel_size=3)
+        h_conv = conv_cal(h_conv, kernel_size=2, operation='pool')
+        h_conv = conv_cal(h_conv, kernel_size=3)
+        h_conv = conv_cal(h_conv, kernel_size=2, operation='pool')
+        w_conv = conv_cal(self.w, kernel_size=3)
+        w_conv = conv_cal(w_conv, kernel_size=2, operation='pool')
+        w_conv = conv_cal(w_conv, kernel_size=3)
+        w_conv = conv_cal(w_conv, kernel_size=2, operation='pool')
+        return h_conv, w_conv
