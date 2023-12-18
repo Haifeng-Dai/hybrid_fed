@@ -11,3 +11,5 @@ b = [a, 3]
 
 b[0] = 'te'
 print(a, b)
+print(id(a))
+print(id(b[0]))

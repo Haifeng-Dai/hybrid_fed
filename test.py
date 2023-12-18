@@ -1,11 +1,18 @@
-from copy import deepcopy
-from utils.model_util import LeNet5
+import torchvision
+import torch
 
-model1 = LeNet5(28, 28, 1, 10)
-model2 = LeNet5(28, 28, 1, 10)
+from torch.utils.data import DataLoader, Dataset
 
-model_param1 = model1.state_dict()
-model_param2 = model1.state_dict()
+torch.set_printoptions(precision=2,
+                       threshold=1000,
+                       edgeitems=5,
+                       linewidth=1000,
+                       sci_mode=False)
 
-print(id(model_param1))
-print(id(model_param2))
+a = torch.randn([3, 4])
+print(a)
+
+b = torch.flatten(a)
+print(b)
+print(b.shape)
+print(b.shape[0])
