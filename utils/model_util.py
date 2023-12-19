@@ -15,12 +15,9 @@ def conv_cal(c, kernel_size, stride=None, padding=0, operation='conv'):
         else:
             stride = kernel_size
     l_return = (c - kernel_size + 2 * padding) / stride + 1
-    # print(stride, operation)
     if operation == 'conv':
-        # print('cov', math.ceil(l_return))
         return math.ceil(l_return)
     if operation == 'pool':
-        # print('pool', math.floor(l_return))
         return math.floor(l_return)
 
 
@@ -42,7 +39,6 @@ class LeNet5(nn.Module):
             nn.ReLU(inplace=True),
             nn.AvgPool2d(kernel_size=2))
         h_conv, w_conv = self.len_s()
-        # print(16 * h_conv * w_conv)
         self.full_con = nn.Sequential(
             nn.Linear(16 * h_conv * w_conv, 120),
             nn.ReLU(inplace=True),
