@@ -70,6 +70,8 @@ for client in all_client:
         train_dataset_client_new = [train_dataset_splited[target][idx]
                                     for idx in idx_client_target[client][target]]
         train_dataset_client[client].extend(train_dataset_client_new)
+print(type(train_dataset_client))
+print(len(train_dataset_client[0]))
 
 # %% 模型初始化
 initial_model = LeNet5(28, 28, 1, 10)
@@ -91,11 +93,13 @@ for epoch_server_commu in range(num_server_commu):
             # 每个服务器下单客户端分别训练
             for client in server_client[server]:
                 # 单个服务器下的客户端在私有数据集上进行num_client_train轮训练
+                print(epoch_server_commu, epoch_client_commu, server, client)
                 client_model[client], loss_sum = train_model(
                     model=client_model[client],
                     dataset=train_dataset_client[client],
                     device=device,
                     epochs=num_client_train)
+                # eval_model(client_model[client], test_dataset, device)
                 # 单个服务器下的客户端在公开数据集上进行num_public_train轮训练
                 if epoch_server_commu != 0:
                     neighbor_server_model = [
@@ -113,23 +117,33 @@ for epoch_server_commu in range(num_server_commu):
                         alpha=alpha,
                         beta=beta)
                 # 在训练后评估该服务器下的客户端
-                client_accuracy[client].append(eval_model(
-                    client_model[client], test_dataset, device))
+                client_accuracy_client = eval_model(client_model[client], test_dataset, device)
+                print(client_accuracy_client)
+                print(type(client_accuracy))
+                print(type(client_accuracy[client]))
+                # client_accuracy[client].append(client_accuracy_client)
+                pass
+            pass
+        pass
+    pass
+pass
+                # client_accuracy[client].append(eval_model(
+                #         client_model[client], test_dataset, device))
             # 在单个服务器下客户端训练完成后更新该服务器下客户端的模型
-            server_client_model[server] = [client_model[client]
-                                           for client in server_client[server]]
-            # 聚合获得单个服务器模型
-            server_model[server] = EdgeServer(
-                server_client_model[server]).average()
-            # 评估单个服务器模型
-            server_accuracy[server].append(eval_model(
-                server_model[server], test_dataset, device))
-    # 服务器在多轮更新联邦学习后固定用于蒸馏的模型
-    server_model_distillation = deepcopy(server_model)
-    # 评估该蒸馏模型
-    for server in server_model:
-        server_model_distillation_accuracy[server].append(eval_model(
-            server_model_distillation[server], test_dataset, device))
+    #         server_client_model[server] = [client_model[client]
+    #                                        for client in server_client[server]]
+    #         # 聚合获得单个服务器模型
+    #         server_model[server] = EdgeServer(
+    #             server_client_model[server]).average()
+    #         # 评估单个服务器模型
+    #         server_accuracy[server].append(eval_model(
+    #             server_model[server], test_dataset, device))
+    # # 服务器在多轮更新联邦学习后固定用于蒸馏的模型
+    # server_model_distillation = deepcopy(server_model)
+    # # 评估该蒸馏模型
+    # for server in server_model:
+    #     server_model_distillation_accuracy[server].append(eval_model(
+    #         server_model_distillation[server], test_dataset, device))
 
 # %% 作图
 x = range(epoch_client_commu)

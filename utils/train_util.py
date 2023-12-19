@@ -2,6 +2,7 @@ import torch
 
 from copy import deepcopy
 from torch.utils.data import Dataset, DataLoader
+import torch.nn.functional as f
 from utils.lib_util import get_list
 
 
@@ -14,8 +15,8 @@ class LossWithoutDistillation(torch.nn.Module):
         super().__init__()
 
     def forward(self, input, target):
-        ce_loss = torch.nn.CrossEntropyLoss(reduction='sum')
-        return ce_loss(input, target)
+        ce_loss = torch.nn.functional.cross_entropy(input, target,reduction='sum')
+        return ce_loss
 
 
 class LossWithDistillation(torch.nn.Module):
@@ -29,9 +30,9 @@ class LossWithDistillation(torch.nn.Module):
         self.beta = beta
 
     def forward(self, input, target, logits):
-        ce_loss = torch.nn.CrossEntropyLoss(reduction='sum')
-        kl_loss = torch.nn.KLDivLoss(reduction='batchmean')
-        total_loss = self.alpha * ce_loss(input, target) + self.beta * kl_loss(input, logits)
+        ce_loss = f.cross_entropy(input, target,reduction='sum')
+        kl_loss = f.kl_div(input, logits, reduction='batchmean')
+        total_loss = self.alpha * ce_loss + self.beta * kl_loss
         return total_loss
 
 
@@ -82,8 +83,10 @@ def train_model(model, dataset, device='cpu', epochs=1):
     '''
     trained_model = deepcopy(model).to(device)
     trained_model.train()
-    train_dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+    train_dataloader = DataLoader(dataset, batch_size=1000,
+    shuffle=True)
     criterion = LossWithoutDistillation()
+    # criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(trained_model.parameters())
     loss_sum = 0
     for epoch in range(epochs):
@@ -127,12 +130,14 @@ def eval_model(model, dataset, device):
     '''
     评估模型
     '''
-    model_copy = deepcopy(model).eval().to(device)
+    model_copy = deepcopy(model)
+    model_copy.to(device)
+    model_copy.eval()
     correct = 0
     data_loader = DataLoader(dataset, batch_size=32)
     for images, targets in data_loader:
         outputs = model_copy(images.to(device))
-        _, predicted = torch.max(outputs, 1)
-        correct += torch.eq(predicted, targets.to(device)).sum()
+        _, predicted = torch.max(outputs.data, 1)
+        correct += (predicted == targets.to(device)).sum()
     accuracy = correct / len(dataset)
     return accuracy
