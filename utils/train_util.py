@@ -14,9 +14,8 @@ class LossWithoutDistillation(torch.nn.Module):
         super().__init__()
 
     def forward(self, input, target):
-        ce_loss = torch.nn.functional.cross_entropy(reduction='sum')
-        total_loss = ce_loss(input, target)
-        return total_loss
+        ce_loss = torch.nn.CrossEntropyLoss(reduction='sum')
+        return ce_loss(input, target)
 
 
 class LossWithDistillation(torch.nn.Module):
@@ -30,9 +29,9 @@ class LossWithDistillation(torch.nn.Module):
         self.beta = beta
 
     def forward(self, input, target, logits):
-        ce_loss = torch.nn.functional.cross_entropy(input, target, reduction='sum')
-        kl_loss = torch.nn.functional.kl_div(input, logits, reduction='batchmean')
-        total_loss = self.alpha * ce_loss + self.beta * kl_loss
+        ce_loss = torch.nn.CrossEntropyLoss(reduction='sum')
+        kl_loss = torch.nn.KLDivLoss(reduction='batchmean')
+        total_loss = self.alpha * ce_loss(input, target) + self.beta * kl_loss(input, logits)
         return total_loss
 
 
@@ -46,8 +45,6 @@ class EdgeServer:
         self.num_client = len(client_model)
 
         self.client_params = get_list(self.num_client)
-        # for client in range(self.num_client):
-        #     self.client_params.append([])
         i = 0
         for client in client_model:
             self.client_params[i] = client.state_dict()
@@ -57,7 +54,6 @@ class EdgeServer:
     def average(self):
         model = deepcopy(self.model)
         parameters = deepcopy(self.client_params[0])
-        # print(next(parameters).device)
         for client in range(1, self.num_client):
             for key in parameters:
                 parameters[key] += self.client_params[client][key]
@@ -138,6 +134,5 @@ def eval_model(model, dataset, device):
         outputs = model_copy(images.to(device))
         _, predicted = torch.max(outputs, 1)
         correct += torch.eq(predicted, targets.to(device)).sum()
-    # print(f'Test Accuracy: {100 * correct / total:.2f}%')
     accuracy = correct / len(dataset)
     return accuracy
