@@ -2,6 +2,7 @@ import torch
 import os
 import matplotlib.pyplot as plt
 
+from tqdm import tqdm
 from torch.utils.data import DataLoader
 from utils.model_util import LeNet5, CNN
 from utils.data_util import *
@@ -53,7 +54,7 @@ num_public_train = 2
 server_client_1 = [0, 1, 2]
 server_client_2 = [3, 4, 5]
 server_client = [server_client_1, server_client_2]
-neighbor_server = [1, 0]
+neighbor_server = [[1], [0]]
 
 # %% 训练集分配
 idx_client_target = train_data_split(train_dataset_splited, all_client)
@@ -70,8 +71,6 @@ for client in all_client:
         train_dataset_client_new = [train_dataset_splited[target][idx]
                                     for idx in idx_client_target[client][target]]
         train_dataset_client[client].extend(train_dataset_client_new)
-print(type(train_dataset_client))
-print(len(train_dataset_client[0]))
 
 # %% 模型初始化
 initial_model = LeNet5(28, 28, 1, 10)
@@ -85,25 +84,23 @@ server_model_distillation_accuracy = get_list(num_all_server)
 
 # %% 模型训练
 # 对每个服务器通讯幕进行循环
-for epoch_server_commu in range(num_server_commu):
+for epoch_server_commu in tqdm(range(num_server_commu), desc='epoch_server_commu', position=0, leave=False):
     # 所有边缘服务器分别协调其客户端进行多轮联邦学习
-    for epoch_client_commu in range(num_client_commu):
+    for epoch_client_commu in tqdm(range(num_client_commu), desc='epoch_client_commu', position=1, leave=False):
         # 所有边缘服务器分别协调其客户端进行联邦学习
-        for server in all_server:
+        for server in tqdm(all_server, desc='server', position=2, leave=False):
             # 每个服务器下单客户端分别训练
-            for client in server_client[server]:
+            for client in tqdm(server_client[server], desc='client', position=3, leave=False):
                 # 单个服务器下的客户端在私有数据集上进行num_client_train轮训练
-                print(epoch_server_commu, epoch_client_commu, server, client)
                 client_model[client], loss_sum = train_model(
                     model=client_model[client],
                     dataset=train_dataset_client[client],
                     device=device,
                     epochs=num_client_train)
-                # eval_model(client_model[client], test_dataset, device)
                 # 单个服务器下的客户端在公开数据集上进行num_public_train轮训练
                 if epoch_server_commu != 0:
                     neighbor_server_model = [
-                        client_model[client] for client in server_model_distillation[neighbor_server[server]]]
+                        server_model_distillation[server] for server in neighbor_server[server]]
                     weight = torch.tensor(
                         [1/len(neighbor_server_model) for _ in neighbor_server_model]).to(device)
                     client_model[client], loss_sum = train_model_disti(
@@ -117,36 +114,25 @@ for epoch_server_commu in range(num_server_commu):
                         alpha=alpha,
                         beta=beta)
                 # 在训练后评估该服务器下的客户端
-                client_accuracy_client = eval_model(client_model[client], test_dataset, device)
-                print(client_accuracy_client)
-                print(type(client_accuracy))
-                print(type(client_accuracy[client]))
-                # client_accuracy[client].append(client_accuracy_client)
-                pass
-            pass
-        pass
-    pass
-pass
-                # client_accuracy[client].append(eval_model(
-                #         client_model[client], test_dataset, device))
+                client_accuracy[client].append(eval_model(
+                    client_model[client], test_dataset, device))
             # 在单个服务器下客户端训练完成后更新该服务器下客户端的模型
-    #         server_client_model[server] = [client_model[client]
-    #                                        for client in server_client[server]]
-    #         # 聚合获得单个服务器模型
-    #         server_model[server] = EdgeServer(
-    #             server_client_model[server]).average()
-    #         # 评估单个服务器模型
-    #         server_accuracy[server].append(eval_model(
-    #             server_model[server], test_dataset, device))
-    # # 服务器在多轮更新联邦学习后固定用于蒸馏的模型
-    # server_model_distillation = deepcopy(server_model)
-    # # 评估该蒸馏模型
-    # for server in server_model:
-    #     server_model_distillation_accuracy[server].append(eval_model(
-    #         server_model_distillation[server], test_dataset, device))
+            server_client_model[server] = [client_model[client]
+                                           for client in server_client[server]]
+            # 聚合获得单个服务器模型
+            server_model[server] = EdgeServer(
+                server_client_model[server]).average()
+            # 评估单个服务器模型
+            server_accuracy[server].append(eval_model(server_model[server], test_dataset, device).cpu())
+    # 服务器在多轮更新联邦学习后固定用于蒸馏的模型
+    server_model_distillation = deepcopy(server_model)
+    # 评估该蒸馏模型
+    for server in all_server:
+        server_model_distillation_accuracy[server].append(eval_model(
+            server_model_distillation[server], test_dataset, device).cpu())
 
 # %% 作图
-x = range(epoch_client_commu)
+x = [i for i in range(num_server_commu * num_client_commu)]
 line_list = []
 for server in all_server:
     line_list.append(plt.plot(x, server_accuracy[server]))

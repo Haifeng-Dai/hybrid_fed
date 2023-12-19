@@ -83,7 +83,7 @@ def train_model(model, dataset, device='cpu', epochs=1):
     '''
     trained_model = deepcopy(model).to(device)
     trained_model.train()
-    train_dataloader = DataLoader(dataset, batch_size=1000,
+    train_dataloader = DataLoader(dataset, batch_size=32,
     shuffle=True)
     criterion = LossWithoutDistillation()
     # criterion = torch.nn.CrossEntropyLoss()
@@ -104,10 +104,9 @@ def train_model_disti(model, neighbor_server_model, weight, dataset, alpha, beta
     '''
     训练蒸馏模型
     '''
-    batch_size = 32
     trained_model = deepcopy(model).to(device)
     trained_model.train()
-    train_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    train_dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
     criterion = LossWithDistillation(alpha, beta)
     optimizer = torch.optim.Adam(trained_model.parameters())
     loss_sum = 0
@@ -134,10 +133,10 @@ def eval_model(model, dataset, device):
     model_copy.to(device)
     model_copy.eval()
     correct = 0
-    data_loader = DataLoader(dataset, batch_size=32)
+    data_loader = DataLoader(dataset, batch_size=320)
     for images, targets in data_loader:
         outputs = model_copy(images.to(device))
         _, predicted = torch.max(outputs.data, 1)
         correct += (predicted == targets.to(device)).sum()
     accuracy = correct / len(dataset)
-    return accuracy
+    return accuracy.cpu()
