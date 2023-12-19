@@ -2,22 +2,22 @@ import torch
 
 from copy import deepcopy
 from torch.utils.data import Dataset, DataLoader
+from utils.lib_util import get_list
 
-
-class LWoD(torch.nn.Module):
+class LossWithoutDistillation(torch.nn.Module):
     '''
     Loss Without Distillation
     '''
     def __init__(self):
         super().__init__()
 
-    def forward(self, input, target, logits):
+    def forward(self, input, target):
         ce_loss = torch.nn.CrossEntropyLoss()
         total_loss = ce_loss(input, target)
         return total_loss
 
 
-class LWD(torch.nn.Module):
+class LossWithDistillation(torch.nn.Module):
     '''
     Loss With Distillation
     '''
@@ -43,9 +43,9 @@ class EdgeServer:
         self.model = deepcopy(client_model[0])
         self.num_client = len(client_model)
 
-        self.client_params = []
-        for client in range(self.num_client):
-            self.client_params.append([])
+        self.client_params = get_list(self.num_client)
+        # for client in range(self.num_client):
+        #     self.client_params.append([])
         i = 0
         for client in client_model:
             self.client_params[i] = client.state_dict()
@@ -55,6 +55,7 @@ class EdgeServer:
     def average(self):
         model = deepcopy(self.model)
         parameters = deepcopy(self.client_params[0])
+        # print(next(parameters).device)
         for client in range(1, self.num_client):
             for key in parameters:
                 parameters[key] += self.client_params[client][key]
@@ -77,17 +78,17 @@ class EdgeServer:
         return model
 
 
-def train_model(model, dataset, criterion, device='cpu', epochs=1):
+def train_model(model, dataset, device='cpu', epochs=1):
     '''
     训练模型
     '''
     trained_model = deepcopy(model).to(device)
     trained_model.train()
     train_dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-    # criterion = torch.nn.CrossEntropyLoss()
+    criterion = LossWithoutDistillation()
     optimizer = torch.optim.Adam(trained_model.parameters())
     for epoch in range(epochs):
-        for i, (data, target) in enumerate(train_dataloader):
+        for data, target in train_dataloader:
             optimizer.zero_grad()
             output = trained_model(data.to(device))
             loss = criterion(output, target.to(device))
@@ -95,23 +96,25 @@ def train_model(model, dataset, criterion, device='cpu', epochs=1):
             optimizer.step()
     return trained_model
 
-def train_model_disti(model, server_models, weight, dataset, criterion, device='cpu', epochs=1):
+def train_model_disti(model, neighbor_server_model, weight, dataset, alpha, beta, device='cpu', epochs=1, num_target=10):
     '''
-    训练模型
+    训练蒸馏模型
     '''
+    batch_size = 32
     trained_model = deepcopy(model).to(device)
     trained_model.train()
-    train_dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-    # criterion = torch.nn.CrossEntropyLoss()
+    train_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    criterion = LossWithDistillation(alpha, beta)
     optimizer = torch.optim.Adam(trained_model.parameters())
     for epoch in range(epochs):
-        for i, (data, target) in enumerate(train_dataloader):
+        for data, target in train_dataloader:
             optimizer.zero_grad()
-            logits = 0
-            for server_model in server_models:
-                logits += server_model[data] * weight
+            logits = torch.zeros([len(target), num_target]).to(device)
+            for j, server_model in enumerate(neighbor_server_model):
+                logits += server_model(data.to(device)) * weight[j]
+            logits.detach()
             output = trained_model(data.to(device))
-            loss = criterion(output, target.to(device))
+            loss = criterion(output, target.to(device), logits)
             loss.backward()
             optimizer.step()
     return trained_model
@@ -123,13 +126,12 @@ def eval_model(model, dataset, device):
     model_copy = deepcopy(model)
     model_copy.eval()
     model_copy.to(device)
-    with torch.no_grad():
-        correct = 0
-        total = 0
-        data_loader = DataLoader(dataset, batch_size=32)
-        for images, targets in data_loader:
-            outputs = model_copy(images.to(device))
-            _, predicted = torch.max(outputs.data, 1)
-            total += targets.size(0)
-            correct += (predicted == targets.to(device)).sum().item()
-        print('Test Accuracy: {:.2f}%'.format(100 * correct / total))
+    correct = 0
+    total = 0
+    data_loader = DataLoader(dataset, batch_size=32)
+    for images, targets in data_loader:
+        outputs = model_copy(images.to(device))
+        _, predicted = torch.max(outputs.data, 1)
+        total += targets.size(0)
+        correct += (predicted == targets.to(device)).sum().item()
+    print('Test Accuracy: {:.2f}%'.format(100 * correct / total))
