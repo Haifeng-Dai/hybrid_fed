@@ -121,9 +121,13 @@ class SplitData:
                 idx += num_data_target
         return client_data
 
-    def all_non_iid(self, num_client, num_client_data, proportion=None, replace=True):
+    def all_non_iid(self, num_client, num_client_data, proportion=None):
         if proportion:
             proportion = 2 / self.num_target
+        if num_client <= self.num_target:
+            replace = False
+        else:
+            replace = True
         num_client_data_minor = (1 - proportion) * \
             num_client_data // (self.num_target - 1)
         num_client_data_mian = num_client_data - num_client_data_minor
@@ -147,14 +151,12 @@ class SplitData:
         return client_data
 
     # 按照客户端数量和每个客户端的数据量分配数据
-    def server_non_iid(self, num_server, num_server_client, num_client_data, proportion=0.3):
+    def server_non_iid(self, num_server, num_server_client, num_client_data, proportion=None):
+        if proportion:
+            proportion = 2 / self.num_target
         num_data_server = num_server_client * num_client_data
-        if num_server <= self.num_target:
-            server_data = self.all_non_iid(
-                num_server, num_data_server, proportion, replace=False)
-        else:
-            server_data = self.all_non_iid(
-                num_server, num_data_server, proportion, replace=True)
+        server_data = self.all_non_iid(
+            num_server, num_data_server, proportion)
         server_client_data = list_same_term(num_server)
         for server in range(num_server):
             server_data_ = server_data(server)
@@ -171,6 +173,38 @@ class SplitData:
                 client_date.append(server_client_data[server][client])
         return client_date
 
-    # def client_non_iid(self, num_server, num_server_client, num_client_data, proportion=0.3):
-    #     num_data_server = num_server_client * num_client_data
-    #     server_data_target =
+    def client_non_iid(self, num_server, num_server_client, num_client_data, proportion=None):
+        if proportion:
+            proportion = 2 / self.num_target
+        num_client_data_minor = (1 - proportion) * \
+            num_client_data // (self.num_target - 1)
+        num_client_data_mian = num_client_data - num_client_data_minor
+        if num_server_client <= self.num_target:
+            replace = False
+        else:
+            replace = True
+        client_main_target = numpy.random.choice(
+            self.targets, num_server_client, replace=replace).tolist()
+        server_client_main_target = list_same_term(
+            num_server, client_main_target)
+        server_client_data = list_same_term(num_server)
+        splited_data = self.split_data()
+        for target in range(self.num_target):
+            data_target = splited_data[target]
+            idx = 0
+            for server in range(num_server):
+                server_client_data[server] = list_same_term(num_server_client)
+                for client in range(num_server_client):
+                    if server_client_main_target[server][client] == target:
+                        server_client_data[server][client].append(
+                            data_target[idx: idx + num_client_data_mian])
+                        idx += num_client_data_mian
+                        continue
+                    server_client_data[server][client].append(
+                        data_target[idx: idx + num_client_data_minor])
+                    idx += num_client_data_mian
+        client_date = list_same_term(num_server * num_server_client)
+        for server in range(num_server):
+            for client in range(num_server_client):
+                client_date.append(server_client_data[server][client])
+        return client_date
