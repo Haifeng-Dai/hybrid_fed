@@ -3,8 +3,7 @@ import os
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
-from torch.utils.data import DataLoader
-from utils.model_util import LeNet5, CNN
+from utils.model_util import *
 from utils.data_util import *
 from utils.lib_util import *
 from utils.train_util import *
@@ -39,13 +38,12 @@ else:
     torch.save([train_dataset_splited, test_dataset_o], file_path)
 
 # %% 参数定义
-alpha = 0.8
-beta = 0.2
+alpha = 0.5
 
 num_all_client = 6
 num_all_server = 2
-all_client = [i for i in range(num_all_client)]
-all_server = [i for i in range(num_all_server)]
+all_client = number_list(num_all_client)
+all_server = number_list(num_all_server)
 num_server_commu = 2
 num_client_commu = 2
 num_client_train = 2
@@ -65,7 +63,7 @@ public_idx, test_idx = split_idx_proportion(
 public_dataset = [test_dataset_o[idx] for idx in public_idx]
 test_dataset = [test_dataset_o[idx] for idx in test_idx]
 
-train_dataset_client = get_list(num_all_client)
+train_dataset_client = list_same_term(num_all_client)
 for client in all_client:
     for target in all_target:
         train_dataset_client_new = [train_dataset_splited[target][idx]
@@ -75,12 +73,12 @@ for client in all_client:
 # %% 模型初始化
 initial_model = LeNet5(28, 28, 1, 10)
 
-client_model = get_list(num_all_client, initial_model)
-server_model = get_list(num_all_server)
-server_accuracy = get_list(num_all_server)
-client_accuracy = get_list(num_all_client)
-server_client_model = get_list(num_all_server)
-server_model_distillation_accuracy = get_list(num_all_server)
+client_model = list_same_term(num_all_client, initial_model)
+server_model = list_same_term(num_all_server)
+server_accuracy = list_same_term(num_all_server)
+client_accuracy = list_same_term(num_all_client)
+server_client_model = list_same_term(num_all_server)
+server_model_distillation_accuracy = list_same_term(num_all_server)
 
 # %% 模型训练
 # 对每个服务器通讯幕进行循环
@@ -111,8 +109,7 @@ for epoch_server_commu in tqdm(range(num_server_commu), desc='epoch_server_commu
                         device=device,
                         epochs=num_public_train,
                         num_target=len(all_target),
-                        alpha=alpha,
-                        beta=beta)
+                        alpha=alpha)
                 # 在训练后评估该服务器下的客户端
                 client_accuracy[client].append(eval_model(
                     client_model[client], test_dataset, device))

@@ -4,7 +4,7 @@ import numpy
 from copy import deepcopy
 
 
-def empty_list(len_list, term=[]):
+def list_same_term(len_list, term=[]):
     '''
     返回一个全是空列表的列表
     '''

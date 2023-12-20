@@ -3,38 +3,23 @@ import torch
 from copy import deepcopy
 from torch.utils.data import Dataset, DataLoader
 import torch.nn.functional as f
-from utils.lib_util import get_list
+from utils.lib_util import list_same_term
 
 
-class LossWithoutDistillation(torch.nn.Module):
+class DistillKL(torch.nn.Module):
     '''
-    Loss Without Distillation
-    '''
-
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, input, target):
-        ce_loss = torch.nn.functional.cross_entropy(
-            input, target, reduction='sum')
-        return ce_loss
-
-
-class LossWithDistillation(torch.nn.Module):
-    '''
-    Loss With Distillation
+    distilling loss
     '''
 
-    def __init__(self, alpha, beta):
-        super().__init__()
-        self.alpha = alpha
-        self.beta = beta
+    def __init__(self, T):
+        super(DistillKL, self).__init__()
+        self.T = T
 
-    def forward(self, input, target, logits):
-        ce_loss = f.cross_entropy(input, target, reduction='sum')
-        kl_loss = f.kl_div(input, logits, reduction='batchmean')
-        total_loss = self.alpha * ce_loss + self.beta * kl_loss
-        return total_loss
+    def forward(self, logits_teacher, logits_student):
+        prob_teacher = f.softmax(logits_teacher/self.T, dim=1)
+        prob_student = f.log_softmax(logits_student/self.T, dim=1)
+        loss = f.kl_div(prob_student, prob_teacher, reduction='batchmean')
+        return loss * self.T**2 / logits_teacher.shape[0]
 
 
 class EdgeServer:
@@ -46,7 +31,7 @@ class EdgeServer:
         self.model = deepcopy(client_model[0])
         self.num_client = len(client_model)
 
-        self.client_params = get_list(self.num_client)
+        self.client_params = list_same_term(self.num_client)
         i = 0
         for client in client_model:
             self.client_params[i] = client.state_dict()
@@ -84,31 +69,33 @@ def train_model(model, dataset, device='cpu', epochs=1):
     '''
     trained_model = deepcopy(model).to(device)
     trained_model.train()
-    train_dataloader = DataLoader(dataset, batch_size=32,
-                                  shuffle=True)
-    criterion = LossWithoutDistillation()
-    # criterion = torch.nn.CrossEntropyLoss()
+    train_dataloader = DataLoader(
+        dataset,
+        batch_size=32,
+        shuffle=True)
     optimizer = torch.optim.Adam(trained_model.parameters())
-    loss_sum = 0
+    loss_epoch = []
     for epoch in range(epochs):
+        loss_epoch.append(0)
         for data, target in train_dataloader:
             optimizer.zero_grad()
             output = trained_model(data.to(device))
-            loss = criterion(output, target.to(device))
+            loss = f.cross_entropy(output, target.to(device))
             loss.backward()
             optimizer.step()
-            loss_sum += loss.item()
-    return trained_model, loss_sum
+            loss_epoch[epoch] += loss.item()
+    return trained_model, loss_epoch
 
 
-def train_model_disti(model, neighbor_server_model, weight, dataset, alpha, beta, device='cpu', epochs=1, num_target=10):
+def train_model_disti(model, neighbor_server_model, weight, dataset, alpha, device='cpu', epochs=1, num_target=10):
     '''
     训练蒸馏模型
     '''
     trained_model = deepcopy(model).to(device)
     trained_model.train()
     train_dataloader = DataLoader(dataset, batch_size=320, shuffle=True)
-    criterion = LossWithDistillation(alpha, beta)
+    weight_device = weight.to(device)
+    criterion = DistillKL(T=1)
     optimizer = torch.optim.Adam(trained_model.parameters())
     loss_epoch = []
     for epoch in range(epochs):
@@ -117,10 +104,12 @@ def train_model_disti(model, neighbor_server_model, weight, dataset, alpha, beta
             optimizer.zero_grad()
             logits = torch.zeros([len(target), num_target]).to(device)
             for j, server_model in enumerate(neighbor_server_model):
-                logits += server_model(data.to(device)) * weight[j]
+                logits += server_model(data.to(device)) * weight_device[j]
             logits.detach()
             output = trained_model(data.to(device))
-            loss = criterion(output, target.to(device), logits)
+            ce_loss = f.cross_entropy(output, target.to(device))
+            distill_loss = criterion(output, logits)
+            loss = alpha * ce_loss + (1 - alpha) * distill_loss
             loss.backward()
             optimizer.step()
             loss_epoch[epoch] += loss.item()
