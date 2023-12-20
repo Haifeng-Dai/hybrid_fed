@@ -15,7 +15,8 @@ class LossWithoutDistillation(torch.nn.Module):
         super().__init__()
 
     def forward(self, input, target):
-        ce_loss = torch.nn.functional.cross_entropy(input, target,reduction='sum')
+        ce_loss = torch.nn.functional.cross_entropy(
+            input, target, reduction='sum')
         return ce_loss
 
 
@@ -30,7 +31,7 @@ class LossWithDistillation(torch.nn.Module):
         self.beta = beta
 
     def forward(self, input, target, logits):
-        ce_loss = f.cross_entropy(input, target,reduction='sum')
+        ce_loss = f.cross_entropy(input, target, reduction='sum')
         kl_loss = f.kl_div(input, logits, reduction='batchmean')
         total_loss = self.alpha * ce_loss + self.beta * kl_loss
         return total_loss
@@ -84,7 +85,7 @@ def train_model(model, dataset, device='cpu', epochs=1):
     trained_model = deepcopy(model).to(device)
     trained_model.train()
     train_dataloader = DataLoader(dataset, batch_size=32,
-    shuffle=True)
+                                  shuffle=True)
     criterion = LossWithoutDistillation()
     # criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(trained_model.parameters())
@@ -106,11 +107,12 @@ def train_model_disti(model, neighbor_server_model, weight, dataset, alpha, beta
     '''
     trained_model = deepcopy(model).to(device)
     trained_model.train()
-    train_dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+    train_dataloader = DataLoader(dataset, batch_size=320, shuffle=True)
     criterion = LossWithDistillation(alpha, beta)
     optimizer = torch.optim.Adam(trained_model.parameters())
-    loss_sum = 0
+    loss_epoch = []
     for epoch in range(epochs):
+        loss_epoch.append(0)
         for data, target in train_dataloader:
             optimizer.zero_grad()
             logits = torch.zeros([len(target), num_target]).to(device)
@@ -121,8 +123,8 @@ def train_model_disti(model, neighbor_server_model, weight, dataset, alpha, beta
             loss = criterion(output, target.to(device), logits)
             loss.backward()
             optimizer.step()
-            loss_sum += loss.item()
-    return trained_model, loss_sum
+            loss_epoch[epoch] += loss.item()
+    return trained_model, loss_epoch
 
 
 def eval_model(model, dataset, device):
