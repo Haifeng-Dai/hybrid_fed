@@ -1,9 +1,10 @@
 import torch
 
 from copy import deepcopy
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 import torch.nn.functional as f
-from lib_util import list_same_term
+
+from utils.lib_util import list_same_term
 
 
 class DistillKL(torch.nn.Module):
@@ -131,3 +132,17 @@ def eval_model(model, dataset, device):
         correct += (predicted == targets.to(device)).sum()
     accuracy = correct / len(dataset)
     return accuracy.cpu()
+
+
+# if __name__ == '__main__':
+#     loss_fun = DistillKL(T=1)
+#     a = torch.randn(1, 5)
+#     b = torch.randn(1, 5)
+#     print(a)
+#     print(b)
+#     loss_fun_1 = torch.nn.CrossEntropyLoss()
+#     c = loss_fun_1(a, b)
+#     print(c)
+
+#     d = loss_fun(a, b)
+#     print(d)

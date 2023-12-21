@@ -21,19 +21,19 @@ def number_list(len_list):
     return [i for i in range(len_list)]
 
 
-def split_idx_evenly(idxs, num_set):
-    '''
-    把给定的指标集随机分割成几个集合
-    input: index list
-    out put: a list with indexes of each set
-    '''
-    idxs_copy = deepcopy(idxs)
-    random.shuffle(idxs_copy)
-    idx_cut = idxs_copy[ : len(idxs_copy) // num_set * num_set]
-    idx_numpy = numpy.array(idx_cut)
-    idx_set_matrix = idx_numpy.reshape(num_set, -1)
-    idx_set = idx_set_matrix.tolist()
-    return idx_set
+# def split_idx_evenly(idxs, num_set):
+#     '''
+#     把给定的指标集随机分割成几个集合
+#     input: index list
+#     out put: a list with indexes of each set
+#     '''
+#     idxs_copy = deepcopy(idxs)
+#     random.shuffle(idxs_copy)
+#     idx_cut = idxs_copy[ : len(idxs_copy) // num_set * num_set]
+#     idx_numpy = numpy.array(idx_cut)
+#     idx_set_matrix = idx_numpy.reshape(num_set, -1)
+#     idx_set = idx_set_matrix.tolist()
+#     return idx_set
 
 
 def split_idx_proportion(idx, proportion):
@@ -59,12 +59,12 @@ def split_idx_proportion(idx, proportion):
 
 if __name__ == '__main__':
     # deepcopy is importent
-    a = empty_list(2)
+    a = list_same_term(2)
     print(a)
     for i, _ in enumerate(a):
         a[i].append(i)
     print(a)
-    b = empty_list(3)
+    b = list_same_term(3)
     print(b)
 
     c = number_list(3)
