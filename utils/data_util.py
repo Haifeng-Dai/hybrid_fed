@@ -3,7 +3,7 @@ import torchvision
 import numpy
 
 from torch.utils.data import Dataset
-from utils.lib_util import *
+from lib_util import *
 
 
 class DealDataset(Dataset):
@@ -104,10 +104,11 @@ class SplitData:
 
     # 按照客户端数量和每个客户端的数据量分配数据
     def all_iid(self, num_client, num_client_data):
-        if num_client_data > min(self.num_data_target()):
-            raise ValueError('too large num_target.')
+        if num_client_data * num_client > min(self.num_data_target()):
+            raise ValueError('too large num_client_data * num_client.')
         if num_client_data % self.num_target != 0:
-            raise ValueError('num_client_data / num_targets != 0.')
+            raise ValueError('num_client_data \% num_targets != 0.')
+
         num_data_target = num_client_data // self.num_target
         client_data = list_same_term(num_client)
         splited_data = self.split_data()
@@ -122,15 +123,21 @@ class SplitData:
         return client_data
 
     def all_non_iid(self, num_client, num_client_data, proportion=None):
-        if proportion:
+        if not proportion:
             proportion = 2 / self.num_target
         if num_client <= self.num_target:
             replace = False
         else:
             replace = True
-        num_client_data_minor = (1 - proportion) * \
-            num_client_data // (self.num_target - 1)
-        num_client_data_mian = num_client_data - num_client_data_minor
+        if num_client_data * num_client > min(self.num_data_target()):
+            raise ValueError('too large num_client_data * num_client.')
+        if num_client_data % self.num_target != 0:
+            raise ValueError('num_client_data \% num_targets != 0.')
+
+        num_client_data_minor = int(
+            (1 - proportion) * num_client_data // (self.num_target - 1))
+        num_client_data_mian = num_client_data - \
+            num_client_data_minor * (self.num_target - 1)
         client_main_target = numpy.random.choice(
             self.targets, num_client, replace=replace).tolist()
         splited_data = self.split_data()
@@ -152,14 +159,20 @@ class SplitData:
 
     # 按照客户端数量和每个客户端的数据量分配数据
     def server_non_iid(self, num_server, num_server_client, num_client_data, proportion=None):
-        if proportion:
+        if not proportion:
             proportion = 2 / self.num_target
         num_data_server = num_server_client * num_client_data
+        if num_data_server * num_server > min(self.num_data_target()):
+            raise ValueError(
+                'too large num_server * num_server_client * num_client_data.')
+        if num_client_data % self.num_target != 0:
+            raise ValueError('num_client_data \% num_targets != 0.')
+
         server_data = self.all_non_iid(
             num_server, num_data_server, proportion)
         server_client_data = list_same_term(num_server)
         for server in range(num_server):
-            server_data_ = server_data(server)
+            server_data_ = server_data[server]
             random.shuffle(server_data_)
             idx = 0
             server_client_data[server] = list_same_term(num_server_client)
@@ -167,17 +180,23 @@ class SplitData:
                 add_data = server_data_[idx: idx + num_client_data]
                 server_client_data[server][client].extend(add_data)
                 idx += num_client_data
-        client_date = list_same_term(num_server * num_server_client)
+        client_data = []
         for server in range(num_server):
             for client in range(num_server_client):
-                client_date.append(server_client_data[server][client])
-        return client_date
+                client_data.append(server_client_data[server][client])
+        return client_data
 
     def client_non_iid(self, num_server, num_server_client, num_client_data, proportion=None):
-        if proportion:
+        if not proportion:
             proportion = 2 / self.num_target
-        num_client_data_minor = (1 - proportion) * \
-            num_client_data // (self.num_target - 1)
+        if num_server_client * num_client_data * num_server > min(self.num_data_target()):
+            raise ValueError(
+                'too large num_server * num_server_client * num_client_data.')
+        if num_client_data % self.num_target != 0:
+            raise ValueError('num_client_data \% num_targets != 0.')
+
+        num_client_data_minor = int(
+            (1 - proportion) * num_client_data // (self.num_target - 1))
         num_client_data_mian = num_client_data - num_client_data_minor
         if num_server_client <= self.num_target:
             replace = False
@@ -185,26 +204,46 @@ class SplitData:
             replace = True
         client_main_target = numpy.random.choice(
             self.targets, num_server_client, replace=replace).tolist()
-        server_client_main_target = list_same_term(
-            num_server, client_main_target)
-        server_client_data = list_same_term(num_server)
+        print(client_main_target)
+        # server_client_main_target = list_same_term(
+        #     num_server, client_main_target)
         splited_data = self.split_data()
+        server_client_data = list_same_term(num_server)
         for target in range(self.num_target):
             data_target = splited_data[target]
             idx = 0
             for server in range(num_server):
                 server_client_data[server] = list_same_term(num_server_client)
                 for client in range(num_server_client):
-                    if server_client_main_target[server][client] == target:
-                        server_client_data[server][client].append(
-                            data_target[idx: idx + num_client_data_mian])
+                    print('target', target, 'server', server, 'client', client, end=' | ')
+                    if client_main_target[client] == target:
+                        add_data = data_target[idx: idx + num_client_data_mian]
+                        print('mian', len(add_data), end=' | ')
+                        server_client_data[server][client].extend(add_data)
+                        print(len(server_client_data[server][client]), end=' | ')
                         idx += num_client_data_mian
+                        print(idx)
                         continue
-                    server_client_data[server][client].append(
-                        data_target[idx: idx + num_client_data_minor])
-                    idx += num_client_data_mian
-        client_date = list_same_term(num_server * num_server_client)
+                    add_data = data_target[idx: idx + num_client_data_minor]
+                    print('minor', len(add_data), end=' | ')
+                    server_client_data[server][client].extend(add_data)
+                    print(len(server_client_data[server][client]), end=' | ')
+                    idx += num_client_data_minor
+                    print(idx)
+        # print(len(server_client_data), len(
+        #     server_client_data[0]), len(server_client_data[0][0]))
+        client_date = []
         for server in range(num_server):
             for client in range(num_server_client):
                 client_date.append(server_client_data[server][client])
         return client_date
+
+
+if __name__ == '__main__':
+
+    dataset, _ = get_dataset()
+    DataSplit = SplitData(dataset=dataset)
+    splited_data = DataSplit.split_data()
+    client_data = DataSplit.client_non_iid(2, 3, 100)
+    print(type(client_data), len(client_data))
+    print(type(client_data[0]), len(client_data[0]))

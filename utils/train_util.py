@@ -3,7 +3,7 @@ import torch
 from copy import deepcopy
 from torch.utils.data import Dataset, DataLoader
 import torch.nn.functional as f
-from utils.lib_util import list_same_term
+from lib_util import list_same_term
 
 
 class DistillKL(torch.nn.Module):
