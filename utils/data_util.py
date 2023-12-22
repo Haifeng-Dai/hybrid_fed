@@ -60,8 +60,8 @@ def get_dataset(dataset='mnist'):
             transform=torchvision.transforms.ToTensor())
     else:
         raise ValueError('dataset error.')
-    # data_shape = train_dataset[0][0].shape
-    return train_dataset, test_dataset, (c, h, w)
+    [c, h, w] = train_dataset[0][0].shape
+    return train_dataset, test_dataset, c, h, w
 
 
 class SplitData:

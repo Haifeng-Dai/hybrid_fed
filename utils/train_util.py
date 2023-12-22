@@ -94,7 +94,7 @@ def train_model_disti(model, neighbor_server_model, weight, dataset, alpha, devi
     '''
     trained_model = deepcopy(model).to(device)
     trained_model.train()
-    train_dataloader = DataLoader(dataset, batch_size=320, shuffle=True)
+    train_dataloader = DataLoader(dataset, batch_size=200, shuffle=True)
     weight_device = weight.to(device)
     criterion = DistillKL(T=1)
     optimizer = torch.optim.Adam(trained_model.parameters())
@@ -105,6 +105,7 @@ def train_model_disti(model, neighbor_server_model, weight, dataset, alpha, devi
             optimizer.zero_grad()
             logits = torch.zeros([len(target), num_target]).to(device)
             for j, server_model in enumerate(neighbor_server_model):
+                server_model.to(device)
                 logits += server_model(data.to(device)) * weight_device[j]
             logits.detach()
             output = trained_model(data.to(device))
@@ -125,7 +126,7 @@ def eval_model(model, dataset, device):
     model_copy.to(device)
     model_copy.eval()
     correct = 0
-    data_loader = DataLoader(dataset, batch_size=320)
+    data_loader = DataLoader(dataset, batch_size=200)
     for images, targets in data_loader:
         outputs = model_copy(images.to(device))
         _, predicted = torch.max(outputs.data, 1)
