@@ -12,15 +12,18 @@ class DistillKL(torch.nn.Module):
     distilling loss
     '''
 
-    def __init__(self, T):
+    def __init__(self, T, alpha):
         super(DistillKL, self).__init__()
         self.T = T
+        self.alpha = alpha
 
-    def forward(self, logits_teacher, logits_student):
+    def forward(self, output, target, logits_teacher):
         prob_teacher = f.softmax(logits_teacher/self.T, dim=1)
-        prob_student = f.log_softmax(logits_student/self.T, dim=1)
-        loss = f.kl_div(prob_student, prob_teacher, reduction='batchmean')
-        return loss * self.T**2 / logits_teacher.shape[0]
+        prob_student = f.softmax(output/self.T, dim=1)
+        soft_loss = f.kl_div(prob_student, prob_teacher, reduction='batchmean')
+        hard_loss = f.cross_entropy(output, target)
+        loss = self.alpha * hard_loss + (1 - self.alpha) * soft_loss * self.T**2 / logits_teacher.shape[0]
+        return loss
 
 
 class EdgeServer:
@@ -64,61 +67,65 @@ class EdgeServer:
         return model
 
 
-def train_model(model, dataset, device='cpu', epochs=1):
+def train_model(model, dataloader, device='cpu'):
     '''
     训练模型
     '''
     trained_model = deepcopy(model).to(device)
     trained_model.train()
-    train_dataloader = DataLoader(
-        dataset,
-        batch_size=32,
-        shuffle=True)
     optimizer = torch.optim.Adam(trained_model.parameters())
-    loss_epoch = []
-    for epoch in range(epochs):
-        loss_epoch.append(0)
-        for data, target in train_dataloader:
-            optimizer.zero_grad()
-            output = trained_model(data.to(device))
-            loss = f.cross_entropy(output, target.to(device))
-            loss.backward()
-            optimizer.step()
-            loss_epoch[epoch] += loss.item()
-    return trained_model, loss_epoch
+    for data, target in dataloader:
+        optimizer.zero_grad()
+        output = trained_model(data.to(device))
+        loss = f.cross_entropy(output, target.to(device))
+        loss.backward()
+        optimizer.step()
+    return trained_model
 
-
-def train_model_disti(model, neighbor_server_model, weight, dataset, alpha, device='cpu', epochs=1, num_target=10):
+def train_model_disti_weighted(model, neighbor_server_model, weight, dataloader, alpha, T, device='cpu', num_target=10):
     '''
-    训练蒸馏模型
+    训练蒸馏模型, logits加权聚合
     '''
     trained_model = deepcopy(model).to(device)
     trained_model.train()
-    train_dataloader = DataLoader(dataset, batch_size=200, shuffle=True)
     weight_device = weight.to(device)
-    criterion = DistillKL(T=1)
     optimizer = torch.optim.Adam(trained_model.parameters())
-    loss_epoch = []
-    for epoch in range(epochs):
-        loss_epoch.append(0)
-        for data, target in train_dataloader:
-            optimizer.zero_grad()
-            logits = torch.zeros([len(target), num_target]).to(device)
-            for j, server_model in enumerate(neighbor_server_model):
-                server_model.to(device)
-                logits += server_model(data.to(device)) * weight_device[j]
-            logits.detach()
-            output = trained_model(data.to(device))
-            ce_loss = f.cross_entropy(output, target.to(device))
-            distill_loss = criterion(output, logits)
-            loss = alpha * ce_loss + (1 - alpha) * distill_loss
-            loss.backward()
-            optimizer.step()
-            loss_epoch[epoch] += loss.item()
-    return trained_model, loss_epoch
+    criterion = DistillKL(T=T, alpha=alpha)
+    for data, target in dataloader:
+        data_device = data.to(device)
+        teacher_logits = torch.zeros([len(target), num_target], device=device)
+        for i, model in enumerate(neighbor_server_model):
+            teacher_model = deepcopy(model).to(device)
+            teacher_model.eval()
+            teacher_logits += teacher_model(data_device) * weight_device[i]
+        optimizer.zero_grad()
+        output = trained_model(data_device)
+        loss = criterion(output, target.to(device), teacher_logits)
+        loss.backward()
+        optimizer.step()
+    return trained_model
+
+def train_model_disti_single(model, teacher_model, dataloader, alpha, T, device='cpu'):
+    '''
+    训练蒸馏模型, 单个teacher
+    '''
+    trained_model = deepcopy(model).to(device)
+    trained_model.train()
+    teacher_model = deepcopy(teacher_model).to(device)
+    teacher_model.eval()
+    criterion = DistillKL(T=T, alpha=alpha)
+    optimizer = torch.optim.Adam(trained_model.parameters())
+    for data, target in dataloader:
+        optimizer.zero_grad()
+        logits = teacher_model(data.to(device))
+        output = trained_model(data.to(device))
+        loss = criterion(output, target.to(device), logits)
+        loss.backward()
+        optimizer.step()
+    return trained_model
 
 
-def eval_model(model, dataset, device):
+def eval_model(model, dataloader, device):
     '''
     评估模型
     '''
@@ -126,12 +133,13 @@ def eval_model(model, dataset, device):
     model_copy.to(device)
     model_copy.eval()
     correct = 0
-    data_loader = DataLoader(dataset, batch_size=200)
-    for images, targets in data_loader:
+    len_data = 0
+    for images, targets in dataloader:
         outputs = model_copy(images.to(device))
         _, predicted = torch.max(outputs.data, 1)
         correct += (predicted == targets.to(device)).sum()
-    accuracy = correct / len(dataset)
+        len_data += len(targets)
+    accuracy = correct / len_data
     return accuracy.cpu()
 
 

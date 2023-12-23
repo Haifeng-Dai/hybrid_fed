@@ -1,15 +1,14 @@
+# %% intial
 import torch
-import os
 import matplotlib.pyplot as plt
 
-from tqdm import tqdm
-from utils.model_util import *
+from torch.utils.data import DataLoader
+
+from utils.model_util import LeNet5, CNN
 from utils.data_util import *
 from utils.lib_util import *
 from utils.train_util import *
 
-torch.backends.cudnn.enabled = True
-torch.backends.cudnn.benchmark = True
 torch.set_printoptions(precision=2,
                        threshold=1000,
                        edgeitems=5,
@@ -18,60 +17,62 @@ torch.set_printoptions(precision=2,
 # 是否使用显卡加速
 if torch.cuda.is_available():
     device = 'cuda'
+    if torch.backends.cudnn.is_available():
+        torch.backends.cudnn.enabled = True
+        torch.backends.cudnn.benchmark = True
+        print('cudnn', end=' and ')
+elif torch.backends.mps.is_available():
+    device = 'mps'
 else:
     device = 'cpu'
 print(device)
 
-# %% 原始数据处理
-save_path = './data/dealed-data/'
-
-dataset = 'mnist'
-file_path = save_path + dataset + '_train_dataset_splited.pt'
-if os.path.exists(file_path):
-    [train_dataset_splited, test_dataset_o] = torch.load(file_path)
-    print('file existed.')
-else:
-    if not os.path.exists(save_path):
-        os.mkdir(save_path)
-    train_dataset_o, test_dataset_o = get_dataset(dataset)
-    train_dataset_splited = split_data(train_dataset_o)
-    torch.save([train_dataset_splited, test_dataset_o], file_path)
-
 # %% 参数定义
-alpha = 0.5
+alpha = 0
+num_server_commu = 100
+num_client_commu = 5
+num_client_train = 5
+num_public_train = 50
+batch_size = 100
 
-num_all_client = 6
-num_all_server = 2
+num_all_client = 9
+num_all_server = 3
+num_client_data = 1000
 all_client = number_list(num_all_client)
 all_server = number_list(num_all_server)
-num_server_commu = 2
-num_client_commu = 2
-num_client_train = 2
-num_public_train = 2
-
 server_client_1 = [0, 1, 2]
 server_client_2 = [3, 4, 5]
-server_client = [server_client_1, server_client_2]
-neighbor_server = [[1], [0]]
+server_client_3 = [6, 7, 8]
+server_client = [server_client_1, server_client_2, server_client_3]
+neighbor_server = [[1], [2], [0]]
 
-# %% 训练集分配
-idx_client_target = train_data_split(train_dataset_splited, all_client)
-all_target = train_dataset_splited.keys()
+# %% 原始数据处理
+save_path = './data/dealed-data/'
+dataset = 'mnist'
+train_dataset_o, test_dataset_o, c, h, w = get_dataset(dataset)
+TrainDatasetSplited = SplitData(train_dataset_o)
+all_target = TrainDatasetSplited.targets
+num_target = TrainDatasetSplited.num_target
 
-public_idx, test_idx = split_idx_proportion(
-    [i for i in range(len(test_dataset_o))], [0.2, 0.8])
-public_dataset = [test_dataset_o[idx] for idx in public_idx]
-test_dataset = [test_dataset_o[idx] for idx in test_idx]
+target_list = [[0], [1], [2], [3], [4], [5], [6], [7], [8], [9]]
+train_public_dataset_client = TrainDatasetSplited.part_target(
+    num_all_client, num_client_data, target_list)
+train_dataset_client = train_public_dataset_client[:9]
+# public_dataset = train_public_dataset_client[-1][:200]
+[public_dataset, test_dataset] = split_parts_random(
+    test_dataset_o, [200, 9800])
 
-train_dataset_client = list_same_term(num_all_client)
-for client in all_client:
-    for target in all_target:
-        train_dataset_client_new = [train_dataset_splited[target][idx]
-                                    for idx in idx_client_target[client][target]]
-        train_dataset_client[client].extend(train_dataset_client_new)
+public_dataloader = DataLoader(
+    dataset=public_dataset,
+    batch_size=batch_size,
+    shuffle=True)
+test_dataloader = DataLoader(
+    dataset=test_dataset,
+    batch_size=batch_size,
+    shuffle=True)
 
 # %% 模型初始化
-initial_model = LeNet5(28, 28, 1, 10)
+initial_model = CNN(h, w, c, num_target)
 
 client_model = list_same_term(num_all_client, initial_model)
 server_model = list_same_term(num_all_server)
@@ -82,51 +83,100 @@ server_model_distillation_accuracy = list_same_term(num_all_server)
 
 # %% 模型训练
 # 对每个服务器通讯幕进行循环
-for epoch_server_commu in tqdm(range(num_server_commu), desc='epoch_server_commu', position=0, leave=False):
+print('-'*100)
+for epoch_server_commu in range(num_server_commu):
+    print('|epoch_server_commu', epoch_server_commu, '/', num_server_commu)
     # 所有边缘服务器分别协调其客户端进行多轮联邦学习
-    for epoch_client_commu in tqdm(range(num_client_commu), desc='epoch_client_commu', position=1, leave=False):
+    for epoch_client_commu in range(num_client_commu):
+        print('  |epoch_client_commu', epoch_client_commu, '/', num_client_commu)
         # 所有边缘服务器分别协调其客户端进行联邦学习
-        for server in tqdm(all_server, desc='server', position=2, leave=False):
+        for server in all_server:
             # 每个服务器下单客户端分别训练
-            for client in tqdm(server_client[server], desc='client', position=3, leave=False):
+            for client in server_client[server]:
+                print('   |server', server, '/', all_server, 'client', client, '/', server_client[server])
                 # 单个服务器下的客户端在私有数据集上进行num_client_train轮训练
-                client_model[client], loss_sum = train_model(
-                    model=client_model[client],
+                train_dataloader_client = DataLoader(
                     dataset=train_dataset_client[client],
-                    device=device,
-                    epochs=num_client_train)
+                    batch_size=batch_size,
+                    shuffle=True)
+                for epoch in range(num_client_train):
+                    client_model[client] = train_model(
+                        model=client_model[client],
+                        dataloader=train_dataloader_client,
+                        device=device)
+                    acc = eval_model(
+                        model=client_model[client],
+                        dataloader=test_dataloader,
+                        device=device)
+                    print('    |local epoch,', epoch, 'acc', acc, end='\r')
                 # 单个服务器下的客户端在公开数据集上进行num_public_train轮训练
                 if epoch_server_commu != 0:
                     neighbor_server_model = [
                         server_model_distillation[server] for server in neighbor_server[server]]
                     weight = torch.tensor(
-                        [1/len(neighbor_server_model) for _ in neighbor_server_model]).to(device)
-                    client_model[client], loss_sum = train_model_disti(
-                        model=client_model[client],
-                        neighbor_server_model=neighbor_server_model,
-                        weight=weight,
-                        dataset=public_dataset,
-                        device=device,
-                        epochs=num_public_train,
-                        num_target=len(all_target),
-                        alpha=alpha)
+                        [1/len(neighbor_server_model) for _ in neighbor_server_model])
+                    for epoch in range(num_public_train):
+                        # client_model[client] = train_model_disti_weighted(
+                        #     model=client_model[client],
+                        #     neighbor_server_model=neighbor_server_model,
+                        #     weight=weight,
+                        #     dataloader=public_dataloader,
+                        #     alpha=alpha,
+                        #     T=2,
+                        #     device=device,
+                        #     num_target=num_target)
+                        # acc = eval_model(
+                        #     model=client_model[client],
+                        #     dataloader=test_dataloader,
+                        #     device=device)
+                        # print('     distill epoch,', epoch, 'acc', acc)
+                        for model_ in server_model_distillation:
+                            client_model[client] = train_model_disti_single(
+                                model=client_model[client],
+                                teacher_model=model_,
+                                dataloader=public_dataloader,
+                                alpha=alpha,
+                                T=0.1,
+                                device=device)
+                            acc = eval_model(
+                                model=client_model[client],
+                                dataloader=test_dataloader,
+                                device=device)
+                        print('    |distill epoch,', epoch, 'acc', acc, end='\r')
                 # 在训练后评估该服务器下的客户端
                 client_accuracy[client].append(eval_model(
-                    client_model[client], test_dataset, device))
+                    model=client_model[client],
+                    dataloader=test_dataloader,
+                    device=device))
+            print('-'*50)
             # 在单个服务器下客户端训练完成后更新该服务器下客户端的模型
-            server_client_model[server] = [client_model[client]
-                                           for client in server_client[server]]
+            server_client_model[server] = [
+                client_model[client] for client in server_client[server]]
             # 聚合获得单个服务器模型
             server_model[server] = EdgeServer(
                 server_client_model[server]).average()
             # 评估单个服务器模型
-            server_accuracy[server].append(eval_model(server_model[server], test_dataset, device).cpu())
+            acc_server = eval_model(
+                model=server_model[server],
+                dataloader=test_dataloader,
+                device=device)
+            print(
+                f'|servers comunicates {epoch_server_commu}, server aggregated {epoch_client_commu}, server {server} acc_server: {acc_server:.3f}')
+            print('-'*20)
+            server_accuracy[server].append(acc_server)
     # 服务器在多轮更新联邦学习后固定用于蒸馏的模型
+    print('-'*50)
+    print('|servers comunicates.')
     server_model_distillation = deepcopy(server_model)
-    # 评估该蒸馏模型
-    for server in all_server:
-        server_model_distillation_accuracy[server].append(eval_model(
-            server_model_distillation[server], test_dataset, device).cpu())
+    # # 评估该蒸馏模型
+    # for server in all_server:
+    #     acc_server_distill = eval_model(
+    #         model=server_model_distillation[server],
+    #         dataloader=test_dataloader,
+    #         device=device)
+    #     print('distill server', server, 'acc_server_distill', acc_server_distill)
+    #     server_model_distillation_accuracy[server].append(acc_server_distill)
+    print('-'*100)
 
 # %% 作图
 x = [i for i in range(num_server_commu * num_client_commu)]
