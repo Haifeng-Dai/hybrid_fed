@@ -106,10 +106,10 @@ class SplitData:
 
     # 按照客户端数量和每个客户端的数据量分配数据
     def all_iid(self, num_client, num_client_data):
-        if num_client_data * num_client > self.num_target * min(self.num_data_target()):
-            raise ValueError('too large num_client_data * num_client.')
-        if num_client_data % self.num_target != 0:
-            raise ValueError('num_client_data \% num_targets != 0.')
+        # if num_client_data * num_client > self.num_target * min(self.num_data_target()):
+        #     raise ValueError('too large num_client_data * num_client.')
+        # if num_client_data % self.num_target != 0:
+        #     raise ValueError('num_client_data \% num_targets != 0.')
 
         num_data_target = num_client_data // self.num_target
         client_data = list_same_term(num_client)
@@ -125,26 +125,20 @@ class SplitData:
         return client_data
 
     def all_non_iid(self, num_client, num_client_data, client_main_target, proportion=None):
-        if num_client_data * num_client > self.num_target * min(self.num_data_target()):
-            raise ValueError('too large num_client_data * num_client.')
+        # if num_client_data * num_client > self.num_target * min(self.num_data_target()):
+        #     raise ValueError('too large num_client_data * num_client.')
         if not proportion:
             proportion = 2 / self.num_target
-        # if num_client <= self.num_target:
-        #     replace = False
-        # else:
-        #     replace = True
-        if num_client_data * num_client * proportion > min(self.num_data_target()):
-            raise Warning(
-                'maybe too large num_client_data * num_client * proportion.')
-        if num_client_data % self.num_target != 0:
-            raise ValueError('num_client_data \% num_targets != 0.')
+        # if num_client_data * num_client * proportion > min(self.num_data_target()):
+        #     raise Warning(
+        #         'maybe too large num_client_data * num_client * proportion.')
+        # if num_client_data % self.num_target != 0:
+        #     raise ValueError('num_client_data \% num_targets != 0.')
 
         num_client_data_minor = int(
             (1 - proportion) * num_client_data // (self.num_target - 1))
         num_client_data_mian = num_client_data - \
             num_client_data_minor * (self.num_target - 1)
-        # client_main_target = numpy.random.choice(
-        #     self.targets, num_client, replace=replace).tolist()
         splited_data = self.split_data()
         client_data = list_same_term(num_client)
         for target in self.targets:
@@ -164,17 +158,17 @@ class SplitData:
 
     # 按照客户端数量和每个客户端的数据量分配数据
     def server_non_iid(self, num_server, num_server_client, num_client_data, client_main_target, proportion=None):
-        if num_client_data * num_server * num_server_client > self.num_target * min(self.num_data_target()):
-            raise ValueError(
-                'too large num_client_data * num_server * num_server_client.')
+        # if num_client_data * num_server * num_server_client > self.num_target * min(self.num_data_target()):
+        #     raise ValueError(
+        #         'too large num_client_data * num_server * num_server_client.')
         if not proportion:
             proportion = 2 / self.num_target
         num_data_server = num_server_client * num_client_data
-        if num_server_client * num_client_data * num_server * proportion > min(self.num_data_target()):
-            raise Warning(
-                'maybe too large num_server * num_server_client * num_client_data.')
-        if num_client_data % self.num_target != 0:
-            raise ValueError('num_client_data \% num_targets != 0.')
+        # if num_server_client * num_client_data * num_server * proportion > min(self.num_data_target()):
+        #     raise Warning(
+        #         'maybe too large num_server * num_server_client * num_client_data.')
+        # if num_client_data % self.num_target != 0:
+        #     raise ValueError('num_client_data \% num_targets != 0.')
 
         server_data = self.all_non_iid(
             num_server, num_data_server, client_main_target, proportion)
@@ -195,27 +189,21 @@ class SplitData:
         return client_data
 
     def client_non_iid(self, num_server, num_server_client, num_client_data, client_main_target, proportion=None):
-        if num_client_data * num_server * num_server_client > self.num_target * min(self.num_data_target()):
-            raise ValueError(
-                'too large num_client_data * num_server * num_server_client.')
+        # if num_client_data * num_server * num_server_client > self.num_target * min(self.num_data_target()):
+        #     raise ValueError(
+        #         'too large num_client_data * num_server * num_server_client.')
         if not proportion:
             proportion = 2 / self.num_target
-        if num_server_client * num_client_data * num_server * proportion > min(self.num_data_target()):
-            raise Warning(
-                'maybe too large num_server * num_server_client * num_client_data.')
-        if num_client_data % self.num_target != 0:
-            raise ValueError('num_client_data \% num_targets != 0.')
+        # if num_server_client * num_client_data * num_server * proportion > min(self.num_data_target()):
+        #     raise Warning(
+        #         'maybe too large num_server * num_server_client * num_client_data.')
+        # if num_client_data % self.num_target != 0:
+        #     raise ValueError('num_client_data \% num_targets != 0.')
 
         num_client_data_minor = int(
             (1 - proportion) * num_client_data // (self.num_target - 1))
         num_client_data_mian = num_client_data - \
             num_client_data_minor * (self.num_target - 1)
-        # if num_server_client <= self.num_target:
-        #     replace = False
-        # else:
-        #     replace = True
-        # client_main_target = numpy.random.choice(
-        #     self.targets, num_server_client, replace=replace).tolist()
         splited_data = deepcopy(self.split_data())
         server_client_data = list_same_term(
             num_server, list_same_term(num_server_client))
