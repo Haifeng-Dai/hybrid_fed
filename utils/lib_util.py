@@ -1,7 +1,10 @@
 import sys
+import os
 import logging
+import numpy
 
 from copy import deepcopy
+
 
 
 def list_same_term(len_list, term=[]):
@@ -76,18 +79,23 @@ def get_logger(filename):
     logger.addHandler(std_handler)
     return logger
 
+def save_file(args):
+    save_path = f'./data/dealed-data/{args.dataset}/{args.model_select}/'
+    if not os.path.exists():
+        os.makedirs(save_path)
+    file_name = f'alpha_{args.alpha}_T_{args.T}'
+    numpy.savez(save_path+save_file, )
+# if __name__ == '__main__':
+#     import time
+#     t = time.localtime()
+#     a = 1
+#     b = 2
+#     c = ' '*20
+#     massage = '{}:{:^5}\n{}{}:{:^5}'.format('a', a, ' '*29, 'b', b)
+#     file_name = f'./log/{t.tm_year}-{t.tm_mon}-{t.tm_mday}-{t.tm_hour}-{t.tm_min} test.txt'
 
-if __name__ == '__main__':
-    import time
-    t = time.localtime()
-    a = 1
-    b = 2
-    c = ' '*20
-    massage = '{}:{:^5}\n{}{}:{:^5}'.format('a', a, ' '*29, 'b', b)
-    file_name = f'./log/{t.tm_year}-{t.tm_mon}-{t.tm_mday}-{t.tm_hour}-{t.tm_min} test.txt'
-
-    logger = get_logger(file_name)
-    logger.info(massage)
+#     logger = get_logger(file_name)
+#     logger.info(massage)
 
     # # deepcopy is importent
     # a = list_same_term(2)

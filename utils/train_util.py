@@ -21,7 +21,8 @@ class DistillKL(torch.nn.Module):
         prob_student = f.softmax(output/self.T, dim=1)
         soft_loss = f.kl_div(prob_student, prob_teacher, reduction='batchmean')
         hard_loss = f.cross_entropy(output, target)
-        loss = self.alpha * hard_loss + (1 - self.alpha) * soft_loss * self.T**2 / logits_teacher.shape[0]
+        loss = self.alpha * hard_loss + \
+            (1 - self.alpha) * soft_loss * self.T**2 / logits_teacher.shape[0]
         return loss
 
 
@@ -73,13 +74,16 @@ def train_model(model, dataloader, device='cpu'):
     trained_model = deepcopy(model).to(device)
     trained_model.train()
     optimizer = torch.optim.Adam(trained_model.parameters())
+    loss_ = []
     for data, target in dataloader:
         optimizer.zero_grad()
         output = trained_model(data.to(device))
         loss = f.cross_entropy(output, target.to(device))
         loss.backward()
         optimizer.step()
-    return trained_model
+        loss_.append(loss.item())
+    return trained_model, loss_
+
 
 def train_model_disti_weighted(model, neighbor_server_model, weight, dataloader, alpha, T, device='cpu', num_target=10):
     '''
@@ -90,6 +94,7 @@ def train_model_disti_weighted(model, neighbor_server_model, weight, dataloader,
     weight_device = weight.to(device)
     optimizer = torch.optim.Adam(trained_model.parameters())
     criterion = DistillKL(T=T, alpha=alpha)
+    loss_ = []
     for data, target in dataloader:
         data_device = data.to(device)
         teacher_logits = torch.zeros([len(target), num_target], device=device)
@@ -102,7 +107,9 @@ def train_model_disti_weighted(model, neighbor_server_model, weight, dataloader,
         loss = criterion(output, target.to(device), teacher_logits)
         loss.backward()
         optimizer.step()
-    return trained_model
+        loss_.append(loss)
+    return trained_model, loss.item()
+
 
 def train_model_disti_single(model, teacher_model, dataloader, alpha, T, device='cpu'):
     '''
@@ -114,6 +121,7 @@ def train_model_disti_single(model, teacher_model, dataloader, alpha, T, device=
     teacher_model.eval()
     criterion = DistillKL(T=T, alpha=alpha)
     optimizer = torch.optim.Adam(trained_model.parameters())
+    loss_ = []
     for data, target in dataloader:
         optimizer.zero_grad()
         logits = teacher_model(data.to(device))
@@ -121,7 +129,8 @@ def train_model_disti_single(model, teacher_model, dataloader, alpha, T, device=
         loss = criterion(output, target.to(device), logits)
         loss.backward()
         optimizer.step()
-    return trained_model
+        loss_.append(loss)
+    return trained_model, loss_.item()
 
 
 def eval_model(model, dataloader, device):

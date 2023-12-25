@@ -2,24 +2,20 @@ import torch
 import torchvision
 import random
 
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
 
 from utils.lib_util import *
 
 
-class DealDataset(Dataset):
-    '''
-    根据给定的指标集返回一个数据集
-    '''
+# def data_loader(dataset, args):
+#     '''
+#     根据给定的指标集返回一个数据集
+#     '''
 
-    def __init__(self, dataset):
-        self.__dataset__ = dataset
-
-    def __len__(self):
-        return len(self.__dataset__)
-
-    def __getitem__(self, index):
-        return self.__dataset__[index]
+#     return DataLoader(
+#         dataset=dataset,
+#         batch_size=args.batch_size,
+#         shuffle=True)
 
 
 def get_dataset(dataset='mnist'):
@@ -68,10 +64,11 @@ class SplitData:
     分割数据集
     '''
 
-    def __init__(self, dataset):
+    def __init__(self, dataset, args):
         self.initial_dataset = dataset
         self.targets = self.get_target()
         self.num_target = len(self.targets)
+        self.args = args
 
     # 获取所以标签
 
