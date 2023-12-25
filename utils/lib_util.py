@@ -1,27 +1,7 @@
-import random
+import sys
 import logging
 
 from copy import deepcopy
-
-
-def get_logger(filename):
-    # Logging configuration: set the basic configuration of the logging system
-    log_formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)-5.5s] %(message)s',
-                                      datefmt='%Y-%b-%d %H:%M')
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    # File logger
-    file_handler = logging.FileHandler(
-        filename, mode='w')  # default is 'a' to append
-    file_handler.setFormatter(log_formatter)
-    file_handler.setLevel(logging.DEBUG)
-    logger.addHandler(file_handler)
-    # Stdout logger
-    std_handler = logging.StreamHandler(sys.stdout)
-    std_handler.setFormatter(log_formatter)
-    std_handler.setLevel(logging.DEBUG)
-    logger.addHandler(std_handler)
-    return logger
 
 
 def list_same_term(len_list, term=[]):
@@ -34,11 +14,11 @@ def list_same_term(len_list, term=[]):
     return list_return
 
 
-def number_list(len_list):
-    '''
-    返回一个数字列表
-    '''
-    return [i for i in range(len_list)]
+# def number_list(len_list):
+#     '''
+#     返回一个数字列表
+#     '''
+#     return [i for i in range(len_list)]
 
 
 # def split_idx_evenly(idxs, num_set):
@@ -77,23 +57,54 @@ def number_list(len_list):
 #     return idx_sets
 
 
+def get_logger(filename):
+    # Logging configuration: set the basic configuration of the logging system
+    log_formatter = logging.Formatter(
+        fmt='[%(asctime)s] [%(levelname)s] %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S')
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    # File logger
+    file_handler = logging.FileHandler(filename, mode='w')
+    file_handler.setFormatter(log_formatter)
+    file_handler.setLevel(logging.DEBUG)
+    logger.addHandler(file_handler)
+    # Stdout logger
+    std_handler = logging.StreamHandler(sys.stdout)
+    std_handler.setFormatter(log_formatter)
+    std_handler.setLevel(logging.DEBUG)
+    logger.addHandler(std_handler)
+    return logger
+
+
 if __name__ == '__main__':
-    # deepcopy is importent
-    a = list_same_term(2)
-    print('a', a)
-    for i, _ in enumerate(a):
-        a[i].append(i)
-    print('a', a)
-    b = list_same_term(3)
-    print('b', b)
+    import time
+    t = time.localtime()
+    a = 1
+    b = 2
+    c = ' '*20
+    massage = '{}:{:^5}\n{}{}:{:^5}'.format('a', a, ' '*29, 'b', b)
+    file_name = f'./log/{t.tm_year}-{t.tm_mon}-{t.tm_mday}-{t.tm_hour}-{t.tm_min} test.txt'
 
-    bb = list_same_term(3, b)
-    print(bb)
-    bb[0][0] = 1
-    print(bb)
+    logger = get_logger(file_name)
+    logger.info(massage)
 
-    c = number_list(3)
-    print(c)
-    d = number_list(3)
-    d[0] = 1
-    print(d)
+    # # deepcopy is importent
+    # a = list_same_term(2)
+    # print('a', a)
+    # for i, _ in enumerate(a):
+    #     a[i].append(i)
+    # print('a', a)
+    # b = list_same_term(3)
+    # print('b', b)
+
+    # bb = list_same_term(3, b)
+    # print(bb)
+    # bb[0][0] = 1
+    # print(bb)
+
+    # c = number_list(3)
+    # print(c)
+    # d = number_list(3)
+    # d[0] = 1
+    # print(d)

@@ -1,6 +1,6 @@
 import torch
 import torchvision
-import numpy
+import random
 
 from torch.utils.data import Dataset
 
