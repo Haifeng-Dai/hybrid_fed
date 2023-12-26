@@ -37,6 +37,7 @@ else:
     device = 'cpu'
     log.info(f'device {device} is used.')
 
+
 # %% 参数定义
 
 args = get_args()
@@ -127,30 +128,31 @@ test_dataloader = DataLoader(
 # %% 模型初始化
 if args.model_select == 1:
     model = CNN(h, w, c, num_target)
+    client_model = list_same_term(args.num_all_client, model)
 elif args.model_select == 2:
     model = LeNet5(h, w, c, num_target)
+    client_model = list_same_term(args.num_all_client, model)
 else:
     raise ValueError('model error.')
 
-client_model = list_same_term(args.num_all_client, model)
+
 server_model = deepcopy(client_model)
 server_accuracy = list_same_term(args.num_all_server)
 client_accuracy = list_same_term(args.num_all_client)
 server_client_model = deepcopy(server_accuracy)
-# server_model_distillation_accuracy = deepcopy(server_accuracy)
 client_loss = deepcopy(client_accuracy)
 
 # %% 模型训练
-
 keys = ['server_model', 'train_dataloader', 'test_dataloader',
         'public_dataloader', 'log', 'client_model', 'num_target', 'neighbor', 'client_idx', 'client_accuracy', 'client_loss']
 values = [server_model, train_dataloader, test_dataloader,
           public_dataloader, log, None, num_target, None, None, client_accuracy, client_loss]
 args_train = dict(zip(keys, values))
-# %%
-# 对每个服务器通讯幕进行循环
-algorithm = args.algorithm
-# algorithm = rank
+
+client_model_save = dict.fromkeys([i for i in range(args.num_client_commu)])
+server_model_save = dict.fromkeys([i for i in range(args.num_server_commu)])
+
+# %% 对每个服务器通讯幕进行循环
 for epoch_server_commu in range(args.num_server_commu):
     log.info('-'*50)
     log.info('|epoch_server_commu: {}/{}'.format(epoch_server_commu,
@@ -168,7 +170,7 @@ for epoch_server_commu in range(args.num_server_commu):
             log.info(message)
             args_train['client_idx'] = args.server_client[server]
             args_train['client_model'] = client_model
-            if algorithm == 0:
+            if args.algorithm == 0:
                 if epoch_server_commu == 0:
                     client_model = ServerTrain(args, args_train, 1).train
                 else:
@@ -176,7 +178,7 @@ for epoch_server_commu in range(args.num_server_commu):
                         neighbor_model.append(server_model[i])
                     args_train['neighbor'] = neighbor_model
                     client_model = ServerTrain(args, args_train, 3).train
-            if algorithm == 1:
+            if args.algorithm == 1:
                 if epoch_server_commu == 0:
                     client_model = ServerTrain(args, args_train, 1).train
                 else:
@@ -184,7 +186,7 @@ for epoch_server_commu in range(args.num_server_commu):
                         neighbor_model.append(server_model[i])
                     args_train['neighbor'] = neighbor_model
                     client_model = ServerTrain(args, args_train, 4).train
-            if algorithm == 2 or algorithm == 3:
+            if args.algorithm == 2 or args.algorithm == 3:
                 client_model = ServerTrain(args, args_train, 1).train
             if args.algorithm == 4:
                 client_model = ServerTrain(args, args_train, 2).train
@@ -213,13 +215,15 @@ for epoch_server_commu in range(args.num_server_commu):
             for server in all_server:
                 for client in args.server_client[server]:
                     client_model[client] = deepcopy(server_model[server])
+        client_model_save[epoch_client_commu] = client_model
+    server_model_save[epoch_client_commu] = server_model
     message = '{:^50}'.format('********  servers comunicates  ********')
     log.info(message)
 
 # %% 保存
-save_data = {'server_model': server_model,
+save_data = {'server_model': server_model_save,
              'server_acc': server_accuracy,
-             'client_model': client_model,
+             'client_model': client_model_save,
              'client_acc': client_accuracy,
              'client_loss': client_loss}
 # save_file(args, save_data, rank)

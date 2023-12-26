@@ -14,7 +14,7 @@ def data_loader(dataset, batch_size, shuffle, ):
 
     return DataLoader(
         dataset=dataset,
-        batch_size=args.batch_size,
+        batch_size=batch_size,
         shuffle=True)
 
 
