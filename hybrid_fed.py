@@ -2,9 +2,6 @@
 import torch
 import numpy
 import time
-import matplotlib.pyplot as plt
-
-from trainer import *
 
 from torch.utils.data import DataLoader
 
@@ -38,11 +35,9 @@ else:
     device = 'cpu'
     log.info(f'device {device} is used.')
 
-
 # %% 参数定义
 
 args = get_args()
-
 args.device = device
 # alpha = 0.5
 # T = 2
@@ -58,8 +53,8 @@ args.device = device
 # num_client_data = 1000
 # num_public_data = 50
 # proportion = 0.8
-server_client = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
-neighbor_server = [[1], [2], [0]]
+# server_client = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+# neighbor_server = [[1], [2], [0]]
 all_client = [i for i in range(args.num_all_client)]
 all_server = [i for i in range(args.num_all_server)]
 num_server_client = args.num_all_client // args.num_all_server
@@ -77,7 +72,8 @@ message = '\n{}{:^19}:{:^7}\n\
     {:^19}:{:^7}\n\
     {:^19}:{:^7}\n\
     {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n'.format(' '*4,
+    {:^19}:{:^7}\n'.format(
+    ' '*4,
     'alpha', args.alpha,
     'T', args.T,
     'num_server_commu', args.num_server_commu,
@@ -104,7 +100,8 @@ client_main_target = numpy.random.choice(
 train_dataset_client = TrainDatasetSplited.server_non_iid(
     num_server=args.num_all_server,
     num_server_client=num_server_client,
-    num_client_data=args.num_client_data, client_main_target=client_main_target, proportion=args.proportion)
+    num_client_data=args.num_client_data, client_main_target=client_main_target,
+    proportion=args.proportion)
 train_dataloader = list_same_term(args.num_all_client)
 for i, dataset_ in enumerate(train_dataset_client):
     train_dataloader[i] = DataLoader(
@@ -149,7 +146,8 @@ args_train = dict(zip(keys, values))
 # 对每个服务器通讯幕进行循环
 for epoch_server_commu in range(args.num_server_commu):
     log.info('-'*50)
-    log.info('|epoch_server_commu: {}/{}'.format(epoch_server_commu, args.num_server_commu))
+    log.info('|epoch_server_commu: {}/{}'.format(epoch_server_commu,
+             args.num_server_commu))
     # 所有边缘服务器分别协调其客户端进行多轮联邦学习
     for epoch_client_commu in range(args.num_client_commu):
         message = ' |epoch_client_commu: {}/{}'.format(
@@ -161,22 +159,22 @@ for epoch_server_commu in range(args.num_server_commu):
             # 每个服务器下单客户端分别训练
             message = f'  |server: {server}'
             log.info(message)
-            args_train['client_idx'] = server_client[server]
+            args_train['client_idx'] = args.server_client[server]
             args_train['client_model'] = client_model
             if epoch_server_commu == 0:
-                client_model = Server(args, args_train, 1).train()
+                client_model = ServerTrain(args, args_train, 1).train()
             else:
-                for i in neighbor_server[server]:
+                for i in args.neighbor_server[server]:
                     neighbor_model.append(server_model[i])
                 args_train['neighbor'] = neighbor_model
-                client_model = Server(args, args_train, 3).train()
+                client_model = ServerTrain(args, args_train, args.algorithm).train()
             # 在单个服务器下客户端训练完成后更新该服务器下客户端的模型
             server_client_model[server] = [
-                client_model[client] for client in server_client[server]]
+                client_model[client] for client in args.server_client[server]]
             # 聚合获得单个服务器模型并下发
-            server_model[server] = EdgeServer(
-                server_client_model[server]).average()
-            for client in server_client[server]:
+            weight_server = [1/3, 1/3, 1/3]
+            server_model[server] = aggregate(server_client_model[server], weight_server)
+            for client in args.server_client[server]:
                 client_model[client] = deepcopy(server_model[server])
             # 评估单个服务器模型
             acc_server = eval_model(

@@ -4,13 +4,13 @@ import logging
 import numpy
 import argparse
 
+import matplotlib.pyplot as plt
+
 from copy import deepcopy
 
 
 def list_same_term(len_list, term=[]):
-    '''
-    返回一个全是空列表的列表
-    '''
+    # 返回一个全是空列表的列表
     list_return = []
     for _ in range(len_list):
         list_return.append(deepcopy(term))
@@ -61,7 +61,7 @@ def list_same_term(len_list, term=[]):
 
 
 def get_logger(filename):
-    # Logging configuration: set the basic configuration of the logging system
+    # 日志设置
     log_formatter = logging.Formatter(
         fmt='[%(asctime)s] [%(levelname)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S')
@@ -81,23 +81,23 @@ def get_logger(filename):
 
 
 def save_file(args, save_data):
+    # 保存数据
     save_path = f'./data/dealed-data/{args.dataset}_algo_{args.algo}/alpha_{args.alpha}_T_{args.T}/'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     file_name = f'server_commu_{args.num_server_commu}_client_commu_{args.num_client_commu}_client_train_{args.num_client_train}_batch_size_{args.batch_size}_num_all_client_{args.num_all_client}_num_all_server_{args.num_all_server}_num_client_data_{args.num_client_data}_num_public_data_{args.num_public_data}_proportion_{args.proportion}.npz'
     numpy.savez(save_path+file_name, save_data)
 
+
 def get_args():
-    """
-    Parse command line arguments
-    """
+    # 获取输入参数
     parser = argparse.ArgumentParser(description='save results.')
 
     parser.add_argument('--dataset', type=str, default='mnist',
                         help='the used dataset.')
-    parser.add_argument('--alpha', type=int, default=0.5,
+    parser.add_argument('--alpha', type=float, default=0.5,
                         help='trade-off parameters of distillation.')
-    parser.add_argument('--T', type=int, default=2,
+    parser.add_argument('--T', type=int, default=2.0,
                         help='temperature of distillation.')
     parser.add_argument('--num_all_client', type=int,
                         default=9, help='num of all client.')
@@ -117,14 +117,18 @@ def get_args():
                         help='number of client distillation in public data.')
     parser.add_argument('--model_select', type=int, default=1,
                         help='select the model group.')
-    parser.add_argument('--algo', type=int, default=1,
-                        help='select the alogothm.')
-    parser.add_argument('--graph', type=int, default=1,
-                        help='select the graph.')
+    parser.add_argument('--algorithm', type=int, default=1,
+                        help='select the algorithm.')
+    # parser.add_argument('--graph', type=int, default=1,
+    #                     help='select the graph.')
     parser.add_argument('--num_public_data', type=int, default=50,
                         help='number of public data.')
     parser.add_argument('--proportion', type=float, default=0.8,
                         help='proportion of main target data.')
+    parser.add_argument('--server_client', type=list,
+                        default=[[0, 1, 2], [3, 4, 5], [6, 7, 8]], help='clients of servers.')
+    parser.add_argument('--neighbor_server', type=list,
+                        default=[[1], [2], [0]], help='neighbor servers of each server.')
     return parser.parse_args()
 
 # if __name__ == '__main__':
