@@ -2,7 +2,6 @@
 import torch
 import numpy
 import time
-import argparse
 import matplotlib.pyplot as plt
 
 from trainer import *
@@ -42,44 +41,7 @@ else:
 
 # %% 参数定义
 
-parser = argparse.ArgumentParser(description='save results.')
-parser.add_argument('--dataset', type=str, default='mnist',
-                    help='the used dataset.')
-parser.add_argument('--alpha', type=int, default=0.5,
-                    help='trade-off parameters of distillation.')
-parser.add_argument('--T', type=int, default=2,
-                    help='temperature of distillation.')
-parser.add_argument('--num_all_client', type=int,
-                    default=9, help='num of all client.')
-parser.add_argument('--num_all_server', type=int,
-                    default=3, help='num of all server.')
-# parser.add_argument('--distil_way', type=str,
-#                     default='weighted', help='the way of distillation.')
-parser.add_argument('--batch_size', type=int, default=200,
-                    help='batch size of trainning.')
-parser.add_argument('--num_client_data', type=int,
-                    default=1000, help='number of client datas.')
-parser.add_argument('--num_server_commu', type=int, default=10,
-                    help='number of server communications.')
-parser.add_argument('--num_client_commu', type=int, default=10,
-                    help='number of clients communicate with servers.')
-parser.add_argument('--num_client_train', type=int, default=10,
-                    help='number of client train in local data.')
-parser.add_argument('--num_public_train', type=int, default=10,
-                    help='number of client distillation in public data.')
-parser.add_argument('--model_select', type=int, default=1,
-                    help='select the model group.')
-parser.add_argument('--algo', type=int, default=1,
-                    help='select the alogothm.')
-parser.add_argument('--graph', type=int, default=1,
-                    help='select the graph.')
-parser.add_argument('--num_public_data', type=int, default=50,
-                    help='number of public data.')
-parser.add_argument('--proportion', type=float, default=0.8,
-                    help='proportion of main target data.')
-
-
-args = parser.parse_args()
+args = get_args()
 
 args.device = device
 # alpha = 0.5
@@ -150,7 +112,7 @@ for i, dataset_ in enumerate(train_dataset_client):
         batch_size=args.batch_size,
         shuffle=True)
 [public_dataset, test_dataset] = split_parts_random(
-    test_dataset_o, [args.num_public_data, int(1e4) - args.num_public_data])
+    test_dataset_o, [args.num_public_data, int(len(test_dataset_o)) - args.num_public_data])
 public_dataloader = DataLoader(
     dataset=public_dataset,
     batch_size=args.batch_size,

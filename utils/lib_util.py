@@ -2,9 +2,9 @@ import sys
 import os
 import logging
 import numpy
+import argparse
 
 from copy import deepcopy
-
 
 
 def list_same_term(len_list, term=[]):
@@ -79,12 +79,54 @@ def get_logger(filename):
     logger.addHandler(std_handler)
     return logger
 
+
 def save_file(args, save_data):
     save_path = f'./data/dealed-data/{args.dataset}_algo_{args.algo}/alpha_{args.alpha}_T_{args.T}/'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    file_name = f'server_commu_{args.num_server_commu}_client_commu_{args.num_client_commu}_client_train_{args.num_client_train}_batch_size_{args.batch_size}_num_all_client_{args.num_all_client}_num_all_server_{args.num_all_server}_num_client_data_{args.num_client_data}_num_public_data_{args.num_public_data}_proportion_{args.proportion}.ptz'
+    file_name = f'server_commu_{args.num_server_commu}_client_commu_{args.num_client_commu}_client_train_{args.num_client_train}_batch_size_{args.batch_size}_num_all_client_{args.num_all_client}_num_all_server_{args.num_all_server}_num_client_data_{args.num_client_data}_num_public_data_{args.num_public_data}_proportion_{args.proportion}.npz'
     numpy.savez(save_path+file_name, save_data)
+
+def get_args():
+    """
+    Parse command line arguments
+    """
+    parser = argparse.ArgumentParser(description='save results.')
+
+    parser.add_argument('--dataset', type=str, default='mnist',
+                        help='the used dataset.')
+    parser.add_argument('--alpha', type=int, default=0.5,
+                        help='trade-off parameters of distillation.')
+    parser.add_argument('--T', type=int, default=2,
+                        help='temperature of distillation.')
+    parser.add_argument('--num_all_client', type=int,
+                        default=9, help='num of all client.')
+    parser.add_argument('--num_all_server', type=int,
+                        default=3, help='num of all server.')
+    parser.add_argument('--batch_size', type=int, default=200,
+                        help='batch size of trainning.')
+    parser.add_argument('--num_client_data', type=int,
+                        default=1000, help='number of client datas.')
+    parser.add_argument('--num_server_commu', type=int, default=10,
+                        help='number of server communications.')
+    parser.add_argument('--num_client_commu', type=int, default=10,
+                        help='number of clients communicate with servers.')
+    parser.add_argument('--num_client_train', type=int, default=10,
+                        help='number of client train in local data.')
+    parser.add_argument('--num_public_train', type=int, default=10,
+                        help='number of client distillation in public data.')
+    parser.add_argument('--model_select', type=int, default=1,
+                        help='select the model group.')
+    parser.add_argument('--algo', type=int, default=1,
+                        help='select the alogothm.')
+    parser.add_argument('--graph', type=int, default=1,
+                        help='select the graph.')
+    parser.add_argument('--num_public_data', type=int, default=50,
+                        help='number of public data.')
+    parser.add_argument('--proportion', type=float, default=0.8,
+                        help='proportion of main target data.')
+    return parser.parse_args()
+
 # if __name__ == '__main__':
 #     import time
 #     t = time.localtime()
