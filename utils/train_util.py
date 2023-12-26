@@ -25,9 +25,6 @@ class DistillKL(torch.nn.Module):
             (1 - self.alpha) * soft_loss * self.T**2 / logits_teacher.shape[0]
         return loss
 
-def server_communicate(server_model, weight_list):
-    def __init__(self):
-        self.
 
 class ServerTrain:
     def __init__(self, args, args_train, algorithm):
@@ -35,7 +32,7 @@ class ServerTrain:
         self.args_train = args_train
         self.algorithm = algorithm
 
-    # @property
+    @property
     def train(self):
         client_model = deepcopy(self.args_train['client_model'])
         client_model_ = deepcopy(client_model)
@@ -51,7 +48,7 @@ class ServerTrain:
                 self.args_train['client_accuracy'][i].extend(acc)
                 client_model_[i] = deepcopy(model)
         elif self.algorithm == 2:
-            # 仅在本地数据和客户端上训练，不进行蒸馏
+            # 仅在本地数据和公开数据集上训练，不进行蒸馏
             for i in self.args_train['client_idx']:
                 message = f'   -client {i}'
                 self.args_train['log'].info(message)
@@ -97,20 +94,20 @@ class ServerTrain:
                 self.args_train['client_loss'][i].extend(loss)
                 self.args_train['client_accuracy'][i].extend(acc)
                 client_model_[i] = deepcopy(model)
-        elif self.algorithm == 5:
-            # 交换参数
-            for i in self.args_train['client_idx']:
-                message = f'   -client {i}'
-                self.args_train['log'].info(message)
-                dataloader = self.args_train['train_dataloader'][i]
-                model, loss, acc = self.normal_train(
-                    client_model[i], dataloader)
-                self.args_train['client_loss'][i].extend(loss)
-                self.args_train['client_accuracy'][i].extend(acc)
-                model, loss, acc = self.single_distill_train(model)
-                self.args_train['client_loss'][i].extend(loss)
-                self.args_train['client_accuracy'][i].extend(acc)
-                client_model_[i] = deepcopy(model)
+        # elif self.algorithm == 5:
+        #     # 交换参数
+        #     for i in self.args_train['client_idx']:
+        #         message = f'   -client {i}'
+        #         self.args_train['log'].info(message)
+        #         dataloader = self.args_train['train_dataloader'][i]
+        #         model, loss, acc = self.normal_train(
+        #             client_model[i], dataloader)
+        #         self.args_train['client_loss'][i].extend(loss)
+        #         self.args_train['client_accuracy'][i].extend(acc)
+        #         model, loss, acc = self.single_distill_train(model)
+        #         self.args_train['client_loss'][i].extend(loss)
+        #         self.args_train['client_accuracy'][i].extend(acc)
+        #         client_model_[i] = deepcopy(model)
         else:
             raise ValueError('algorithm error.')
         return client_model_
@@ -119,13 +116,14 @@ class ServerTrain:
         loss_ = []
         acc_ = []
         for epoch in range(self.args.num_client_train):
-            model, loss = self.train_model(
+            model, loss = train_model(
                 model=model,
-                dataloader=dataloader)
+                dataloader=dataloader,
+                device=self.args.device)
             acc = eval_model(
                 model=model,
                 dataloader=self.args_train['test_dataloader'],
-                device=self.args.device).item()
+                device=self.args.device)
             acc_.append(acc)
             message = '    |{:^15}: {}, acc {:.3f}'.format(
                 'local epoch', epoch, acc)
@@ -137,14 +135,20 @@ class ServerTrain:
         loss_ = []
         acc_ = []
         for epoch in range(self.args.num_public_train):
-            model, loss = self.train_model_disti_weighted(
+            model, loss = train_model_disti_weighted(
                 model=model,
-                weight=weight)
+                weight=weight,
+                alpha=self.args.alpha,
+                T=self.args.T,
+                dataloader=self.args_train['public_dataloader'],
+                num_target=self.args_train['num_target'],
+                neighbor=self.args_train['neighbor'],
+                device=self.args.device)
             loss_.extend(loss)
             acc = eval_model(
                 model=model,
                 dataloader=self.args_train['test_dataloader'],
-                device=self.args.device).item()
+                device=self.args.device)
             acc_.append(acc)
             message = '    |{:^15}: {}, acc {:.3f}'.format(
                 'distill epoch', epoch, acc)
@@ -156,80 +160,84 @@ class ServerTrain:
         acc_ = []
         for epoch in range(self.args.num_public_train):
             for model_ in self.args_train['neighbor']:
-                model, loss, acc = self.train_model_disti_single(
+                model, loss = train_model_disti_single(
                     model=model,
-                    teacher_model=model_)
+                    teacher_model=model_,
+                    dataloader=self.args_train['public_dataloader'],
+                    alpha=self.args.alpha,
+                    T=self.args.T,
+                    device=self.args.device)
                 loss_.append(loss)
                 acc = eval_model(
                     model=model,
                     dataloader=self.args_train['test_dataloader'],
-                    device=self.args.device).item()
+                    device=self.args.device)
             message = '    |{:^15}: {}, acc {:.3f}'.format(
                 'distill epoch', epoch, acc)
             self.args_train['log'].info(message)
             acc_.append(acc)
         return model, loss_, acc_
 
+
+def train_model(model, dataloader, device):
     # 训练模型
-    def train_model(self, model, dataloader):
-        device = self.args.device
-        trained_model = deepcopy(model).to(device)
-        trained_model.train()
-        optimizer = torch.optim.Adam(trained_model.parameters())
-        loss_ = []
-        for data, target in dataloader:
-            optimizer.zero_grad()
-            output = trained_model(data.to(device))
-            loss = f.cross_entropy(output, target.to(device))
-            loss.backward()
-            optimizer.step()
-            loss_.append(loss.item())
-        return trained_model, loss_
+    trained_model = deepcopy(model).to(device)
+    trained_model.train()
+    optimizer = torch.optim.Adam(trained_model.parameters())
+    loss_ = []
+    for data, target in dataloader:
+        optimizer.zero_grad()
+        output = trained_model(data.to(device))
+        loss = f.cross_entropy(output, target.to(device))
+        loss.backward()
+        optimizer.step()
+        loss_.append(loss.item())
+    return trained_model, loss_
 
+
+def train_model_disti_weighted(model, weight, alpha, T, dataloader, num_target, neighbor, device):
     # 训练蒸馏模型, logits加权聚合
-    def train_model_disti_weighted(self, model, weight):
-        device = self.args.device
-        trained_model = deepcopy(model).to(device)
-        trained_model.train()
-        weight_device = weight.to(device)
-        optimizer = torch.optim.Adam(trained_model.parameters())
-        criterion = DistillKL(T=self.args.T, alpha=self.args.alpha)
-        loss_ = []
-        for data, target in self.args_train['public_dataloader']:
-            data_device = data.to(device)
-            teacher_logits = torch.zeros(
-                [len(target), self.args_train['num_target']], device=device)
-            for i, model in enumerate(self.args_train['neighbor']):
-                teacher_model = deepcopy(model).to(device)
-                teacher_model.eval()
-                teacher_logits += teacher_model(data_device) * weight_device[i]
-            optimizer.zero_grad()
-            output = trained_model(data_device)
-            loss = criterion(output, target.to(device), teacher_logits)
-            loss.backward()
-            optimizer.step()
-            loss_.append(loss.item())
-        return trained_model, loss_
+    trained_model = deepcopy(model).to(device)
+    trained_model.train()
+    weight_device = weight.to(device)
+    optimizer = torch.optim.Adam(trained_model.parameters())
+    criterion = DistillKL(T, alpha)
+    loss_ = []
+    for data, target in dataloader:
+        data_device = data.to(device)
+        teacher_logits = torch.zeros(
+            [len(target), num_target], device=device)
+        for i, model in enumerate(neighbor):
+            teacher_model = deepcopy(model).to(device)
+            teacher_model.eval()
+            teacher_logits += teacher_model(data_device) * weight_device[i]
+        optimizer.zero_grad()
+        output = trained_model(data_device)
+        loss = criterion(output, target.to(device), teacher_logits)
+        loss.backward()
+        optimizer.step()
+        loss_.append(loss.item())
+    return trained_model, loss_
 
+
+def train_model_disti_single(model, teacher_model, dataloader, alpha, T, device):
     # 训练蒸馏模型, 单个teacher
-    def train_model_disti_single(self, model, teacher_model):
-        device = self.args.device
-        trained_model = deepcopy(model).to(device)
-        trained_model.train()
-        teacher_model = deepcopy(teacher_model).to(device)
-        teacher_model.eval()
-        criterion = DistillKL(T=self.args.T, alpha=self.args.alpha)
-        optimizer = torch.optim.Adam(trained_model.parameters())
-        loss_ = []
-        for data, target in self.args_train['public_dataloader']:
-            optimizer.zero_grad()
-            logits = teacher_model(data.to(device))
-            output = trained_model(data.to(device))
-            loss = criterion(output, target.to(device), logits)
-            loss.backward()
-            optimizer.step()
-            loss_.append(loss.item())
-        return trained_model, loss_
+    trained_model = deepcopy(model).to(device)
+    trained_model.train()
+    teacher_model = deepcopy(teacher_model).to(device)
+    teacher_model.eval()
+    criterion = DistillKL(T, alpha)
+    optimizer = torch.optim.Adam(trained_model.parameters())
+    loss_ = []
+    for data, target in dataloader:
+        optimizer.zero_grad()
+        logits = teacher_model(data.to(device))
+        output = trained_model(data.to(device))
+        loss = criterion(output, target.to(device), logits)
+        loss.backward()
+        optimizer.step()
+        loss_.append(loss.item())
+    return trained_model, loss_
 
 
 def aggregate(model_list, weight):
@@ -242,6 +250,13 @@ def aggregate(model_list, weight):
             parameters[key] += model.state_dict()[key] * weight[i+1]
     aggregated_model.load_state_dict(parameters)
     return aggregated_model
+
+
+def server_communicate(server_model, weight_list):
+    server_model_ = deepcopy(server_model)
+    for i, weight in enumerate(weight_list):
+        server_model_[i] = aggregate(server_model, weight)
+    return server_model_
 
 
 # class EdgeServer:
@@ -300,7 +315,7 @@ def eval_model(model, dataloader, device):
         correct += (predicted == targets.to(device)).sum()
         len_data += len(targets)
     accuracy = correct / len_data
-    return accuracy.cpu()
+    return accuracy.item()
 
 
 # if __name__ == '__main__':

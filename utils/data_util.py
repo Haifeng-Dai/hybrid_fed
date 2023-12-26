@@ -7,15 +7,15 @@ from torch.utils.data import DataLoader
 from utils.lib_util import *
 
 
-# def data_loader(dataset, args):
-#     '''
-#     根据给定的指标集返回一个数据集
-#     '''
+def data_loader(dataset, batch_size, shuffle, ):
+    '''
+    根据给定的指标集返回一个数据集
+    '''
 
-#     return DataLoader(
-#         dataset=dataset,
-#         batch_size=args.batch_size,
-#         shuffle=True)
+    return DataLoader(
+        dataset=dataset,
+        batch_size=args.batch_size,
+        shuffle=True)
 
 
 def get_dataset(dataset='mnist'):
