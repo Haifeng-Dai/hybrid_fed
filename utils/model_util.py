@@ -68,7 +68,7 @@ class LeNet5(nn.Module):
 
 class MLP(nn.Module):
 
-    def __init__(self, h, w, c, num_hidden=200, num_classes=10):
+    def __init__(self, h, w, c, num_hidden=50, num_classes=10):
         super(MLP, self).__init__()
 
         self.input = nn.Sequential(

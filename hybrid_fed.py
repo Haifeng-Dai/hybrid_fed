@@ -2,12 +2,10 @@
 import torch
 import numpy
 import time
-# from mpi4py import MPI
-
 
 from torch.utils.data import DataLoader
 
-from utils.model_util import LeNet5, CNN
+from utils.model_util import *
 from utils.data_util import *
 from utils.lib_util import *
 from utils.train_util import *
@@ -132,6 +130,11 @@ if args.model_select == 1:
 elif args.model_select == 2:
     model = LeNet5(h, w, c, num_target)
     client_model = list_same_term(args.num_all_client, model)
+elif args.model_select == 3:
+    model1 = CNN(h, w, c, num_target)
+    model2 = LeNet5(h, w, c, num_target)
+    model3 = MLP(h, w, c, 50, num_target)
+    client_model = []
 else:
     raise ValueError('model error.')
 
@@ -221,7 +224,8 @@ for epoch_server_commu in range(args.num_server_commu):
     log.info(message)
 
 # %% 保存
-save_data = {'server_model': server_model_save,
+save_data = {'args': args,
+             'server_model': server_model_save,
              'server_acc': server_accuracy,
              'client_model': client_model_save,
              'client_acc': client_accuracy,
