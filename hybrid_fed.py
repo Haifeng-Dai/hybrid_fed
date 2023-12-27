@@ -2,6 +2,7 @@
 import torch
 import numpy
 import time
+import sys
 
 from torch.utils.data import DataLoader
 
@@ -95,33 +96,63 @@ message = '\n{}{:^19}:{:^7}\n\
 log.info(message)
 # %% 原始数据处理
 train_dataset_o, test_dataset_o, c, h, w = get_dataset(args.dataset)
-TrainDatasetSplited = SplitData(train_dataset_o, args)
+for data in test_dataset_o:
+    a = torch.from_numpy(numpy.array(data[0])).float()[None, None, :, :]
+    print(a, a.shape)
+    break
+# train_dataset_data = train_dataset_o.data.unsqueeze(1) / 255
+# train_dataset_target = train_dataset_o.targets.int()
+# print(train_dataset_data.shape, train_dataset_target.shape)
+# train_dataset_ = zip(train_dataset_data, train_dataset_target)
+# for a, b in train_dataset_:
+#     print(a.shape, b)
+#     break
+sys.exit()
+TrainDatasetSplited = SplitData(train_dataset_o)
 all_target = TrainDatasetSplited.targets
 num_target = TrainDatasetSplited.num_target
 
+# print(list(all_target))
 client_main_target = numpy.random.choice(
     all_target, args.num_all_client, replace=False).tolist()
 train_dataset_client = TrainDatasetSplited.server_non_iid(
     num_server=args.num_all_server,
     num_server_client=num_server_client,
-    num_client_data=args.num_client_data, client_main_target=client_main_target,
+    num_client_data=args.num_client_data,
+    client_main_target=client_main_target,
     proportion=args.proportion)
+# print(type(train_dataset_client), len(train_dataset_client))
+# print(type(train_dataset_client[0]), len(train_dataset_client[0]))
+# print(type(train_dataset_client[0][0]), len(train_dataset_client[0][0]))
 train_dataloader = list_same_term(args.num_all_client)
 for i, dataset_ in enumerate(train_dataset_client):
-    train_dataloader[i] = DataLoader(
-        dataset=dataset_,
-        batch_size=args.batch_size,
-        shuffle=True)
+    # print(type(dataset_[0][0]), type(dataset_[0][1]))
+    for data_ in dataset_:
+        tensor_data = torch.from_numpy(numpy.array(data_[0])/255).float()
+        target = data_[1]
+        print(tensor_data.shape, tensor_data.dtype, type(target))
+    # train_dataloader[i] = data_loader(
+    #     data_set=dataset_,
+    #     batch_size=args.batch_size,
+    #     dataset=args.dataset,
+    #     shuffle=True,
+    #     device=device)
+    # print(type(train_dataloader[i]))
+# for data, target in train_dataloader[0]:
+#     print(type(data), type(target))
 [public_dataset, test_dataset] = split_parts_random(
     test_dataset_o, [args.num_public_data, int(len(test_dataset_o)) - args.num_public_data])
-public_dataloader = DataLoader(
-    dataset=public_dataset,
+public_dataloader = data_loader(
+    data_set=public_dataset,
     batch_size=args.batch_size,
+    dataset=args.dataset,
     shuffle=True)
-test_dataloader = DataLoader(
-    dataset=test_dataset,
+test_dataloader = data_loader(
+    data_set=test_dataset,
     batch_size=300,
-    shuffle=True)
+    dataset=args.dataset,
+    shuffle=True,
+    device=device)
 
 # %% 模型初始化
 if args.model_select == 1:

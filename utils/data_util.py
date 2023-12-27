@@ -1,21 +1,22 @@
 import torch
 import torchvision
 import random
+import numpy
 
 from torch.utils.data import DataLoader
 
 from utils.lib_util import *
 
 
-def data_loader(dataset, batch_size, shuffle, ):
-    '''
-    根据给定的指标集返回一个数据集
-    '''
+# def data_loader(dataset, batch_size, shuffle, ):
+#     '''
+#     根据给定的指标集返回一个数据集
+#     '''
 
-    return DataLoader(
-        dataset=dataset,
-        batch_size=batch_size,
-        shuffle=True)
+#     return DataLoader(
+#         dataset=dataset,
+#         batch_size=batch_size,
+#         shuffle=True)
 
 
 def get_dataset(dataset='mnist'):
@@ -26,37 +27,66 @@ def get_dataset(dataset='mnist'):
     if dataset == 'mnist':
         train_dataset = torchvision.datasets.MNIST(
             root=raw_data,
-            train=True,
             transform=torchvision.transforms.ToTensor(),
+            train=True,
             download=True)
         test_dataset = torchvision.datasets.MNIST(
             root=raw_data,
-            train=False,
-            transform=torchvision.transforms.ToTensor())
+            transform=torchvision.transforms.ToTensor(),
+            train=False)
     elif dataset == 'cifar10':
         train_dataset = torchvision.datasets.CIFAR10(
             root=raw_data,
-            train=True,
             transform=torchvision.transforms.ToTensor(),
+            train=True,
             download=True)
         test_dataset = torchvision.datasets.CIFAR10(
             root=raw_data,
-            train=False,
-            transform=torchvision.transforms.ToTensor())
+            transform=torchvision.transforms.ToTensor(),
+            train=False)
     elif dataset == 'cifar100':
         train_dataset = torchvision.datasets.CIFAR100(
             root=raw_data,
-            train=True,
             transform=torchvision.transforms.ToTensor(),
+            train=True,
             download=True)
         test_dataset = torchvision.datasets.CIFAR100(
             root=raw_data,
-            train=False,
-            transform=torchvision.transforms.ToTensor())
+            transform=torchvision.transforms.ToTensor(),
+            train=False)
     else:
         raise ValueError('dataset error.')
     [c, h, w] = train_dataset[0][0].shape
     return train_dataset, test_dataset, c, h, w
+
+
+def data_loader(data_set, batch_size, dataset='mnist', shuffle=False, device='cpu'):
+    num_data = len(data_set)
+    if dataset == 'mnist':
+        # images = data_set.data.unsqueeze(1) / 255
+        # target = data_set.targets.int()
+        images = [torch.from_numpy(numpy.array(data[0])).float()[None, None, :, :] for data in data_set]
+        target = data_set.targets.int()
+    elif dataset == 'cifar10':
+        images = data_set.data.transpose([0, 3, 1, 2])
+        cifar10_train_mean = torch.tensor((0.4914, 0.4822, 0.4465))[
+            None, :, None, None]
+        cifar10_train_std = torch.tensor((0.2470, 0.2435, 0.2616))[
+            None, :, None, None]
+        images = torch.tensor(images, dtype=torch.int32) - cifar10_train_mean
+        images /= cifar10_train_std
+        target = torch.tensor(data_set.targets, dtype=torch.int32)
+    idxs = [i for i in range(num_data)]
+    if shuffle:
+        random.shuffle(idxs)
+    num_dataloader = num_data // batch_size
+    if num_data % batch_size:
+        num_dataloader += 1
+    for i in range(num_dataloader):
+        idx = i * batch_size
+        data_return = images[idx: idx+batch_size]
+        target_return = target[idx: idx+batch_size]
+        yield (data_return.to(device), target_return.to(device))
 
 
 class SplitData:
@@ -64,27 +94,25 @@ class SplitData:
     分割数据集
     '''
 
-    def __init__(self, dataset, args):
+    def __init__(self, dataset):
         self.initial_dataset = dataset
-        self.targets = self.get_target()
+        self.targets = list(dataset.class_to_idx.values())
         self.num_target = len(self.targets)
-        self.args = args
 
-    # 获取所以标签
+    # def get_target(self):
+    #     # 获取所有标签
+    #     if isinstance(self.initial_dataset.targets, list):
+    #         targets = set(self.initial_dataset.targets)
+    #     elif torch.is_tensor(self.initial_dataset.targets):
+    #         targets = set(self.initial_dataset.targets.numpy().tolist())
+    #     else:
+    #         raise ValueError('dataset.targets is not tensor or list.')
+    #     targets = list(targets)
+    #     targets.sort()
+    #     return targets
 
-    def get_target(self):
-        if isinstance(self.initial_dataset.targets, list):
-            targets = set(self.initial_dataset.targets)
-        elif torch.is_tensor(self.initial_dataset.targets):
-            targets = set(self.initial_dataset.targets.numpy().tolist())
-        else:
-            raise ValueError('dataset.targets is not tensor or list.')
-        targets = list(targets)
-        targets.sort()
-        return targets
-
-    # 将数据集按标签分割
     def split_data(self):
+        # 将数据集按标签分割
         targets = self.targets
         splited_data = dict.fromkeys(targets)
         for key in splited_data.keys():
@@ -93,16 +121,16 @@ class SplitData:
             splited_data[data[1]].append(data)
         return splited_data
 
-    # 获取每个标签对数据集的数量
     def num_data_target(self):
+        # 获取每个标签对数据集的数量
         num_data_target_all = []
         splited_data = self.split_data()
         for target in self.targets:
             num_data_target_all.append(len(splited_data[target]))
         return num_data_target_all
 
-    # 按照客户端数量和每个客户端的数据量分配数据
     def all_iid(self, num_client, num_client_data):
+        # 按照客户端数量和每个客户端的数据量分配数据
         # if num_client_data * num_client > self.num_target * min(self.num_data_target()):
         #     raise ValueError('too large num_client_data * num_client.')
         # if num_client_data % self.num_target != 0:
@@ -153,8 +181,8 @@ class SplitData:
                 idx += num_client_data_minor
         return client_data
 
-    # 按照客户端数量和每个客户端的数据量分配数据
     def server_non_iid(self, num_server, num_server_client, num_client_data, client_main_target, proportion=None):
+        # 按照客户端数量和每个客户端的数据量分配数据
         # if num_client_data * num_server * num_server_client > self.num_target * min(self.num_data_target()):
         #     raise ValueError(
         #         'too large num_client_data * num_server * num_server_client.')
