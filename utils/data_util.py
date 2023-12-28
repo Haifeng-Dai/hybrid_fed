@@ -60,33 +60,30 @@ def get_dataset(dataset='mnist'):
     return train_dataset, test_dataset, c, h, w
 
 
-def data_loader(data_set, batch_size, dataset='mnist', shuffle=False, device='cpu'):
-    num_data = len(data_set)
-    if dataset == 'mnist':
-        # images = data_set.data.unsqueeze(1) / 255
-        # target = data_set.targets.int()
-        images = [torch.from_numpy(numpy.array(data[0])).float()[None, None, :, :] for data in data_set]
-        target = data_set.targets.int()
-    elif dataset == 'cifar10':
-        images = data_set.data.transpose([0, 3, 1, 2])
-        cifar10_train_mean = torch.tensor((0.4914, 0.4822, 0.4465))[
-            None, :, None, None]
-        cifar10_train_std = torch.tensor((0.2470, 0.2435, 0.2616))[
-            None, :, None, None]
-        images = torch.tensor(images, dtype=torch.int32) - cifar10_train_mean
-        images /= cifar10_train_std
-        target = torch.tensor(data_set.targets, dtype=torch.int32)
-    idxs = [i for i in range(num_data)]
-    if shuffle:
-        random.shuffle(idxs)
-    num_dataloader = num_data // batch_size
-    if num_data % batch_size:
-        num_dataloader += 1
-    for i in range(num_dataloader):
-        idx = i * batch_size
-        data_return = images[idx: idx+batch_size]
-        target_return = target[idx: idx+batch_size]
-        yield (data_return.to(device), target_return.to(device))
+# def tensor_merge(tensor_list):
+#     if len(tensor_list) == 1:
+#         return tensor_list[0].unsqueeze(0)
+#     tensor = torch.stack((tensor_list[0], tensor_list[1]))
+#     for tensor_ in tensor_list[2:]:
+#         tensor = torch.cat((tensor, tensor_.unsqueeze(0)))
+#     return tensor
+
+
+# def data_loader(dataset_list, batch_size, shuffle=False, device='cpu'):
+#     num_data = len(dataset_list)
+#     data = [dataset[0] for dataset in dataset_list]
+#     target = torch.tensor([dataset[1] for dataset in dataset_list])
+#     idxs = [i for i in range(num_data)]
+#     if shuffle:
+#         random.shuffle(idxs)
+#     num_dataloader = num_data // batch_size
+#     if num_data % batch_size:
+#         num_dataloader += 1
+#     for i in range(num_dataloader):
+#         idx = i * batch_size
+#         data_return = tensor_merge(data[idx: idx+batch_size])
+#         target_return = target[idx: idx+batch_size]
+#         yield (data_return.to(device), target_return.to(device))
 
 
 class SplitData:
@@ -96,20 +93,20 @@ class SplitData:
 
     def __init__(self, dataset):
         self.initial_dataset = dataset
-        self.targets = list(dataset.class_to_idx.values())
+        self.targets = self.get_target()
         self.num_target = len(self.targets)
 
-    # def get_target(self):
-    #     # 获取所有标签
-    #     if isinstance(self.initial_dataset.targets, list):
-    #         targets = set(self.initial_dataset.targets)
-    #     elif torch.is_tensor(self.initial_dataset.targets):
-    #         targets = set(self.initial_dataset.targets.numpy().tolist())
-    #     else:
-    #         raise ValueError('dataset.targets is not tensor or list.')
-    #     targets = list(targets)
-    #     targets.sort()
-    #     return targets
+    def get_target(self):
+        # 获取所有标签
+        if isinstance(self.initial_dataset.targets, list):
+            targets = set(self.initial_dataset.targets)
+        elif torch.is_tensor(self.initial_dataset.targets):
+            targets = set(self.initial_dataset.targets.numpy().tolist())
+        else:
+            raise ValueError('dataset.targets is not tensor or list.')
+        targets = list(targets)
+        targets.sort()
+        return targets
 
     def split_data(self):
         # 将数据集按标签分割

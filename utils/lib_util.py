@@ -1,7 +1,7 @@
 import sys
 import os
 import logging
-import numpy
+import torch
 import argparse
 
 import matplotlib.pyplot as plt
@@ -80,19 +80,28 @@ def get_logger(filename):
     return logger
 
 
-def save_file(args, save_data):
+def save_file(args, save_data, log):
     # 保存数据
-    save_path = f'./data/dealed-data/{args.dataset}_algo_{args.algorithm}/alpha_{args.alpha}_T_{args.T}/'
+    save_path = f'./data/saved-data/{args.dataset}_algo_{args.algorithm}/alpha_{args.alpha}_T_{args.T}/'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    file_name = f'server_commu_{args.num_server_commu}_client_commu_{args.num_client_commu}_client_train_{args.num_client_train}_batch_size_{args.batch_size}_num_all_client_{args.num_all_client}_num_all_server_{args.num_all_server}_num_client_data_{args.num_client_data}_num_public_data_{args.num_public_data}_proportion_{args.proportion}.npz'
-    numpy.savez(save_path+file_name, save_data)
+    file_path = save_path+(
+        f'server_commu_{args.num_server_commu}'
+        f'_client_commu_{args.num_client_commu}'
+        f'_client_train_{args.num_client_train}'
+        f'_batch_size_{args.batch_size}'
+        f'_num_all_client_{args.num_all_client}'
+        f'_num_all_server_{args.num_all_server}'
+        f'_num_client_data_{args.num_client_data}'
+        f'_num_public_data_{args.num_public_data}'
+        f'_proportion_{args.proportion}.pt')
+    log.info(file_path)
+    torch.save(save_data, file_path)
 
 
 def get_args():
     # 获取输入参数
     parser = argparse.ArgumentParser(description='save results.')
-
     parser.add_argument('--dataset', type=str, default='mnist',
                         help='the used dataset.')
     parser.add_argument('--alpha', type=float, default=0.5,
@@ -125,11 +134,8 @@ def get_args():
                         help='number of public data.')
     parser.add_argument('--proportion', type=float, default=0.8,
                         help='proportion of main target data.')
-    parser.add_argument('--server_client', type=list,
-                        default=[[0, 1, 2], [3, 4, 5], [6, 7, 8]], help='clients of servers.')
-    parser.add_argument('--neighbor_server', type=list,
-                        default=[[1], [2], [0]], help='neighbor servers of each server.')
     return parser.parse_args()
+
 
 # if __name__ == '__main__':
 #     import time
