@@ -1,7 +1,26 @@
-from mpi4py import MPI
+import torch
+import torchvision
+import time
 
-com = MPI.COMM_WORLD
+from torch.utils.data import DataLoader, Dataset
 
-a = [1, 2, 3, 4]
-b = com.rank
-print(a, b)
+t = []
+t.append(time.time())
+root = './data/raw-data/'
+data = torchvision.datasets.MNIST(
+    root=root,
+    train=False,
+    transform=torchvision.transforms.ToTensor(),
+    download=False)
+
+dataloader = DataLoader(
+    dataset=data,
+    batch_size=100,
+    shuffle=False)
+
+for i in dataloader:
+    t.append(time.time())
+
+for i, t_ in enumerate(t[1:]):
+    print(t_ - t[i-1])
+

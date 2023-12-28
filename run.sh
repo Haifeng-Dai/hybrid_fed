@@ -20,7 +20,7 @@ for alpha_ in ${alpha[@]}; do
     for T_ in ${T[@]}; do
         # for dataset_ in ${dataset[@]}; do
         # for algorithm_ in ${algorithm[@]}; do
-        mpiexec -np 2 python hybrid_fed1.py \
+        mpiexec -np 2 python hybrid_fed.py \
             --dataset ${dataset} \
             --alpha ${alpha_} \
             --T ${T_} \
