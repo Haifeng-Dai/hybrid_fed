@@ -23,7 +23,7 @@ def get_dataset(dataset='mnist'):
     '''
     获取完整的原始数据集
     '''
-    raw_data = './data/raw-data'
+    raw_data = './data/'
     if dataset == 'mnist':
         train_dataset = torchvision.datasets.MNIST(
             root=raw_data,

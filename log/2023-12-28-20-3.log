@@ -1,0 +1,23 @@
+[2023-12-28 20:03:32] [INFO] device cuda is used.
+[2023-12-28 20:03:32] [INFO] cudnn is actived.
+[2023-12-28 20:03:32] [INFO] 
+           alpha       :  0.5  
+             T         :   8   
+         algorithm     :   3   
+     num_server_commu  :   5   
+     num_client_commu  :   5   
+     num_client_train  :   5   
+     num_public_train  :   5   
+        batch_size     :  200  
+          dataset      : mnist 
+       model_select    :   1   
+      num_all_client   :   9   
+      num_all_server   :   3   
+      num_client_data  : 1200  
+      num_public_data  :  50   
+        proportion     :  0.8  
+
+[2023-12-28 20:03:39] [INFO] --------------------------------------------------
+[2023-12-28 20:03:39] [INFO] |epoch_server_commu: 0/5
+[2023-12-28 20:03:39] [INFO]  |epoch_client_commu: 0/5
+[2023-12-28 20:03:39] [INFO]   |server: 0

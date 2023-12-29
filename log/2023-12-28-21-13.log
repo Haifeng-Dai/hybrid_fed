@@ -1,0 +1,372 @@
+[2023-12-28 21:13:16] [INFO] device cuda is used.
+[2023-12-28 21:13:16] [INFO] cudnn is actived.
+[2023-12-28 21:13:16] [INFO] 
+           alpha       :  0.5  
+             T         :   8   
+         algorithm     :   0   
+     num_server_commu  :   2   
+     num_client_commu  :   2   
+     num_client_train  :   5   
+     num_public_train  :   5   
+        batch_size     :  200  
+          dataset      : mnist 
+       model_select    :   1   
+      num_all_client   :   9   
+      num_all_server   :   3   
+      num_client_data  : 1200  
+      num_public_data  :  50   
+        proportion     :  0.8  
+
+[2023-12-28 21:13:23] [INFO] --------------------------------------------------
+[2023-12-28 21:13:23] [INFO] |epoch_server_commu: 0/2
+[2023-12-28 21:13:23] [INFO]  |epoch_client_commu: 0/2
+[2023-12-28 21:13:23] [INFO]   |server: 0
+[2023-12-28 21:13:23] [INFO]    -client 0
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 0, acc 0.089
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 1, acc 0.089
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 2, acc 0.089
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 3, acc 0.089
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 4, acc 0.089
+[2023-12-28 21:13:24] [INFO]    -client 1
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 0, acc 0.089
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 1, acc 0.089
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 2, acc 0.089
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 3, acc 0.089
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 4, acc 0.089
+[2023-12-28 21:13:24] [INFO]    -client 2
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 0, acc 0.089
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 1, acc 0.089
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 2, acc 0.089
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 3, acc 0.089
+[2023-12-28 21:13:24] [INFO]     |  local epoch  : 4, acc 0.089
+[2023-12-28 21:13:24] [INFO] |servers comunicated: 0, server aggregated: 0, acc_server 0: 0.089.
+[2023-12-28 21:13:24] [INFO] --------------------------------------------------
+[2023-12-28 21:13:24] [INFO]   |server: 1
+[2023-12-28 21:13:25] [INFO]    -client 3
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:25] [INFO]    -client 4
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:25] [INFO]    -client 5
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:25] [INFO] |servers comunicated: 0, server aggregated: 0, acc_server 1: 0.098.
+[2023-12-28 21:13:25] [INFO] --------------------------------------------------
+[2023-12-28 21:13:25] [INFO]   |server: 2
+[2023-12-28 21:13:25] [INFO]    -client 6
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:25] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:26] [INFO]    -client 7
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:26] [INFO]    -client 8
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:26] [INFO] |servers comunicated: 0, server aggregated: 0, acc_server 2: 0.098.
+[2023-12-28 21:13:26] [INFO] --------------------------------------------------
+[2023-12-28 21:13:26] [INFO]  |epoch_client_commu: 1/2
+[2023-12-28 21:13:26] [INFO]   |server: 0
+[2023-12-28 21:13:26] [INFO]    -client 0
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 0, acc 0.089
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 1, acc 0.089
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 2, acc 0.089
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 3, acc 0.089
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 4, acc 0.089
+[2023-12-28 21:13:26] [INFO]    -client 1
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 0, acc 0.089
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 1, acc 0.089
+[2023-12-28 21:13:26] [INFO]     |  local epoch  : 2, acc 0.089
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 3, acc 0.089
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 4, acc 0.089
+[2023-12-28 21:13:27] [INFO]    -client 2
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 0, acc 0.089
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 1, acc 0.089
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 2, acc 0.089
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 3, acc 0.089
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 4, acc 0.089
+[2023-12-28 21:13:27] [INFO] |servers comunicated: 0, server aggregated: 1, acc_server 0: 0.089.
+[2023-12-28 21:13:27] [INFO] --------------------------------------------------
+[2023-12-28 21:13:27] [INFO]   |server: 1
+[2023-12-28 21:13:27] [INFO]    -client 3
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:27] [INFO]    -client 4
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:27] [INFO]    -client 5
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:27] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:28] [INFO] |servers comunicated: 0, server aggregated: 1, acc_server 1: 0.098.
+[2023-12-28 21:13:28] [INFO] --------------------------------------------------
+[2023-12-28 21:13:28] [INFO]   |server: 2
+[2023-12-28 21:13:28] [INFO]    -client 6
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:28] [INFO]    -client 7
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:28] [INFO]    -client 8
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:28] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:28] [INFO] |servers comunicated: 0, server aggregated: 1, acc_server 2: 0.098.
+[2023-12-28 21:13:28] [INFO] --------------------------------------------------
+[2023-12-28 21:13:28] [INFO]      ********  servers comunicates  ********      
+[2023-12-28 21:13:28] [INFO] --------------------------------------------------
+[2023-12-28 21:13:28] [INFO] |epoch_server_commu: 1/2
+[2023-12-28 21:13:28] [INFO]  |epoch_client_commu: 0/2
+[2023-12-28 21:13:28] [INFO]   |server: 0
+[2023-12-28 21:13:28] [INFO]    -client 0
+[2023-12-28 21:13:29] [INFO]     |  local epoch  : 0, acc 0.089
+[2023-12-28 21:13:29] [INFO]     |  local epoch  : 1, acc 0.089
+[2023-12-28 21:13:29] [INFO]     |  local epoch  : 2, acc 0.089
+[2023-12-28 21:13:29] [INFO]     |  local epoch  : 3, acc 0.089
+[2023-12-28 21:13:29] [INFO]     |  local epoch  : 4, acc 0.089
+[2023-12-28 21:13:29] [INFO]     | distill epoch : 0, acc 0.089
+[2023-12-28 21:13:29] [INFO]     | distill epoch : 1, acc 0.089
+[2023-12-28 21:13:29] [INFO]     | distill epoch : 2, acc 0.089
+[2023-12-28 21:13:29] [INFO]     | distill epoch : 3, acc 0.089
+[2023-12-28 21:13:29] [INFO]     | distill epoch : 4, acc 0.089
+[2023-12-28 21:13:29] [INFO]    -client 1
+[2023-12-28 21:13:29] [INFO]     |  local epoch  : 0, acc 0.089
+[2023-12-28 21:13:29] [INFO]     |  local epoch  : 1, acc 0.089
+[2023-12-28 21:13:29] [INFO]     |  local epoch  : 2, acc 0.089
+[2023-12-28 21:13:29] [INFO]     |  local epoch  : 3, acc 0.089
+[2023-12-28 21:13:29] [INFO]     |  local epoch  : 4, acc 0.089
+[2023-12-28 21:13:30] [INFO]     | distill epoch : 0, acc 0.089
+[2023-12-28 21:13:30] [INFO]     | distill epoch : 1, acc 0.089
+[2023-12-28 21:13:30] [INFO]     | distill epoch : 2, acc 0.089
+[2023-12-28 21:13:30] [INFO]     | distill epoch : 3, acc 0.089
+[2023-12-28 21:13:30] [INFO]     | distill epoch : 4, acc 0.089
+[2023-12-28 21:13:30] [INFO]    -client 2
+[2023-12-28 21:13:30] [INFO]     |  local epoch  : 0, acc 0.089
+[2023-12-28 21:13:30] [INFO]     |  local epoch  : 1, acc 0.089
+[2023-12-28 21:13:30] [INFO]     |  local epoch  : 2, acc 0.089
+[2023-12-28 21:13:30] [INFO]     |  local epoch  : 3, acc 0.089
+[2023-12-28 21:13:30] [INFO]     |  local epoch  : 4, acc 0.089
+[2023-12-28 21:13:30] [INFO]     | distill epoch : 0, acc 0.089
+[2023-12-28 21:13:30] [INFO]     | distill epoch : 1, acc 0.089
+[2023-12-28 21:13:30] [INFO]     | distill epoch : 2, acc 0.089
+[2023-12-28 21:13:30] [INFO]     | distill epoch : 3, acc 0.089
+[2023-12-28 21:13:30] [INFO]     | distill epoch : 4, acc 0.089
+[2023-12-28 21:13:30] [INFO] |servers comunicated: 1, server aggregated: 0, acc_server 0: 0.089.
+[2023-12-28 21:13:30] [INFO] --------------------------------------------------
+[2023-12-28 21:13:30] [INFO]   |server: 1
+[2023-12-28 21:13:30] [INFO]    -client 3
+[2023-12-28 21:13:30] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:30] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:30] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:30] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:30] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:31] [INFO]     | distill epoch : 0, acc 0.099
+[2023-12-28 21:13:31] [INFO]     | distill epoch : 1, acc 0.105
+[2023-12-28 21:13:31] [INFO]     | distill epoch : 2, acc 0.137
+[2023-12-28 21:13:31] [INFO]     | distill epoch : 3, acc 0.186
+[2023-12-28 21:13:31] [INFO]     | distill epoch : 4, acc 0.231
+[2023-12-28 21:13:31] [INFO]    -client 4
+[2023-12-28 21:13:31] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:31] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:31] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:31] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:31] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:31] [INFO]     | distill epoch : 0, acc 0.098
+[2023-12-28 21:13:31] [INFO]     | distill epoch : 1, acc 0.098
+[2023-12-28 21:13:31] [INFO]     | distill epoch : 2, acc 0.098
+[2023-12-28 21:13:31] [INFO]     | distill epoch : 3, acc 0.102
+[2023-12-28 21:13:31] [INFO]     | distill epoch : 4, acc 0.130
+[2023-12-28 21:13:31] [INFO]    -client 5
+[2023-12-28 21:13:31] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:31] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:31] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:31] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:31] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:31] [INFO]     | distill epoch : 0, acc 0.098
+[2023-12-28 21:13:32] [INFO]     | distill epoch : 1, acc 0.098
+[2023-12-28 21:13:32] [INFO]     | distill epoch : 2, acc 0.098
+[2023-12-28 21:13:32] [INFO]     | distill epoch : 3, acc 0.099
+[2023-12-28 21:13:32] [INFO]     | distill epoch : 4, acc 0.116
+[2023-12-28 21:13:32] [INFO] |servers comunicated: 1, server aggregated: 0, acc_server 1: 0.156.
+[2023-12-28 21:13:32] [INFO] --------------------------------------------------
+[2023-12-28 21:13:32] [INFO]   |server: 2
+[2023-12-28 21:13:32] [INFO]    -client 6
+[2023-12-28 21:13:32] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:32] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:32] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:32] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:32] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:32] [INFO]     | distill epoch : 0, acc 0.098
+[2023-12-28 21:13:32] [INFO]     | distill epoch : 1, acc 0.098
+[2023-12-28 21:13:32] [INFO]     | distill epoch : 2, acc 0.098
+[2023-12-28 21:13:32] [INFO]     | distill epoch : 3, acc 0.098
+[2023-12-28 21:13:32] [INFO]     | distill epoch : 4, acc 0.098
+[2023-12-28 21:13:32] [INFO]    -client 7
+[2023-12-28 21:13:32] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:32] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:32] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:32] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:32] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:33] [INFO]     | distill epoch : 0, acc 0.098
+[2023-12-28 21:13:33] [INFO]     | distill epoch : 1, acc 0.098
+[2023-12-28 21:13:33] [INFO]     | distill epoch : 2, acc 0.098
+[2023-12-28 21:13:33] [INFO]     | distill epoch : 3, acc 0.098
+[2023-12-28 21:13:33] [INFO]     | distill epoch : 4, acc 0.098
+[2023-12-28 21:13:33] [INFO]    -client 8
+[2023-12-28 21:13:33] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:33] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:33] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:33] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:33] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:33] [INFO]     | distill epoch : 0, acc 0.098
+[2023-12-28 21:13:33] [INFO]     | distill epoch : 1, acc 0.098
+[2023-12-28 21:13:33] [INFO]     | distill epoch : 2, acc 0.098
+[2023-12-28 21:13:33] [INFO]     | distill epoch : 3, acc 0.098
+[2023-12-28 21:13:33] [INFO]     | distill epoch : 4, acc 0.098
+[2023-12-28 21:13:33] [INFO] |servers comunicated: 1, server aggregated: 0, acc_server 2: 0.098.
+[2023-12-28 21:13:33] [INFO] --------------------------------------------------
+[2023-12-28 21:13:33] [INFO]  |epoch_client_commu: 1/2
+[2023-12-28 21:13:33] [INFO]   |server: 0
+[2023-12-28 21:13:33] [INFO]    -client 0
+[2023-12-28 21:13:33] [INFO]     |  local epoch  : 0, acc 0.089
+[2023-12-28 21:13:33] [INFO]     |  local epoch  : 1, acc 0.089
+[2023-12-28 21:13:33] [INFO]     |  local epoch  : 2, acc 0.089
+[2023-12-28 21:13:33] [INFO]     |  local epoch  : 3, acc 0.089
+[2023-12-28 21:13:34] [INFO]     |  local epoch  : 4, acc 0.089
+[2023-12-28 21:13:34] [INFO]     | distill epoch : 0, acc 0.089
+[2023-12-28 21:13:34] [INFO]     | distill epoch : 1, acc 0.089
+[2023-12-28 21:13:34] [INFO]     | distill epoch : 2, acc 0.089
+[2023-12-28 21:13:34] [INFO]     | distill epoch : 3, acc 0.089
+[2023-12-28 21:13:34] [INFO]     | distill epoch : 4, acc 0.090
+[2023-12-28 21:13:34] [INFO]    -client 1
+[2023-12-28 21:13:34] [INFO]     |  local epoch  : 0, acc 0.089
+[2023-12-28 21:13:34] [INFO]     |  local epoch  : 1, acc 0.089
+[2023-12-28 21:13:34] [INFO]     |  local epoch  : 2, acc 0.089
+[2023-12-28 21:13:34] [INFO]     |  local epoch  : 3, acc 0.089
+[2023-12-28 21:13:34] [INFO]     |  local epoch  : 4, acc 0.089
+[2023-12-28 21:13:34] [INFO]     | distill epoch : 0, acc 0.089
+[2023-12-28 21:13:34] [INFO]     | distill epoch : 1, acc 0.089
+[2023-12-28 21:13:34] [INFO]     | distill epoch : 2, acc 0.089
+[2023-12-28 21:13:34] [INFO]     | distill epoch : 3, acc 0.089
+[2023-12-28 21:13:34] [INFO]     | distill epoch : 4, acc 0.089
+[2023-12-28 21:13:34] [INFO]    -client 2
+[2023-12-28 21:13:34] [INFO]     |  local epoch  : 0, acc 0.089
+[2023-12-28 21:13:34] [INFO]     |  local epoch  : 1, acc 0.089
+[2023-12-28 21:13:34] [INFO]     |  local epoch  : 2, acc 0.089
+[2023-12-28 21:13:34] [INFO]     |  local epoch  : 3, acc 0.089
+[2023-12-28 21:13:34] [INFO]     |  local epoch  : 4, acc 0.089
+[2023-12-28 21:13:34] [INFO]     | distill epoch : 0, acc 0.089
+[2023-12-28 21:13:35] [INFO]     | distill epoch : 1, acc 0.089
+[2023-12-28 21:13:35] [INFO]     | distill epoch : 2, acc 0.089
+[2023-12-28 21:13:35] [INFO]     | distill epoch : 3, acc 0.089
+[2023-12-28 21:13:35] [INFO]     | distill epoch : 4, acc 0.089
+[2023-12-28 21:13:35] [INFO] |servers comunicated: 1, server aggregated: 1, acc_server 0: 0.089.
+[2023-12-28 21:13:35] [INFO] --------------------------------------------------
+[2023-12-28 21:13:35] [INFO]   |server: 1
+[2023-12-28 21:13:35] [INFO]    -client 3
+[2023-12-28 21:13:35] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:35] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:35] [INFO]     |  local epoch  : 2, acc 0.108
+[2023-12-28 21:13:35] [INFO]     |  local epoch  : 3, acc 0.153
+[2023-12-28 21:13:35] [INFO]     |  local epoch  : 4, acc 0.189
+[2023-12-28 21:13:35] [INFO]     | distill epoch : 0, acc 0.210
+[2023-12-28 21:13:35] [INFO]     | distill epoch : 1, acc 0.233
+[2023-12-28 21:13:35] [INFO]     | distill epoch : 2, acc 0.270
+[2023-12-28 21:13:35] [INFO]     | distill epoch : 3, acc 0.281
+[2023-12-28 21:13:35] [INFO]     | distill epoch : 4, acc 0.279
+[2023-12-28 21:13:35] [INFO]    -client 4
+[2023-12-28 21:13:35] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:35] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:35] [INFO]     |  local epoch  : 2, acc 0.107
+[2023-12-28 21:13:35] [INFO]     |  local epoch  : 3, acc 0.165
+[2023-12-28 21:13:35] [INFO]     |  local epoch  : 4, acc 0.232
+[2023-12-28 21:13:35] [INFO]     | distill epoch : 0, acc 0.257
+[2023-12-28 21:13:36] [INFO]     | distill epoch : 1, acc 0.272
+[2023-12-28 21:13:36] [INFO]     | distill epoch : 2, acc 0.276
+[2023-12-28 21:13:36] [INFO]     | distill epoch : 3, acc 0.260
+[2023-12-28 21:13:36] [INFO]     | distill epoch : 4, acc 0.246
+[2023-12-28 21:13:36] [INFO]    -client 5
+[2023-12-28 21:13:36] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:36] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:36] [INFO]     |  local epoch  : 2, acc 0.110
+[2023-12-28 21:13:36] [INFO]     |  local epoch  : 3, acc 0.184
+[2023-12-28 21:13:36] [INFO]     |  local epoch  : 4, acc 0.198
+[2023-12-28 21:13:36] [INFO]     | distill epoch : 0, acc 0.212
+[2023-12-28 21:13:36] [INFO]     | distill epoch : 1, acc 0.223
+[2023-12-28 21:13:36] [INFO]     | distill epoch : 2, acc 0.226
+[2023-12-28 21:13:36] [INFO]     | distill epoch : 3, acc 0.220
+[2023-12-28 21:13:36] [INFO]     | distill epoch : 4, acc 0.210
+[2023-12-28 21:13:36] [INFO] |servers comunicated: 1, server aggregated: 1, acc_server 1: 0.260.
+[2023-12-28 21:13:36] [INFO] --------------------------------------------------
+[2023-12-28 21:13:36] [INFO]   |server: 2
+[2023-12-28 21:13:36] [INFO]    -client 6
+[2023-12-28 21:13:36] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:36] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:36] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:36] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:36] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:37] [INFO]     | distill epoch : 0, acc 0.098
+[2023-12-28 21:13:37] [INFO]     | distill epoch : 1, acc 0.098
+[2023-12-28 21:13:37] [INFO]     | distill epoch : 2, acc 0.099
+[2023-12-28 21:13:37] [INFO]     | distill epoch : 3, acc 0.104
+[2023-12-28 21:13:37] [INFO]     | distill epoch : 4, acc 0.122
+[2023-12-28 21:13:37] [INFO]    -client 7
+[2023-12-28 21:13:37] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:37] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:37] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:37] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:37] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:37] [INFO]     | distill epoch : 0, acc 0.098
+[2023-12-28 21:13:37] [INFO]     | distill epoch : 1, acc 0.098
+[2023-12-28 21:13:37] [INFO]     | distill epoch : 2, acc 0.101
+[2023-12-28 21:13:37] [INFO]     | distill epoch : 3, acc 0.112
+[2023-12-28 21:13:37] [INFO]     | distill epoch : 4, acc 0.133
+[2023-12-28 21:13:37] [INFO]    -client 8
+[2023-12-28 21:13:37] [INFO]     |  local epoch  : 0, acc 0.098
+[2023-12-28 21:13:37] [INFO]     |  local epoch  : 1, acc 0.098
+[2023-12-28 21:13:37] [INFO]     |  local epoch  : 2, acc 0.098
+[2023-12-28 21:13:37] [INFO]     |  local epoch  : 3, acc 0.098
+[2023-12-28 21:13:37] [INFO]     |  local epoch  : 4, acc 0.098
+[2023-12-28 21:13:37] [INFO]     | distill epoch : 0, acc 0.098
+[2023-12-28 21:13:38] [INFO]     | distill epoch : 1, acc 0.098
+[2023-12-28 21:13:38] [INFO]     | distill epoch : 2, acc 0.098
+[2023-12-28 21:13:38] [INFO]     | distill epoch : 3, acc 0.098
+[2023-12-28 21:13:38] [INFO]     | distill epoch : 4, acc 0.098
+[2023-12-28 21:13:38] [INFO] |servers comunicated: 1, server aggregated: 1, acc_server 2: 0.107.
+[2023-12-28 21:13:38] [INFO] --------------------------------------------------
+[2023-12-28 21:13:38] [INFO]      ********  servers comunicates  ********      
+[2023-12-28 21:13:38] [INFO] ./data/saved-data/mnist_algo_0/alpha_0.5_T_8/server_commu_2_client_commu_2_client_train_5_batch_size_200_num_all_client_9_num_all_server_3_num_client_data_1200_num_public_data_50_proportion_0.8.pt
