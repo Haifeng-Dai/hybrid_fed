@@ -3,7 +3,7 @@ import torch
 import numpy
 import time
 import sys
-from mpi4py import MPI
+# from mpi4py import MPI
 
 from torch.utils.data import DataLoader
 
@@ -43,8 +43,8 @@ else:
 args = get_args()
 args.device = device
 
-comm = MPI.COMM_WORLD
-args.algorithm = comm.rank
+# comm = MPI.COMM_WORLD
+# args.algorithm = comm.rank
 # alpha = 0.5
 # T = 2
 # num_server_commu = 15

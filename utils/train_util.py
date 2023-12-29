@@ -185,6 +185,9 @@ class ServerTrain:
         acc_ = []
         acc__ = []
         for epoch in range(self.args.num_public_train):
+            _loss = []
+            _acc = []
+            __acc = []
             for model_ in self.args_train['neighbor']:
                 model, loss = train_model_disti_single(
                     model=model,
@@ -193,7 +196,7 @@ class ServerTrain:
                     alpha=self.args.alpha,
                     T=self.args.T,
                     device=self.args.device)
-                loss_.append(loss)
+                _loss.append(loss)
                 acc = eval_model(
                     model=model,
                     dataloader=self.args_train['test_dataloader'],
@@ -205,8 +208,11 @@ class ServerTrain:
                 message = '    |{:^15}: {}, acc {:.3f}'.format(
                     'distill epoch', epoch, acc)
                 self.args_train['log'].info(message)
-                acc_.append(acc)
-                acc__.append(acc_train)
+                _acc.append(acc)
+                __acc.append(acc_train)
+            loss_.extend(_loss)
+            acc_.extend(_acc)
+            acc__.extend(__acc)
         return model, loss_, acc_, acc__
 
 

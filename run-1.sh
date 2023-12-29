@@ -1,6 +1,6 @@
 #!/bin/bash
 dataset='mnist'
-alpha=0
+alpha=0.5
 T=8
 num_all_client=9
 num_all_server=3
