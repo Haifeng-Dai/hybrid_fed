@@ -196,7 +196,7 @@ class ServerTrain:
                     alpha=self.args.alpha,
                     T=self.args.T,
                     device=self.args.device)
-                _loss.append(loss)
+                _loss.extend(loss)
                 acc = eval_model(
                     model=model,
                     dataloader=self.args_train['test_dataloader'],

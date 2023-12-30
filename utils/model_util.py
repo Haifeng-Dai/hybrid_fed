@@ -76,6 +76,8 @@ class MLP(nn.Module):
             nn.ReLU(inplace=True))
         self.hidden = nn.Sequential(
             nn.Linear(num_hidden, num_hidden),
+            nn.ReLU(inplace=True),
+            nn.Linear(num_hidden, num_hidden),
             nn.ReLU(inplace=True))
         self.output = nn.Linear(num_hidden, num_classes)
 

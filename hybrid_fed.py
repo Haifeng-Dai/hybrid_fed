@@ -119,37 +119,50 @@ for i, dataset_ in enumerate(train_dataset_client):
     train_dataloader[i] = DataLoader(
         dataset=dataset_train,
         batch_size=args.batch_size,
-        shuffle=True)
+        shuffle=True,
+        pin_memory=True,
+        num_workers=4)
     train_test_dataloader[i] = DataLoader(
         dataset=dataset_test,
         batch_size=args.batch_size,
-        shuffle=True)
+        shuffle=True,
+        pin_memory=True,
+        num_workers=4)
 [public_dataset, test_dataset] = split_parts_random(
     test_dataset_o, [args.num_public_data, int(len(test_dataset_o)) - args.num_public_data])
 public_dataloader = DataLoader(
     dataset=public_dataset,
     batch_size=args.batch_size,
-    shuffle=True)
+    shuffle=True,
+    pin_memory=True,
+    num_workers=4)
 test_dataloader = DataLoader(
     dataset=test_dataset,
-    batch_size=args.batch_size)
+    batch_size=args.batch_size,
+    pin_memory=True,
+    num_workers=4)
 
 # %% 模型初始化
 if args.model_select == 1:
     model = CNN(h, w, c, num_target).to(device)
     client_model = list_same_term(args.num_all_client, model)
+    server_model = list_same_term(args.num_all_server, model)
 elif args.model_select == 2:
     model = LeNet5(h, w, c, num_target).to(device)
     client_model = list_same_term(args.num_all_client, model)
+    server_model = list_same_term(args.num_all_server, model)
 elif args.model_select == 3:
     model1 = CNN(h, w, c, num_target).to(device)
     model2 = LeNet5(h, w, c, num_target).to(device)
     model3 = MLP(h, w, c, 50, num_target).to(device)
-    client_model = [model1, model2, model3].to(device)
+    server_model = [model1, model2, model3]
+    client_model1 = list_same_term(num_server_client, model1)
+    client_model2 = list_same_term(num_server_client, model2)
+    client_model3 = list_same_term(num_server_client, model3)
+    client_model = [client_model1, client_model2, client_model3]
 else:
     raise ValueError('model error.')
 
-server_model = list_same_term(args.num_all_server, model)
 server_accuracy = list_same_term(args.num_all_server)
 client_accuracy = list_same_term(args.num_all_client)
 train_accuracy = list_same_term(args.num_all_client)

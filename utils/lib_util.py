@@ -82,7 +82,7 @@ def get_logger(filename):
 
 def save_file(args, save_data, log):
     # 保存数据
-    save_path = f'./res/{args.dataset}_algo_{args.algorithm}/alpha_{args.alpha}_T_{args.T}/'
+    save_path = f'./res/{args.dataset}_model_{args.model_select}_algo_{args.algorithm}/alpha_{args.alpha}_T_{args.T}/'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     file_path = save_path+(
