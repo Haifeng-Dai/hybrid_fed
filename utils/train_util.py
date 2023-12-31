@@ -19,7 +19,8 @@ class DistillKL(torch.nn.Module):
     def forward(self, output, target, logits_teacher):
         prob_teacher = f.softmax(logits_teacher/self.T, dim=1)
         prob_student = f.softmax(output/self.T, dim=1)
-        soft_loss = f.kl_div(prob_student.log(), prob_teacher, reduction='batchmean')
+        soft_loss = f.kl_div(prob_student.log(),
+                             prob_teacher, reduction='batchmean')
         hard_loss = f.cross_entropy(output, target)
         loss = self.alpha * hard_loss + \
             (1 - self.alpha) * soft_loss * self.T**2 / logits_teacher.shape[0]
@@ -220,7 +221,9 @@ def train_model(model, dataloader, device):
     # 训练模型
     trained_model = deepcopy(model)
     trained_model.train()
-    optimizer = torch.optim.Adam(trained_model.parameters())
+    optimizer = torch.optim.Adam(trained_model.parameters(),
+                                 lr=1e-4,
+                                 weight_decay=5e-4)
     loss_ = []
     for data, target in dataloader:
         optimizer.zero_grad()
@@ -237,7 +240,9 @@ def train_model_disti_weighted(model, weight, alpha, T, dataloader, num_target, 
     trained_model = deepcopy(model)
     trained_model.train()
     weight_device = weight.to(device)
-    optimizer = torch.optim.Adam(trained_model.parameters())
+    optimizer = torch.optim.Adam(trained_model.parameters(),
+                                 lr=1e-4,
+                                 weight_decay=5e-4)
     criterion = DistillKL(T, alpha)
     loss_ = []
     for data, target in dataloader:
@@ -264,7 +269,9 @@ def train_model_disti_single(model, teacher_model, dataloader, alpha, T, device)
     teacher_model = deepcopy(teacher_model).to(device)
     teacher_model.eval()
     criterion = DistillKL(T, alpha)
-    optimizer = torch.optim.Adam(trained_model.parameters())
+    optimizer = torch.optim.Adam(trained_model.parameters(),
+                                 lr=1e-4,
+                                 weight_decay=5e-4)
     loss_ = []
     for data, target in dataloader:
         optimizer.zero_grad()

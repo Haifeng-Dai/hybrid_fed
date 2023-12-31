@@ -13,7 +13,7 @@ from utils.lib_util import *
 from utils.train_util import *
 
 t = time.localtime()
-log_path = f'./log/{t.tm_year}-{t.tm_mon}-{t.tm_mday}-{t.tm_hour}-{t.tm_min}.log'
+log_path = f'./tmp.log'
 log = get_logger(log_path)
 
 torch.set_printoptions(
@@ -124,20 +124,84 @@ test_dataloader = DataLoader(
     pin_memory=True,
     num_workers=4)
 
+if args.model_select == 1:
+    model = CNN(h, w, c, num_target).to(args.device)
+    client_model = list_same_term(args.num_all_client, model)
+    server_model = list_same_term(args.num_all_server, model)
+elif args.model_select == 2:
+    model = LeNet5(h, w, c, num_target).to(args.device)
+    client_model = list_same_term(args.num_all_client, model)
+    server_model = list_same_term(args.num_all_server, model)
+elif args.model_select == 3:
+    model1 = CNN(h, w, c, num_target).to(args.device)
+    model2 = LeNet5(h, w, c, num_target).to(args.device)
+    model3 = MLP(h, w, c, 50, num_target).to(args.device)
+    server_model = [model1, model2, model3]
+    client_model1 = list_same_term(num_server_client, model1)
+    client_model2 = list_same_term(num_server_client, model2)
+    client_model3 = list_same_term(num_server_client, model3)
+    client_model = [client_model1, client_model2, client_model3]
+else:
+    raise ValueError('model error.')
+
+server_accuracy = list_same_term(args.num_all_server)
+client_accuracy = list_same_term(args.num_all_client)
+train_accuracy = list_same_term(args.num_all_client)
+server_client_model = deepcopy(server_accuracy)
+client_loss = deepcopy(client_accuracy)
+
+# %% 模型训练
+# keys = ['server_model',
+#         'train_dataloader',
+#         'test_dataloader',
+#         'train_test_dataloader',
+#         'public_dataloader',
+#         'log',
+#         'client_model',
+#         'num_target',
+#         'neighbor',
+#         'client_idx',
+#         'client_accuracy',
+#         'client_loss',
+#         'train_accuracy']
+# values = [server_model,
+#           train_dataloader,
+#           test_dataloader,
+#           train_test_dataloader,
+#           public_dataloader,
+#           log,
+#           None,
+#           num_target,
+#           None,
+#           None,
+#           client_accuracy,
+#           client_loss,
+#           train_accuracy]
+# args_train = dict(zip(keys, values))
+
+client_model_save = dict.fromkeys([i for i in range(args.num_client_commu)])
+server_model_save = dict.fromkeys([i for i in range(args.num_server_commu)])
+weight_server = list_same_term(args.num_all_server, 1/args.num_all_server)
+weight_list = list_same_term(args.num_all_server, weight_server)
+
 save_data = {'args': args,
-             'h': h,
-             'w': w,
-             'c': c,
              'num_target': num_target,
              'num_server_client': num_server_client,
              'train_dataloader': train_dataloader,
              'test_dataloader': test_dataloader,
              'train_test_dataloader': train_test_dataloader,
              'public_dataloader': public_dataloader,
-             'log': log,
-             'num_target': num_target,
              'server_client': server_client,
              'neighbor_server': neighbor_server,
-             'all_server': all_server}
+             'all_server': all_server,
+             'client_model': client_model,
+             'server_model': server_model,
+             'client_loss': client_loss,
+             'client_accuracy': client_accuracy,
+             'server_accuracy': server_accuracy,
+             'all_client': all_client,
+             'log_path': log_path}
+message = 'save data'
 file_path = './test.pt'
 torch.save(save_data, file_path)
+log.info(message)
