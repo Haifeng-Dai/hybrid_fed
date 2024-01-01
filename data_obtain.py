@@ -3,6 +3,7 @@ import torch
 import numpy
 import time
 import sys
+import os
 # from mpi4py import MPI
 
 from torch.utils.data import DataLoader
@@ -79,6 +80,12 @@ message = '\n\
     'num_public_data', args.num_public_data,
     'proportion', args.proportion)
 log.info(message)
+
+# if os.path.exists(log_path):
+#     message = 'file exists.'
+#     log.info(message)
+#     sys.exit()
+
 # %% 原始数据处理
 train_dataset_o, test_dataset_o, c, h, w = get_dataset(args.dataset)
 TrainDatasetSplited = SplitData(train_dataset_o)
@@ -125,17 +132,17 @@ test_dataloader = DataLoader(
     num_workers=4)
 
 if args.model_select == 1:
-    model = CNN(h, w, c, num_target).to(args.device)
+    model = CNN(h, w, c, num_target)
     client_model = list_same_term(args.num_all_client, model)
     server_model = list_same_term(args.num_all_server, model)
 elif args.model_select == 2:
-    model = LeNet5(h, w, c, num_target).to(args.device)
+    model = LeNet5(h, w, c, num_target)
     client_model = list_same_term(args.num_all_client, model)
     server_model = list_same_term(args.num_all_server, model)
 elif args.model_select == 3:
-    model1 = CNN(h, w, c, num_target).to(args.device)
-    model2 = LeNet5(h, w, c, num_target).to(args.device)
-    model3 = MLP(h, w, c, 50, num_target).to(args.device)
+    model1 = CNN(h, w, c, num_target)
+    model2 = LeNet5(h, w, c, num_target)
+    model3 = MLP(h, w, c, 50, num_target)
     server_model = [model1, model2, model3]
     client_model1 = list_same_term(num_server_client, model1)
     client_model2 = list_same_term(num_server_client, model2)

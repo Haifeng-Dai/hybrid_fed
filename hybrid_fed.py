@@ -43,22 +43,6 @@ else:
 args = get_args()
 args.device = device
 
-# comm = MPI.COMM_WORLD
-# args.algorithm = comm.rank
-# alpha = 0.5
-# T = 2
-# num_server_commu = 15
-# num_client_commu = 10
-# num_client_train = 10
-# num_public_train = 10
-# batch_size = 200
-# dataset = 'mnist'
-
-# num_all_client = 9
-# num_all_server = 3
-# num_client_data = 1000
-# num_public_data = 50
-# proportion = 0.8
 server_client = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
 neighbor_server = [[1], [2], [0]]
 all_client = [i for i in range(args.num_all_client)]
@@ -144,17 +128,17 @@ test_dataloader = DataLoader(
 
 # %% 模型初始化
 if args.model_select == 1:
-    model = CNN(h, w, c, num_target).to(device)
+    model = CNN(h, w, c, num_target)
     client_model = list_same_term(args.num_all_client, model)
     server_model = list_same_term(args.num_all_server, model)
 elif args.model_select == 2:
-    model = LeNet5(h, w, c, num_target).to(device)
+    model = LeNet5(h, w, c, num_target)
     client_model = list_same_term(args.num_all_client, model)
     server_model = list_same_term(args.num_all_server, model)
 elif args.model_select == 3:
-    model1 = CNN(h, w, c, num_target).to(device)
-    model2 = LeNet5(h, w, c, num_target).to(device)
-    model3 = MLP(h, w, c, 50, num_target).to(device)
+    model1 = CNN(h, w, c, num_target)
+    model2 = LeNet5(h, w, c, num_target)
+    model3 = MLP(h, w, c, 50, num_target)
     server_model = [model1, model2, model3]
     client_model1 = list_same_term(num_server_client, model1)
     client_model2 = list_same_term(num_server_client, model2)
@@ -182,7 +166,8 @@ keys = ['server_model',
         'client_idx',
         'client_accuracy',
         'client_loss',
-        'train_accuracy']
+        'train_accuracy',
+        'LR']
 values = [server_model,
           train_dataloader,
           test_dataloader,
@@ -195,7 +180,8 @@ values = [server_model,
           None,
           client_accuracy,
           client_loss,
-          train_accuracy]
+          train_accuracy,
+          None]
 args_train = dict(zip(keys, values))
 
 client_model_save = dict.fromkeys([i for i in range(args.num_client_commu)])
@@ -205,10 +191,12 @@ weight_server = list_same_term(args.num_all_server, 1/args.num_all_server)
 weight_list = list_same_term(args.num_all_server, weight_server)
 
 # %% 对每个服务器通讯幕进行循环
+d = 2
 for epoch_server_commu in range(args.num_server_commu):
     log.info('-'*50)
     log.info('|epoch_server_commu: {}/{}'.format(epoch_server_commu,
              args.num_server_commu))
+    args_train['LR'] = 1e-3 / (1 + d * epoch_server_commu)
     # 所有边缘服务器分别协调其客户端进行多轮联邦学习
     for epoch_client_commu in range(args.num_client_commu):
         message = ' |epoch_client_commu: {}/{}'.format(
@@ -223,14 +211,14 @@ for epoch_server_commu in range(args.num_server_commu):
             args_train['client_idx'] = server_client[server]
             args_train['client_model'] = client_model
             if args.algorithm == 0:
-                if epoch_server_commu == 0:
+                if epoch_server_commu == 0:  # weighted distill
                     client_model = ServerTrain(args, args_train, 1).train
                 else:
                     for i in neighbor_server[server]:
                         neighbor_model.append(server_model[i])
                     args_train['neighbor'] = neighbor_model
                     client_model = ServerTrain(args, args_train, 3).train
-            if args.algorithm == 1:
+            if args.algorithm == 1:  # single distill
                 if epoch_server_commu == 0:
                     client_model = ServerTrain(args, args_train, 1).train
                 else:
@@ -238,12 +226,10 @@ for epoch_server_commu in range(args.num_server_commu):
                         neighbor_model.append(server_model[i])
                     args_train['neighbor'] = neighbor_model
                     client_model = ServerTrain(args, args_train, 4).train
-            if args.algorithm == 2 or args.algorithm == 3:
+            if args.algorithm == 2 or args.algorithm == 3:  # 3仅在训练集上训练，2交换参数
                 client_model = ServerTrain(args, args_train, 1).train
-            if args.algorithm == 4:
+            if args.algorithm == 4: # 不交换参数，在训练集和公开数据集上训练
                 client_model = ServerTrain(args, args_train, 2).train
-            # torch.save(client_model, './test.pt')
-            # break
             # 在单个服务器下客户端训练完成后更新该服务器下客户端的模型
             server_model_ = [
                 client_model[client] for client in server_client[server]]
@@ -262,17 +248,12 @@ for epoch_server_commu in range(args.num_server_commu):
             log.info(message)
             log.info('-'*50)
             server_accuracy[server].append(acc_server)
-        # if epoch_client_commu == 1:
-        #     torch.save(client_model, './client_model.pt')
         server_model_save[epoch_client_commu] = deepcopy(server_model)
-        # break
-        # client_model_save[epoch_client_commu] = deepcopy(client_model)
-        if args.algorithm == 2:
+        if args.algorithm == 2:  # 参数平均
             server_model = server_communicate(server_model, weight_list)
             for server in all_server:
                 for client in server_client[server]:
                     client_model[client] = deepcopy(server_model[server])
-    # torch.save(server_model, './server_model.pt')
     message = '{:^50}'.format('********  servers comunicates  ********')
     log.info(message)
 

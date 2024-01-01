@@ -60,7 +60,7 @@ def list_same_term(len_list, term=[]):
 #     return idx_sets
 
 
-def get_logger(filename):
+def get_logger(filename, mode='w'):
     # 日志设置
     log_formatter = logging.Formatter(
         fmt='[%(asctime)s] [%(levelname)s] %(message)s',
@@ -68,7 +68,7 @@ def get_logger(filename):
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     # File logger
-    file_handler = logging.FileHandler(filename, mode='w')
+    file_handler = logging.FileHandler(filename, mode=mode)
     file_handler.setFormatter(log_formatter)
     file_handler.setLevel(logging.DEBUG)
     logger.addHandler(file_handler)
@@ -80,8 +80,10 @@ def get_logger(filename):
     return logger
 
 
-def save_file(args, save_data, log):
+def save_file(args, save_data, log, rank):
     # 保存数据
+    if rank != 0:
+        return
     save_path = f'./res/{args.dataset}_model_{args.model_select}_algo_{args.algorithm}/alpha_{args.alpha}_T_{args.T}/'
     if not os.path.exists(save_path):
         os.makedirs(save_path)

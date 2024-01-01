@@ -32,6 +32,7 @@ class ServerTrain:
         self.args = args
         self.args_train = args_train
         self.train_way = train_way
+        self.LR = self.args_train['LR']
 
     @property
     def train(self):
@@ -133,12 +134,12 @@ class ServerTrain:
             model, loss = train_model(
                 model=model,
                 dataloader=dataloader,
-                device=self.args.device)
+                device=self.args.device,
+                LR=self.LR)
             acc = eval_model(
                 model=model,
                 dataloader=self.args_train['test_dataloader'],
                 device=self.args.device)
-            print(epoch, type(self.args_train['train_test_dataloader']))
             acc_train = eval_model(
                 model=model,
                 dataloader=test_dataloader,
@@ -164,7 +165,8 @@ class ServerTrain:
                 dataloader=self.args_train['public_dataloader'],
                 num_target=self.args_train['num_target'],
                 neighbor=self.args_train['neighbor'],
-                device=self.args.device)
+                device=self.args.device,
+                LR=self.LR)
             loss_.extend(loss)
             acc = eval_model(
                 model=model,
@@ -196,7 +198,8 @@ class ServerTrain:
                     dataloader=self.args_train['public_dataloader'],
                     alpha=self.args.alpha,
                     T=self.args.T,
-                    device=self.args.device)
+                    device=self.args.device,
+                    LR=self.LR)
                 _loss.extend(loss)
                 acc = eval_model(
                     model=model,
@@ -217,12 +220,12 @@ class ServerTrain:
         return model, loss_, acc_, acc__
 
 
-def train_model(model, dataloader, device):
+def train_model(model, dataloader, device, LR):
     # 训练模型
-    trained_model = deepcopy(model)
+    trained_model = deepcopy(model).to(device)
     trained_model.train()
     optimizer = torch.optim.Adam(trained_model.parameters(),
-                                 lr=1e-4,
+                                 lr=LR,
                                  weight_decay=5e-4)
     loss_ = []
     for data, target in dataloader:
@@ -235,14 +238,14 @@ def train_model(model, dataloader, device):
     return trained_model, loss_
 
 
-def train_model_disti_weighted(model, weight, alpha, T, dataloader, num_target, neighbor, device):
+def train_model_disti_weighted(model, weight, alpha, T, dataloader, num_target, neighbor, device, LR):
     # 训练蒸馏模型, logits加权聚合
-    trained_model = deepcopy(model)
+    trained_model = deepcopy(model).to(device)
     trained_model.train()
     weight_device = weight.to(device)
     optimizer = torch.optim.Adam(trained_model.parameters(),
-                                 lr=1e-4,
-                                 weight_decay=5e-4)
+                                 lr=LR,
+                                 weight_decay=1e-3)
     criterion = DistillKL(T, alpha)
     loss_ = []
     for data, target in dataloader:
@@ -262,7 +265,7 @@ def train_model_disti_weighted(model, weight, alpha, T, dataloader, num_target, 
     return trained_model, loss_
 
 
-def train_model_disti_single(model, teacher_model, dataloader, alpha, T, device):
+def train_model_disti_single(model, teacher_model, dataloader, alpha, T, device, LR):
     # 训练蒸馏模型, 单个teacher
     trained_model = deepcopy(model).to(device)
     trained_model.train()
@@ -270,8 +273,8 @@ def train_model_disti_single(model, teacher_model, dataloader, alpha, T, device)
     teacher_model.eval()
     criterion = DistillKL(T, alpha)
     optimizer = torch.optim.Adam(trained_model.parameters(),
-                                 lr=1e-4,
-                                 weight_decay=5e-4)
+                                 lr=LR,
+                                 weight_decay=1e-3)
     loss_ = []
     for data, target in dataloader:
         optimizer.zero_grad()
@@ -348,7 +351,7 @@ def eval_model(model, dataloader, device):
     '''
     评估模型
     '''
-    model_copy = deepcopy(model)
+    model_copy = deepcopy(model).to(device)
     # model_copy.to(device)
     model_copy.eval()
     correct = 0
