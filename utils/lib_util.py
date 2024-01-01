@@ -80,10 +80,8 @@ def get_logger(filename, mode='w'):
     return logger
 
 
-def save_file(args, save_data, log, rank):
+def save_file(args, save_data, log):
     # 保存数据
-    if rank != 0:
-        return
     save_path = f'./res/{args.dataset}_model_{args.model_select}_algo_{args.algorithm}/alpha_{args.alpha}_T_{args.T}/'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
