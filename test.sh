@@ -1,22 +1,22 @@
 #!/bin/bash
 
-dataset='mnist'
-alpha=0.5
-T=8
+dataset='mnist' # (mnist cifar10 cifar100)
+alpha=0.5       # (0.0 0.2 0.4 0.6 0.8 1.0)
+T=6             # (2 4 6 8)
 num_all_client=9
 num_all_server=3
-batch_size=128
+batch_size=160
 num_client_data=1200
-num_server_commu=50
-num_client_commu=5
-num_client_train=5
-num_public_train=5
-model_select=1
-algorithm=2
+num_server_commu=2
+num_client_commu=2
+num_client_train=2
+num_public_train=2
+model_select=1 # (1 2 3)
+algorithm=(2)  # (0 1 2 3 4)
 num_public_data=50
 proportion=0.8
 
-python data_obtain.py \
+python test-2.py \
         --dataset ${dataset} \
         --alpha ${alpha} \
         --T ${T} \
@@ -32,5 +32,3 @@ python data_obtain.py \
         --algorithm ${algorithm} \
         --num_public_data ${num_public_data} \
         --proportion ${proportion}
-
-mpiexec -n ${num_all_client} --oversubscribe python test.py

@@ -306,47 +306,6 @@ def server_communicate(server_model, weight_list):
     return server_model_
 
 
-# class EdgeServer:
-#     '''
-#     边缘服务器聚合
-#     '''
-
-#     def __init__(self, client_model):
-#         self.model = deepcopy(client_model[0])
-#         self.num_client = len(client_model)
-
-#         self.client_params = list_same_term(self.num_client)
-#         i = 0
-#         for client in client_model:
-#             self.client_params[i] = client.state_dict()
-#             i += 1
-
-#     # 平均
-#     def average(self):
-#         model = deepcopy(self.model)
-#         parameters = deepcopy(self.client_params[0])
-#         for client in range(1, self.num_client):
-#             for key in parameters:
-#                 parameters[key] += self.client_params[client][key]
-#         for key in parameters:
-#             parameters[key] /= self.num_client
-#         model.load_state_dict(parameters)
-#         return model
-
-#     # 加权平均
-#     def weighted_average(self, weight):
-#         model = deepcopy(self.model)
-#         parameters = deepcopy(self.client_params[0])
-#         for key in parameters:
-#             parameters[key] *= weight[0]
-#         for client in range(1, self.num_client):
-#             for key in parameters:
-#                 parameters[key] += self.client_params[client][key] * \
-#                     weight[client]
-#         model.load_state_dict(parameters)
-#         return model
-
-
 def eval_model(model, dataloader, device):
     '''
     评估模型
@@ -363,17 +322,3 @@ def eval_model(model, dataloader, device):
         len_data += len(targets)
     accuracy = correct / len_data
     return accuracy.item()
-
-
-# if __name__ == '__main__':
-#     loss_fun = DistillKL(T=1)
-#     a = torch.randn(1, 5)
-#     b = torch.randn(1, 5)
-#     print(a)
-#     print(b)
-#     loss_fun_1 = torch.nn.CrossEntropyLoss()
-#     c = loss_fun_1(a, b)
-#     print(c)
-
-#     d = loss_fun(a, b)
-#     print(d)

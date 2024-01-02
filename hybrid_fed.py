@@ -2,8 +2,6 @@
 import torch
 import numpy
 import time
-import sys
-# from mpi4py import MPI
 
 from torch.utils.data import DataLoader
 
@@ -22,7 +20,7 @@ torch.set_printoptions(
     edgeitems=5,
     linewidth=1000,
     sci_mode=False)
-# 是否使用显卡加速
+
 if torch.cuda.is_available():
     device = 'cuda'
     log.info(f'device {device} is used.')
@@ -39,7 +37,6 @@ else:
 
 
 # %% 参数定义
-
 args = get_args()
 args.device = device
 
@@ -49,38 +46,24 @@ all_client = [i for i in range(args.num_all_client)]
 all_server = [i for i in range(args.num_all_server)]
 num_server_client = args.num_all_client // args.num_all_server
 
-message = '\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n\
-    {:^19}:{:^7}\n'.format(
-    'alpha', args.alpha,
-    'T', args.T,
-    'algorithm', args.algorithm,
-    'num_server_commu', args.num_server_commu,
-    'num_client_commu', args.num_client_commu,
-    'num_client_train', args.num_client_train,
-    'num_public_train', args.num_public_train,
-    'batch_size', args.batch_size,
-    'dataset', args.dataset,
-    'model_select', args.model_select,
-    'num_all_client', args.num_all_client,
-    'num_all_server', args.num_all_server,
-    'num_client_data', args.num_client_data,
-    'num_public_data', args.num_public_data,
-    'proportion', args.proportion)
+message = f"\n\
+{'alpha':^17}:{args.alpha:^7}\n\
+{'T':^17}:{args.T:^7}\n\
+{'algorithm':^17}:{args.algorithm:^7}\n\
+{'num_server_commu':^17}:{args.num_server_commu:^7}\n\
+{'num_client_commu':^17}:{args.num_client_commu:^7}\n\
+{'num_client_train':^17}:{args.num_client_train:^7}\n\
+{'num_public_train':^17}:{args.num_public_train:^7}\n\
+{'batch_size':^17}:{args.batch_size:^7}\n\
+{'dataset':^17}:{args.dataset:^7}\n\
+{'model_select':^17}:{args.model_select:^7}\n\
+{'num_all_client':^17}:{args.num_all_client:^7}\n\
+{'num_all_server':^17}:{args.num_all_server:^7}\n\
+{'num_client_data':^17}:{args.num_client_data:^7}\n\
+{'num_public_data':^17}:{args.num_public_data:^7}\n\
+{'proportion':^17}:{args.proportion:^7}"
 log.info(message)
+
 # %% 原始数据处理
 train_dataset_o, test_dataset_o, c, h, w = get_dataset(args.dataset)
 TrainDatasetSplited = SplitData(train_dataset_o)
@@ -184,9 +167,6 @@ values = [server_model,
           None]
 args_train = dict(zip(keys, values))
 
-client_model_save = dict.fromkeys([i for i in range(args.num_client_commu)])
-server_model_save = dict.fromkeys([i for i in range(args.num_server_commu)])
-
 weight_server = list_same_term(args.num_all_server, 1/args.num_all_server)
 weight_list = list_same_term(args.num_all_server, weight_server)
 
@@ -228,7 +208,7 @@ for epoch_server_commu in range(args.num_server_commu):
                     client_model = ServerTrain(args, args_train, 4).train
             if args.algorithm == 2 or args.algorithm == 3:  # 3仅在训练集上训练，2交换参数
                 client_model = ServerTrain(args, args_train, 1).train
-            if args.algorithm == 4: # 不交换参数，在训练集和公开数据集上训练
+            if args.algorithm == 4:  # 不交换参数，在训练集和公开数据集上训练
                 client_model = ServerTrain(args, args_train, 2).train
             # 在单个服务器下客户端训练完成后更新该服务器下客户端的模型
             server_model_ = [
@@ -248,7 +228,7 @@ for epoch_server_commu in range(args.num_server_commu):
             log.info(message)
             log.info('-'*50)
             server_accuracy[server].append(acc_server)
-        server_model_save[epoch_client_commu] = deepcopy(server_model)
+        # server_model_save[epoch_client_commu] = deepcopy(server_model)
         if args.algorithm == 2:  # 参数平均
             server_model = server_communicate(server_model, weight_list)
             for server in all_server:
@@ -259,9 +239,9 @@ for epoch_server_commu in range(args.num_server_commu):
 
 # %% 保存
 save_data = {'args': args,
-             'server_model': server_model_save,
+             #  'server_model': server_model_save,
              'server_acc': server_accuracy,
-             'client_model': client_model_save,
+             #  'client_model': client_model_save,
              'client_acc': client_accuracy,
              'train_acc': train_accuracy,
              'client_loss': client_loss}
