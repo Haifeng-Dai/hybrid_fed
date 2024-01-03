@@ -39,65 +39,19 @@ def get_logger(filename, mode='w'):
 
 def save_file(args, save_data, log):
     # 保存数据
-    if args.algorithm == 0 or args.algorithm == 1:
-        save_path = f'./res/{args.dataset}_model_{args.model_select}_algo_{args.algorithm}/alpha_{args.alpha}_T_{args.T}/'
-        file_path = save_path+(
-            f'server_commu_{args.num_server_commu}'
-            f'_client_commu_{args.num_client_commu}'
-            f'_client_train_{args.num_client_train}'
-            f'_batch_size_{args.batch_size}'
-            f'_num_all_client_{args.num_all_client}'
-            f'_num_all_server_{args.num_all_server}'
-            f'_num_client_data_{args.num_client_data}'
-            f'_num_public_data_{args.num_public_data}'
-            f'_proportion_{args.proportion}.pt')
-    if args.algorithm == 2:
-        save_path = f'./res/{args.dataset}_model_{args.model_select}_algo_{args.algorithm}/'
-        file_path = save_path+(
-            f'server_commu_{args.num_server_commu}'
-            f'_client_commu_{args.num_client_commu}'
-            f'_client_train_{args.num_client_train}'
-            f'_batch_size_{args.batch_size}'
-            f'_num_all_client_{args.num_all_client}'
-            f'_num_all_server_{args.num_all_server}'
-            f'_num_client_data_{args.num_client_data}'
-            f'_num_public_data_{args.num_public_data}'
-            f'_proportion_{args.proportion}.pt')
-    elif args.algorithm == 3:
-        save_path = f'./res/{args.dataset}_model_{args.model_select}_algo_{args.algorithm}/'
-        file_path = save_path+(
-            f'_client_commu_{args.num_client_commu * args.num_server_commu}'
-            f'_client_train_{args.num_client_train}'
-            f'_batch_size_{args.batch_size}'
-            f'_num_all_client_{args.num_all_client}'
-            f'_num_all_server_{args.num_all_server}'
-            f'_num_client_data_{args.num_client_data}'
-            f'_proportion_{args.proportion}.pt')
-    elif args.algorithm == 4:
-        save_path = f'./res/{args.dataset}_model_{args.model_select}_algo_{args.algorithm}/'
-        file_path = save_path+(
-            f'_client_commu_{args.num_client_commu * args.num_server_commu}'
-            f'_client_train_{args.num_client_train}'
-            f'_batch_size_{args.batch_size}'
-            f'_num_all_client_{args.num_all_client}'
-            f'_num_all_server_{args.num_all_server}'
-            f'_num_client_data_{args.num_client_data}'
-            f'_num_public_data_{args.num_public_data}'
-            f'_proportion_{args.proportion}.pt')
-
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    # save_path = f'./res/{args.dataset}_model_{args.model_select}_algo_{args.algorithm}/alpha_{args.alpha}_T_{args.T}/'
-    # file_path = save_path+(
-    #     f'server_commu_{args.num_server_commu}'
-    #     f'_client_commu_{args.num_client_commu}'
-    #     f'_client_train_{args.num_client_train}'
-    #     f'_batch_size_{args.batch_size}'
-    #     f'_num_all_client_{args.num_all_client}'
-    #     f'_num_all_server_{args.num_all_server}'
-    #     f'_num_client_data_{args.num_client_data}'
-    #     f'_num_public_data_{args.num_public_data}'
-    #     f'_proportion_{args.proportion}.pt')
+    save_path = f'./res/{args.dataset}_model_{args.model_select}_algo_{args.algorithm}/alpha_{args.alpha}_T_{args.T}/'
+    file_path = save_path+(
+        f'server_commu_{args.num_server_commu}'
+        f'_client_commu_{args.num_client_commu}'
+        f'_client_train_{args.num_client_train}'
+        f'_batch_size_{args.batch_size}'
+        f'_num_all_client_{args.num_all_client}'
+        f'_num_all_server_{args.num_all_server}'
+        f'_num_client_data_{args.num_client_data}'
+        f'_num_public_data_{args.num_public_data}'
+        f'_proportion_{args.proportion}.pt')
     log.info(file_path)
     torch.save(save_data, file_path)
 
