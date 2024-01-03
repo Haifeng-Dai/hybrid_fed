@@ -35,7 +35,6 @@ else:
     device = 'cpu'
     log.info(f'device {device} is used.')
 
-
 # %% 参数定义
 args = get_args()
 args.device = device
