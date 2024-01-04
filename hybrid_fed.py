@@ -11,7 +11,10 @@ from utils.lib_util import *
 from utils.train_util import *
 
 t = time.localtime()
-log_path = f'./log/{t.tm_year}-{t.tm_mon}-{t.tm_mday}-{t.tm_hour}-{t.tm_min}.log'
+log_path = f'./log/{t.tm_year}-{t.tm_mon}-{t.tm_mday}/'
+if not os.path.exists(log_path):
+    os.makedirs(log_path)
+log_path += f'{t.tm_hour}-{t.tm_min}-{t.tm_sec}.log'
 log = get_logger(log_path)
 
 torch.set_printoptions(
