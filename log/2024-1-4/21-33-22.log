@@ -1,0 +1,66 @@
+[2024-01-04 21:33:22] [INFO] device cuda is used.
+[2024-01-04 21:33:22] [INFO] cudnn is actived.
+[2024-01-04 21:33:22] [INFO] 
+      alpha      :  0.5  
+        T        :   6   
+    algorithm    :   3   
+num_server_commu :   1   
+num_client_commu :   1   
+num_client_train :  50   
+num_public_train :   0   
+   batch_size    :  32   
+     dataset     :cifar10
+  model_select   :   1   
+ num_all_client  :   9   
+ num_all_server  :   3   
+ num_client_data : 1200  
+ num_public_data :  50   
+   proportion    :  0.8  
+[2024-01-04 21:33:34] [INFO] --------------------------------------------------
+[2024-01-04 21:33:34] [INFO] |epoch_server_commu: 0/1
+[2024-01-04 21:33:34] [INFO]  |epoch_client_commu: 0/1
+[2024-01-04 21:33:34] [INFO]   |server: 0
+[2024-01-04 21:33:34] [INFO]    -client 0
+[2024-01-04 21:33:37] [INFO]     |  local epoch  : 0, acc 0.100
+[2024-01-04 21:33:39] [INFO]     |  local epoch  : 1, acc 0.100
+[2024-01-04 21:33:41] [INFO]     |  local epoch  : 2, acc 0.100
+[2024-01-04 21:33:42] [INFO]     |  local epoch  : 3, acc 0.100
+[2024-01-04 21:33:44] [INFO]     |  local epoch  : 4, acc 0.100
+[2024-01-04 21:33:46] [INFO]     |  local epoch  : 5, acc 0.100
+[2024-01-04 21:33:48] [INFO]     |  local epoch  : 6, acc 0.100
+[2024-01-04 21:33:50] [INFO]     |  local epoch  : 7, acc 0.100
+[2024-01-04 21:33:52] [INFO]     |  local epoch  : 8, acc 0.100
+[2024-01-04 21:33:54] [INFO]     |  local epoch  : 9, acc 0.100
+[2024-01-04 21:33:55] [INFO]     |  local epoch  : 10, acc 0.100
+[2024-01-04 21:33:57] [INFO]     |  local epoch  : 11, acc 0.100
+[2024-01-04 21:33:59] [INFO]     |  local epoch  : 12, acc 0.100
+[2024-01-04 21:34:01] [INFO]     |  local epoch  : 13, acc 0.100
+[2024-01-04 21:34:03] [INFO]     |  local epoch  : 14, acc 0.100
+[2024-01-04 21:34:05] [INFO]     |  local epoch  : 15, acc 0.101
+[2024-01-04 21:34:06] [INFO]     |  local epoch  : 16, acc 0.103
+[2024-01-04 21:34:08] [INFO]     |  local epoch  : 17, acc 0.103
+[2024-01-04 21:34:10] [INFO]     |  local epoch  : 18, acc 0.102
+[2024-01-04 21:34:12] [INFO]     |  local epoch  : 19, acc 0.100
+[2024-01-04 21:34:14] [INFO]     |  local epoch  : 20, acc 0.100
+[2024-01-04 21:34:16] [INFO]     |  local epoch  : 21, acc 0.102
+[2024-01-04 21:34:18] [INFO]     |  local epoch  : 22, acc 0.103
+[2024-01-04 21:34:20] [INFO]     |  local epoch  : 23, acc 0.100
+[2024-01-04 21:34:21] [INFO]     |  local epoch  : 24, acc 0.101
+[2024-01-04 21:34:23] [INFO]     |  local epoch  : 25, acc 0.112
+[2024-01-04 21:34:25] [INFO]     |  local epoch  : 26, acc 0.109
+[2024-01-04 21:34:27] [INFO]     |  local epoch  : 27, acc 0.100
+[2024-01-04 21:34:29] [INFO]     |  local epoch  : 28, acc 0.106
+[2024-01-04 21:34:30] [INFO]     |  local epoch  : 29, acc 0.119
+[2024-01-04 21:34:32] [INFO]     |  local epoch  : 30, acc 0.110
+[2024-01-04 21:34:34] [INFO]     |  local epoch  : 31, acc 0.106
+[2024-01-04 21:34:36] [INFO]     |  local epoch  : 32, acc 0.126
+[2024-01-04 21:34:38] [INFO]     |  local epoch  : 33, acc 0.109
+[2024-01-04 21:34:40] [INFO]     |  local epoch  : 34, acc 0.130
+[2024-01-04 21:34:41] [INFO]     |  local epoch  : 35, acc 0.107
+[2024-01-04 21:34:43] [INFO]     |  local epoch  : 36, acc 0.102
+[2024-01-04 21:34:45] [INFO]     |  local epoch  : 37, acc 0.112
+[2024-01-04 21:34:47] [INFO]     |  local epoch  : 38, acc 0.131
+[2024-01-04 21:34:49] [INFO]     |  local epoch  : 39, acc 0.109
+[2024-01-04 21:34:51] [INFO]     |  local epoch  : 40, acc 0.131
+[2024-01-04 21:34:52] [INFO]     |  local epoch  : 41, acc 0.116
+[2024-01-04 21:34:54] [INFO]     |  local epoch  : 42, acc 0.131
