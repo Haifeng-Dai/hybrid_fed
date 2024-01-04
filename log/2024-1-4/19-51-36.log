@@ -441,3 +441,34 @@ num_public_train :   5
 [2024-01-04 19:55:06] [INFO]     |  local epoch  : 3, acc 0.778
 [2024-01-04 19:55:07] [INFO]     |  local epoch  : 4, acc 0.798
 [2024-01-04 19:55:07] [INFO]    -client 5
+[2024-01-04 19:55:07] [INFO]     |  local epoch  : 0, acc 0.774
+[2024-01-04 19:55:08] [INFO]     |  local epoch  : 1, acc 0.784
+[2024-01-04 19:55:09] [INFO]     |  local epoch  : 2, acc 0.778
+[2024-01-04 19:55:09] [INFO]     |  local epoch  : 3, acc 0.783
+[2024-01-04 19:55:10] [INFO]     |  local epoch  : 4, acc 0.777
+[2024-01-04 19:55:10] [INFO] |servers comunicated: 1, server aggregated: 1, acc_server 1: 0.797.
+[2024-01-04 19:55:10] [INFO] --------------------------------------------------
+[2024-01-04 19:55:10] [INFO]   |server: 2
+[2024-01-04 19:55:10] [INFO]    -client 6
+[2024-01-04 19:55:11] [INFO]     |  local epoch  : 0, acc 0.773
+[2024-01-04 19:55:12] [INFO]     |  local epoch  : 1, acc 0.764
+[2024-01-04 19:55:12] [INFO]     |  local epoch  : 2, acc 0.768
+[2024-01-04 19:55:13] [INFO]     |  local epoch  : 3, acc 0.758
+[2024-01-04 19:55:14] [INFO]     |  local epoch  : 4, acc 0.763
+[2024-01-04 19:55:14] [INFO]    -client 7
+[2024-01-04 19:55:14] [INFO]     |  local epoch  : 0, acc 0.776
+[2024-01-04 19:55:15] [INFO]     |  local epoch  : 1, acc 0.755
+[2024-01-04 19:55:16] [INFO]     |  local epoch  : 2, acc 0.801
+[2024-01-04 19:55:16] [INFO]     |  local epoch  : 3, acc 0.769
+[2024-01-04 19:55:17] [INFO]     |  local epoch  : 4, acc 0.748
+[2024-01-04 19:55:17] [INFO]    -client 8
+[2024-01-04 19:55:18] [INFO]     |  local epoch  : 0, acc 0.784
+[2024-01-04 19:55:18] [INFO]     |  local epoch  : 1, acc 0.783
+[2024-01-04 19:55:19] [INFO]     |  local epoch  : 2, acc 0.796
+[2024-01-04 19:55:20] [INFO]     |  local epoch  : 3, acc 0.776
+[2024-01-04 19:55:20] [INFO]     |  local epoch  : 4, acc 0.810
+[2024-01-04 19:55:21] [INFO] |servers comunicated: 1, server aggregated: 1, acc_server 2: 0.786.
+[2024-01-04 19:55:21] [INFO] --------------------------------------------------
+[2024-01-04 19:55:21] [INFO]  |epoch_client_commu: 2/5
+[2024-01-04 19:55:21] [INFO]   |server: 0
+[2024-01-04 19:55:21] [INFO]    -client 0

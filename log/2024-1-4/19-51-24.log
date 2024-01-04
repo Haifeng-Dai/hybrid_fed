@@ -557,3 +557,34 @@ num_public_train :   5
 [2024-01-04 19:55:06] [INFO] --------------------------------------------------
 [2024-01-04 19:55:06] [INFO]   |server: 1
 [2024-01-04 19:55:06] [INFO]    -client 3
+[2024-01-04 19:55:07] [INFO]     |  local epoch  : 0, acc 0.509
+[2024-01-04 19:55:08] [INFO]     |  local epoch  : 1, acc 0.636
+[2024-01-04 19:55:08] [INFO]     |  local epoch  : 2, acc 0.647
+[2024-01-04 19:55:09] [INFO]     |  local epoch  : 3, acc 0.641
+[2024-01-04 19:55:09] [INFO]     |  local epoch  : 4, acc 0.613
+[2024-01-04 19:55:09] [INFO]    -client 4
+[2024-01-04 19:55:10] [INFO]     |  local epoch  : 0, acc 0.515
+[2024-01-04 19:55:11] [INFO]     |  local epoch  : 1, acc 0.626
+[2024-01-04 19:55:11] [INFO]     |  local epoch  : 2, acc 0.631
+[2024-01-04 19:55:12] [INFO]     |  local epoch  : 3, acc 0.660
+[2024-01-04 19:55:12] [INFO]     |  local epoch  : 4, acc 0.620
+[2024-01-04 19:55:12] [INFO]    -client 5
+[2024-01-04 19:55:13] [INFO]     |  local epoch  : 0, acc 0.510
+[2024-01-04 19:55:13] [INFO]     |  local epoch  : 1, acc 0.639
+[2024-01-04 19:55:14] [INFO]     |  local epoch  : 2, acc 0.628
+[2024-01-04 19:55:15] [INFO]     |  local epoch  : 3, acc 0.611
+[2024-01-04 19:55:15] [INFO]     |  local epoch  : 4, acc 0.627
+[2024-01-04 19:55:16] [INFO] |servers comunicated: 1, server aggregated: 3, acc_server 1: 0.621.
+[2024-01-04 19:55:16] [INFO] --------------------------------------------------
+[2024-01-04 19:55:16] [INFO]   |server: 2
+[2024-01-04 19:55:16] [INFO]    -client 6
+[2024-01-04 19:55:16] [INFO]     |  local epoch  : 0, acc 0.606
+[2024-01-04 19:55:17] [INFO]     |  local epoch  : 1, acc 0.717
+[2024-01-04 19:55:17] [INFO]     |  local epoch  : 2, acc 0.708
+[2024-01-04 19:55:18] [INFO]     |  local epoch  : 3, acc 0.701
+[2024-01-04 19:55:18] [INFO]     |  local epoch  : 4, acc 0.695
+[2024-01-04 19:55:18] [INFO]    -client 7
+[2024-01-04 19:55:19] [INFO]     |  local epoch  : 0, acc 0.649
+[2024-01-04 19:55:20] [INFO]     |  local epoch  : 1, acc 0.750
+[2024-01-04 19:55:20] [INFO]     |  local epoch  : 2, acc 0.724
+[2024-01-04 19:55:21] [INFO]     |  local epoch  : 3, acc 0.738
