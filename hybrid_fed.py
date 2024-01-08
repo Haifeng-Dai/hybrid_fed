@@ -230,7 +230,6 @@ for epoch_server_commu in range(args.num_server_commu):
             log.info(message)
             log.info('-'*50)
             server_accuracy[server].append(acc_server)
-        # server_model_save[epoch_client_commu] = deepcopy(server_model)
         if args.algorithm == 2:  # 参数平均
             server_model = server_communicate(server_model, weight_list)
             for server in all_server:
@@ -241,9 +240,7 @@ for epoch_server_commu in range(args.num_server_commu):
 
 # %% 保存
 save_data = {'args': args,
-             #  'server_model': server_model_save,
              'server_acc': server_accuracy,
-             #  'client_model': client_model_save,
              'client_acc': client_accuracy,
              'train_acc': train_accuracy,
              'client_loss': client_loss}
