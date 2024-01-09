@@ -91,7 +91,6 @@ class MLP(nn.Module):
 
 
 class CNN(nn.Module):
-
     def __init__(self, h, w, c, num_classes):
         super(CNN, self).__init__()
         self.h = h

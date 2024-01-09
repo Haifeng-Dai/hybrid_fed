@@ -7,6 +7,7 @@ import argparse
 import matplotlib.pyplot as plt
 
 from copy import deepcopy
+from utils.train_util import *
 
 
 def list_same_term(len_list, term=[]):
@@ -94,6 +95,22 @@ def get_args():
     return parser.parse_args()
 
 
+def aggregate(model_list, weight):
+    aggregated_model = deepcopy(model_list[0])
+    parameters = deepcopy(model_list[0].state_dict())
+    for i, key in enumerate(parameters):
+        if parameters[key].shape == torch.Size([]):
+            continue
+        parameters[key] *= weight[0]
+    for i, model in enumerate(model_list[1:]):
+        for key in parameters:
+            if parameters[key].shape == torch.Size([]):
+                continue
+            parameters[key] += model.state_dict()[key] * weight[i+1]
+    aggregated_model.load_state_dict(parameters)
+    return aggregated_model
+
+
 def cal_gp(D, real_imgs, fake_imgs, device):  # 定义函数，计算梯度惩罚项gp
     # 真假样本的采样比例r，batch size个随机数，服从区间[0,1)的均匀分布
     r = torch.rand(size=(real_imgs.shape[0], 1, 1, 1)).to(device)
@@ -110,6 +127,7 @@ def cal_gp(D, real_imgs, fake_imgs, device):  # 定义函数，计算梯度惩�
     )[0]  # 返回元组的第一个元素为梯度计算结果
     gp = ((g.norm(2, dim=1) - 1) ** 2).mean()  # (||grad(D(x))||2-1)^2 的均值
     return gp  # 返回梯度惩罚项gp
+
 
 def weights_init(m):
     classname = m.__class__.__name__
