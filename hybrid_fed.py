@@ -113,36 +113,11 @@ test_dataloader = DataLoader(
     num_workers=4)
 
 # %% 模型初始化
-if args.model_select == 1:
-    model = CNN(h, w, c, num_target)
-    client_model = list_same_term(args.num_all_client, model)
-    server_model = list_same_term(args.num_all_server, model)
-elif args.model_select == 2:
-    model = LeNet5(h, w, c, num_target)
-    client_model = list_same_term(args.num_all_client, model)
-    server_model = list_same_term(args.num_all_server, model)
-elif args.model_select == 3:
-    model = torchvision.models.resnet18(weights=None, num_classes=num_target)
-    client_model = list_same_term(args.num_all_client, model)
-    server_model = list_same_term(args.num_all_server, model)
-elif args.model_select == 4:
-    model1 = CNN(h, w, c, num_target)
-    model2 = LeNet5(h, w, c, num_target)
-    model3 = torchvision.models.resnet18(weights=None, num_classes=10)
-    server_model = [model1, model2, model3]
-    client_model1 = list_same_term(num_server_client, model1)
-    client_model2 = list_same_term(num_server_client, model2)
-    client_model3 = list_same_term(num_server_client, model3)
-    client_model = client_model1 + client_model2 + client_model3
-else:
-    raise ValueError('model error.')
-
-# server_accuracy = list_same_term(args.num_all_server)
+client_model, server_model = intial_model(
+    args, num_target, num_server_client, c, h, w)
 client_accuracy = list_same_term(args.num_all_client)
 validate_accuracy = list_same_term(args.num_all_client)
-# server_client_model = deepcopy(server_accuracy)
 client_loss = deepcopy(client_accuracy)
-
 weight_server = list_same_term(args.num_all_server, 1/args.num_all_server)
 weight_list = list_same_term(args.num_all_server, weight_server)
 
@@ -178,85 +153,7 @@ values = [server_model,
           all_server,
           client_model]
 args_train = dict(zip(keys, values))
-
-# %% 对每个服务器通讯幕进行循环
 server_accuracy = Trainer(neighbor_server, args, args_train).train
-# d = 2
-# for epoch_server_commu in range(args.num_server_commu):
-#     log.info('-'*50)
-#     log.info('|epoch_server_commu: {}/{}'.format(epoch_server_commu,
-#              args.num_server_commu))
-#     args_train['LR'] = 1e-3 / (1 + d * epoch_server_commu)
-#     # 所有边缘服务器分别协调其客户端进行多轮联邦学习
-#     for epoch_client_commu in range(args.num_client_commu):
-#         message = ' |epoch_client_commu: {}/{}'.format(
-#             epoch_client_commu, args.num_client_commu)
-#         log.info(message)
-#         # 所有边缘服务器分别协调其客户端进行联邦学习
-#         neighbor_model = []
-#         for server in all_server:
-#             # 每个服务器下单客户端分别训练
-#             message = f'  |server: {server}'
-#             log.info(message)
-#             args_train['client_idx'] = server_client[server]
-#             for i in neighbor_server[server]:
-#                 neighbor_model.append(server_model[i])
-#             args_train['neighbor'] = neighbor_model
-#             client_model = Trainer(epoch_server_commu, args, args_train).train
-#             args_train['client_model'] = deepcopy(client_model)
-#             # if args.algorithm == 0:
-#             # for i in neighbor_server[server]:
-#             #     neighbor_model.append(server_model[i])
-#             # args_train['epoch_server_commu'] = epoch_server_commu
-#             # client_model = weighted_distill(args, args_train)
-#             # if epoch_server_commu == 0:  # weighted distill
-#             #     client_model = ServerTrain(args, args_train, 1).train
-#             # else:
-#             #     for i in neighbor_server[server]:
-#             #         neighbor_model.append(server_model[i])
-#             #     args_train['neighbor'] = neighbor_model
-#             #     client_model = ServerTrain(args, args_train, 3).train
-#             # if args.algorithm == 1:  # single distill
-#             #     client_model = circulate_distill(
-#             #         epoch_server_commu, args, args_train)
-#             # if epoch_server_commu == 0:
-#             #     client_model = ServerTrain(args, args_train, 1).train
-#             # else:
-#             #     for i in neighbor_server[server]:
-#             #         neighbor_model.append(server_model[i])
-#             #     args_train['neighbor'] = neighbor_model
-#             #     client_model = ServerTrain(args, args_train, 4).train
-#             # if args.algorithm == 2 or args.algorithm == 3:  # 3仅在训练集上训练，2交换参数
-#             #     client_model = ServerTrain(args, args_train, 1).train
-#             # if args.algorithm == 4:  # 不交换参数，在训练集和公开数据集上训练
-#             #     client_model = ServerTrain(args, args_train, 2).train
-#             # 在单个服务器下客户端训练完成后更新该服务器下客户端的模型
-#             # server_model_ = [
-#             #     client_model[client] for client in server_client[server]]
-#             # # 聚合获得单个服务器模型并下发
-#             # server_model[server] = aggregate(
-#             #     server_model_, weight_server)
-#             # for client in server_client[server]:
-#             #     client_model[client] = deepcopy(server_model[server])
-#             # # 评估单个服务器模型
-#             # acc_server = eval_model(
-#             #     model=server_model[server],
-#             #     dataloader=test_dataloader,
-#             #     device=device)
-#             acc_server = aggregator(server, args, args_train)
-#             message = '|servers comunicated: {}, server aggregated: {}, acc_server {}: {:.3f}.'.format(
-#                 epoch_server_commu, epoch_client_commu, server, acc_server)
-#             log.info(message)
-#             log.info('-'*50)
-#             server_accuracy[server].append(acc_server)
-#         # if args.algorithm == 2:  # 参数平均
-#         #     server_model = server_communicate(server_model, weight_list)
-#         #     for server in all_server:
-#         #         for client in server_client[server]:
-#         #             client_model[client] = deepcopy(server_model[server])
-#         server_communicate(args, args_train)
-#     message = '{:^50}'.format('********  servers comunicates  ********')
-#     log.info(message)
 
 # %% 保存
 save_data = {'args': args,

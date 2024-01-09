@@ -6,91 +6,6 @@ from utils.lib_util import *
 from utils.train_util import *
 
 
-# class ServerTrain:
-#     def __init__(self, args, args_train, train_way):
-#         self.args = args
-#         self.args_train = args_train
-#         self.train_way = train_way
-#         self.LR = self.args_train['LR']
-
-#     @property
-#     def train(self):
-#         client_model = deepcopy(self.args_train['client_model'])
-#         client_model_ = deepcopy(client_model)
-#         if self.train_way == 1:
-#             # 仅在本地数据上进行训练，不进行蒸馏
-#             for i in self.args_train['client_idx']:
-#                 message = f' ---client {i}'
-#                 self.args_train['log'].info(message)
-#                 dataloader = self.args_train['train_dataloader'][i]
-#                 test_dataloader = self.args_train['train_test_dataloader'][i]
-#                 model, loss, acc, acc_train = self.normal_train(
-#                     client_model[i], dataloader, test_dataloader)
-#                 self.args_train['client_loss'][i].extend(loss)
-#                 self.args_train['client_accuracy'][i].extend(acc)
-#                 self.args_train['train_accuracy'][i].extend(acc_train)
-#                 client_model_[i] = deepcopy(model)
-#         elif self.train_way == 2:
-#             # 仅在本地数据和公开数据集上训练，不进行蒸馏
-#             for i in self.args_train['client_idx']:
-#                 message = f' ---client {i}'
-#                 self.args_train['log'].info(message)
-#                 self.args_train['log'].info(message)
-#                 dataloader = self.args_train['train_dataloader'][i]
-#                 test_dataloader = self.args_train['train_test_dataloader'][i]
-#                 model, loss, acc, acc_train = self.normal_train(
-#                     client_model[i], dataloader, test_dataloader)
-#                 self.args_train['client_loss'][i].extend(loss)
-#                 self.args_train['client_accuracy'][i].extend(acc)
-#                 model, loss, acc, acc_train = self.normal_train(
-#                     model, self.args_train['public_dataloader'], test_dataloader)
-#                 # client_model.append(model)
-#                 self.args_train['client_loss'][i].extend(loss)
-#                 self.args_train['client_accuracy'][i].extend(acc)
-#                 self.args_train['train_accuracy'][i].extend(acc_train)
-#                 client_model_[i] = deepcopy(model)
-#         elif self.train_way == 3:
-#             # 本地训练+加权蒸馏
-#             weight = torch.tensor([1/3, 1/3, 1/3])
-#             for i in self.args_train['client_idx']:
-#                 message = f' ---client {i}'
-#                 self.args_train['log'].info(message)
-#                 dataloader = self.args_train['train_dataloader'][i]
-#                 test_dataloader = self.args_train['train_test_dataloader'][i]
-#                 model, loss, acc, acc_train = self.normal_train(
-#                     client_model[i], dataloader, test_dataloader)
-#                 self.args_train['client_loss'][i].extend(loss)
-#                 self.args_train['client_accuracy'][i].extend(acc)
-#                 self.args_train['train_accuracy'][i].extend(acc_train)
-#                 model, loss, acc, acc_train = self.weighted_distill_train(
-#                     model, weight, test_dataloader)
-#                 self.args_train['client_loss'][i].extend(loss)
-#                 self.args_train['client_accuracy'][i].extend(acc)
-#                 self.args_train['train_accuracy'][i].extend(acc_train)
-#                 client_model_[i] = deepcopy(model)
-#         elif self.train_way == 4:
-#             # 本地训练+逐个蒸馏
-#             for i in self.args_train['client_idx']:
-#                 message = f' ---client {i}'
-#                 self.args_train['log'].info(message)
-#                 dataloader = self.args_train['train_dataloader'][i]
-#                 test_dataloader = self.args_train['train_test_dataloader'][i]
-#                 model, loss, acc, acc_train = self.normal_train(
-#                     client_model[i], dataloader, test_dataloader)
-#                 self.args_train['client_loss'][i].extend(loss)
-#                 self.args_train['client_accuracy'][i].extend(acc)
-#                 self.args_train['train_accuracy'][i].extend(acc_train)
-#                 model, loss, acc, acc_train = self.single_distill_train(
-#                     model, test_dataloader)
-#                 self.args_train['client_loss'][i].extend(loss)
-#                 self.args_train['client_accuracy'][i].extend(acc)
-#                 self.args_train['train_accuracy'][i].extend(acc_train)
-#                 client_model_[i] = deepcopy(model)
-#         else:
-#             raise ValueError('algorithm error.')
-#         return client_model_
-
-
 def weighted_distill(args, args_train):
     # 本地训练+加权蒸馏
     client_model = deepcopy(args_train['client_model'])
@@ -195,10 +110,8 @@ class Trainer:
         self.args = args
         self.args_train = args_train
         if args.algorithm == 0:
-            # args_train['epoch_server_commu'] = epoch_server_commu
             self.trainer = weighted_distill
         elif args.algorithm == 1:
-            # args_train['epoch_server_commu'] = epoch_server_commu
             self.trainer = circulate_distill
         elif args.algorithm == 2:
             self.trainer = regular
@@ -207,17 +120,8 @@ class Trainer:
         else:
             raise ValueError('algorithm error.')
 
-    # @property
-    # def train(self):
-    #     return self.trainer(self.args, self.args_train)
-
     @property
     def train(self):
-        # def trainer(neighbor_server, args, args_train):
-        # neighbor_server = self.neighbor_server
-        # args = self.args
-        # args_train = self.args_train
-        # all_server = [i for i in range(self.args.num_all_server)]
         server_accuracy = list_same_term(self.args.num_all_server)
         d = 2
         for epoch_server_commu in range(self.args.num_server_commu):

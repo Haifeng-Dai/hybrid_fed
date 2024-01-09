@@ -1,6 +1,7 @@
 from __future__ import print_function
 import argparse
 import os
+import sys
 import random
 import torch
 import torch.nn as nn
@@ -14,14 +15,15 @@ import torchvision.utils as vutils
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', required=True,
+parser.add_argument('--dataset', required=False, default='mnist',
                     help='cifar10 | lsun | mnist |imagenet | folder | lfw | fake')
-parser.add_argument('--dataroot', required=False, help='path to dataset')
+parser.add_argument('--dataroot', required=False,
+                    help='path to dataset', default='./data/')
 parser.add_argument('--workers', type=int,
                     help='number of data loading workers', default=2)
 parser.add_argument('--batchSize', type=int,
                     default=64, help='input batch size')
-parser.add_argument('--imageSize', type=int, default=64,
+parser.add_argument('--imageSize', type=int, default=32,
                     help='the height / width of the input image to network')
 parser.add_argument('--nz', type=int, default=100,
                     help='size of the latent z vector')
@@ -61,21 +63,21 @@ except OSError:
 
 if opt.manualSeed is None:
     opt.manualSeed = random.randint(1, 10000)
-print("Random Seed: ", opt.manualSeed)
+# print("Random Seed: ", opt.manualSeed)
 random.seed(opt.manualSeed)
 torch.manual_seed(opt.manualSeed)
 
 cudnn.benchmark = True
 
-if torch.cuda.is_available() and not opt.cuda:
-    print("WARNING: You have a CUDA device, so you should probably run with --cuda")
+# if torch.cuda.is_available() and not opt.cuda:
+#     print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
-if torch.backends.mps.is_available() and not opt.mps:
-    print("WARNING: You have mps device, to enable macOS GPU run with --mps")
+# if torch.backends.mps.is_available() and not opt.mps:
+#     print("WARNING: You have mps device, to enable macOS GPU run with --mps")
 
-if opt.dataroot is None and str(opt.dataset).lower() != 'fake':
-    raise ValueError(
-        "`dataroot` parameter is required for dataset \"%s\"" % opt.dataset)
+# if opt.dataroot is None and str(opt.dataset).lower() != 'fake':
+#     raise ValueError(
+#         "`dataroot` parameter is required for dataset \"%s\"" % opt.dataset)
 
 if opt.dataset in ['imagenet', 'folder', 'lfw']:
     # folder dataset
@@ -136,6 +138,7 @@ ngpu = int(opt.ngpu)
 nz = int(opt.nz)
 ngf = int(opt.ngf)
 ndf = int(opt.ndf)
+print(nz, ngf, ndf)
 
 
 # custom weights initialization called on netG and netD
@@ -166,7 +169,7 @@ class Generator(nn.Module):
             nn.BatchNorm2d(ngf * 2),
             nn.ReLU(True),
             # state size. (ngf*2) x 16 x 16
-            nn.ConvTranspose2d(ngf * 2,     ngf, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf),
             nn.ReLU(True),
             # state size. (ngf) x 32 x 32
@@ -186,9 +189,9 @@ class Generator(nn.Module):
 
 netG = Generator(ngpu).to(device)
 netG.apply(weights_init)
-if opt.netG != '':
-    netG.load_state_dict(torch.load(opt.netG))
-print(netG)
+# if opt.netG != '':
+#     netG.load_state_dict(torch.load(opt.netG))
+# print(netG)
 
 
 class Discriminator(nn.Module):
@@ -227,9 +230,9 @@ class Discriminator(nn.Module):
 
 netD = Discriminator(ngpu).to(device)
 netD.apply(weights_init)
-if opt.netD != '':
-    netD.load_state_dict(torch.load(opt.netD))
-print(netD)
+# if opt.netD != '':
+#     netD.load_state_dict(torch.load(opt.netD))
+# print(netD)
 
 criterion = nn.BCELoss()
 
@@ -264,6 +267,8 @@ for epoch in range(opt.niter):
         # train with fake
         noise = torch.randn(batch_size, nz, 1, 1, device=device)
         fake = netG(noise)
+        print(fake.shape)
+        sys.exit()
         label.fill_(fake_label)
         output = netD(fake.detach())
         errD_fake = criterion(output, label)
@@ -299,5 +304,5 @@ for epoch in range(opt.niter):
         if opt.dry_run:
             break
     # do checkpointing
-    torch.save(netG.state_dict(), '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
-    torch.save(netD.state_dict(), '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
+    # torch.save(netG.state_dict(), '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
+    # torch.save(netD.state_dict(), '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
