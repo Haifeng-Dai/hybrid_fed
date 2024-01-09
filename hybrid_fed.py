@@ -121,14 +121,18 @@ elif args.model_select == 2:
     client_model = list_same_term(args.num_all_client, model)
     server_model = list_same_term(args.num_all_server, model)
 elif args.model_select == 3:
+    model = torchvision.models.resnet18(weights=None, num_classes=num_target)
+    client_model = list_same_term(args.num_all_client, model)
+    server_model = list_same_term(args.num_all_server, model)
+elif args.model_select == 4:
     model1 = CNN(h, w, c, num_target)
     model2 = LeNet5(h, w, c, num_target)
-    model3 = MLP(h, w, c, 50, num_target)
+    model3 = torchvision.models.resnet18(weights=None, num_classes=10)
     server_model = [model1, model2, model3]
     client_model1 = list_same_term(num_server_client, model1)
     client_model2 = list_same_term(num_server_client, model2)
     client_model3 = list_same_term(num_server_client, model3)
-    client_model = [client_model1, client_model2, client_model3]
+    client_model = client_model1 + client_model2 + client_model3
 else:
     raise ValueError('model error.')
 

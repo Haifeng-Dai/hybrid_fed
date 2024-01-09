@@ -1,7 +1,8 @@
 import math
 import torch
-
+import torch.nn as nn
 from torch import nn
+from torch.nn import functional as F
 
 
 def conv_cal(c, kernel_size, stride=None, padding=0, operation='conv'):

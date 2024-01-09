@@ -1,0 +1,82 @@
+[2024-01-09 12:15:23] [INFO] device cuda is used.
+[2024-01-09 12:15:23] [INFO] cudnn is actived.
+[2024-01-09 12:15:23] [INFO] 
+      alpha      :  0.5  
+        T        :   6   
+    algorithm    :   0   
+num_server_commu :   2   
+num_client_commu :   5   
+num_client_train :   5   
+num_public_train :   5   
+   batch_size    :  160  
+     dataset     :cifar10
+  model_select   :   3   
+ num_all_client  :   9   
+ num_all_server  :   3   
+ num_client_data : 1200  
+ num_public_data :  50   
+   proportion    :  0.8  
+[2024-01-09 12:15:33] [INFO] --------------------------------------------------
+[2024-01-09 12:15:33] [INFO] |epoch_server_commu: 0/2
+[2024-01-09 12:15:33] [INFO]  |epoch_client_commu: 0/5
+[2024-01-09 12:15:33] [INFO]   |server: 0
+[2024-01-09 12:15:35] [INFO]  ---client 0
+[2024-01-09 12:15:36] [INFO] |  local epoch  : 0, acc 0.100
+[2024-01-09 12:15:37] [INFO] |  local epoch  : 1, acc 0.100
+[2024-01-09 12:15:37] [INFO] |  local epoch  : 2, acc 0.100
+[2024-01-09 12:15:38] [INFO] |  local epoch  : 3, acc 0.100
+[2024-01-09 12:15:38] [INFO] |  local epoch  : 4, acc 0.100
+[2024-01-09 12:15:38] [INFO]  ---client 1
+[2024-01-09 12:15:39] [INFO] |  local epoch  : 0, acc 0.100
+[2024-01-09 12:15:40] [INFO] |  local epoch  : 1, acc 0.100
+[2024-01-09 12:15:40] [INFO] |  local epoch  : 2, acc 0.100
+[2024-01-09 12:15:41] [INFO] |  local epoch  : 3, acc 0.100
+[2024-01-09 12:15:41] [INFO] |  local epoch  : 4, acc 0.100
+[2024-01-09 12:15:41] [INFO]  ---client 2
+[2024-01-09 12:15:42] [INFO] |  local epoch  : 0, acc 0.100
+[2024-01-09 12:15:42] [INFO] |  local epoch  : 1, acc 0.100
+[2024-01-09 12:15:43] [INFO] |  local epoch  : 2, acc 0.100
+[2024-01-09 12:15:44] [INFO] |  local epoch  : 3, acc 0.100
+[2024-01-09 12:15:44] [INFO] |  local epoch  : 4, acc 0.100
+[2024-01-09 12:15:44] [INFO] |servers comunicated: 0, server aggregated: 0, acc_server 0: 0.100.
+[2024-01-09 12:15:44] [INFO] --------------------------------------------------
+[2024-01-09 12:15:44] [INFO]   |server: 1
+[2024-01-09 12:15:46] [INFO]  ---client 3
+[2024-01-09 12:15:47] [INFO] |  local epoch  : 0, acc 0.100
+[2024-01-09 12:15:48] [INFO] |  local epoch  : 1, acc 0.100
+[2024-01-09 12:15:48] [INFO] |  local epoch  : 2, acc 0.100
+[2024-01-09 12:15:49] [INFO] |  local epoch  : 3, acc 0.100
+[2024-01-09 12:15:49] [INFO] |  local epoch  : 4, acc 0.100
+[2024-01-09 12:15:49] [INFO]  ---client 4
+[2024-01-09 12:15:50] [INFO] |  local epoch  : 0, acc 0.100
+[2024-01-09 12:15:51] [INFO] |  local epoch  : 1, acc 0.100
+[2024-01-09 12:15:51] [INFO] |  local epoch  : 2, acc 0.100
+[2024-01-09 12:15:52] [INFO] |  local epoch  : 3, acc 0.100
+[2024-01-09 12:15:52] [INFO] |  local epoch  : 4, acc 0.100
+[2024-01-09 12:15:52] [INFO]  ---client 5
+[2024-01-09 12:15:53] [INFO] |  local epoch  : 0, acc 0.100
+[2024-01-09 12:15:54] [INFO] |  local epoch  : 1, acc 0.100
+[2024-01-09 12:15:54] [INFO] |  local epoch  : 2, acc 0.100
+[2024-01-09 12:15:55] [INFO] |  local epoch  : 3, acc 0.100
+[2024-01-09 12:15:55] [INFO] |  local epoch  : 4, acc 0.100
+[2024-01-09 12:15:56] [INFO] |servers comunicated: 0, server aggregated: 0, acc_server 1: 0.100.
+[2024-01-09 12:15:56] [INFO] --------------------------------------------------
+[2024-01-09 12:15:56] [INFO]   |server: 2
+[2024-01-09 12:15:57] [INFO]  ---client 6
+[2024-01-09 12:16:02] [INFO] |  local epoch  : 0, acc 0.100
+[2024-01-09 12:16:03] [INFO] |  local epoch  : 1, acc 0.100
+[2024-01-09 12:16:04] [INFO] |  local epoch  : 2, acc 0.100
+[2024-01-09 12:16:05] [INFO] |  local epoch  : 3, acc 0.100
+[2024-01-09 12:16:07] [INFO] |  local epoch  : 4, acc 0.100
+[2024-01-09 12:16:07] [INFO]  ---client 7
+[2024-01-09 12:16:08] [INFO] |  local epoch  : 0, acc 0.100
+[2024-01-09 12:16:09] [INFO] |  local epoch  : 1, acc 0.100
+[2024-01-09 12:16:10] [INFO] |  local epoch  : 2, acc 0.100
+[2024-01-09 12:16:12] [INFO] |  local epoch  : 3, acc 0.126
+[2024-01-09 12:16:13] [INFO] |  local epoch  : 4, acc 0.100
+[2024-01-09 12:16:13] [INFO]  ---client 8
+[2024-01-09 12:16:14] [INFO] |  local epoch  : 0, acc 0.100
+[2024-01-09 12:16:15] [INFO] |  local epoch  : 1, acc 0.100
+[2024-01-09 12:16:17] [INFO] |  local epoch  : 2, acc 0.100
+[2024-01-09 12:16:18] [INFO] |  local epoch  : 3, acc 0.100
+[2024-01-09 12:16:19] [INFO] |  local epoch  : 4, acc 0.102

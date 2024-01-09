@@ -1,9 +1,18 @@
 import torch
-
-from copy import deepcopy
 import torch.nn.functional as f
+from copy import deepcopy
 
-# from utils.lib_util import list_same_term
+
+def ce_loss(output, target, device):
+    return torch.nn.CrossEntropyLoss().to(device)(output, target)
+
+
+def kl_loss(output, target, device):
+    return torch.nn.KLDivLoss(reduction='batchmean').to(device)(output, target)
+
+
+def softmax_loss(tensor, device):
+    return torch.nn.Softmax(dim=1).to(device)(tensor)
 
 
 class DistillKL(torch.nn.Module):
@@ -11,17 +20,17 @@ class DistillKL(torch.nn.Module):
     distilling loss
     '''
 
-    def __init__(self, T, alpha):
+    def __init__(self, T, alpha, device):
         super(DistillKL, self).__init__()
         self.T = T
         self.alpha = alpha
+        self.device = device
 
     def forward(self, output, target, logits_teacher):
-        prob_teacher = f.softmax(logits_teacher/self.T, dim=1)
-        prob_student = f.softmax(output/self.T, dim=1)
-        soft_loss = f.kl_div(prob_student.log(),
-                             prob_teacher, reduction='batchmean')
-        hard_loss = f.cross_entropy(output, target)
+        prob_teacher = softmax_loss(logits_teacher/self.T, self.device)
+        prob_student = softmax_loss(output/self.T, self.device)
+        soft_loss = kl_loss(prob_student.log(), prob_teacher, self.device)
+        hard_loss = ce_loss(output, target, self.device)
         loss = self.alpha * hard_loss + \
             (1 - self.alpha) * soft_loss * self.T**2 / logits_teacher.shape[0]
         return loss
@@ -41,7 +50,7 @@ class ServerTrain:
         if self.train_way == 1:
             # 仅在本地数据上进行训练，不进行蒸馏
             for i in self.args_train['client_idx']:
-                message = f'   -client {i}'
+                message = f' ---client {i}'
                 self.args_train['log'].info(message)
                 dataloader = self.args_train['train_dataloader'][i]
                 test_dataloader = self.args_train['train_test_dataloader'][i]
@@ -54,7 +63,7 @@ class ServerTrain:
         elif self.train_way == 2:
             # 仅在本地数据和公开数据集上训练，不进行蒸馏
             for i in self.args_train['client_idx']:
-                message = f'   -client {i}'
+                message = f' ---client {i}'
                 self.args_train['log'].info(message)
                 self.args_train['log'].info(message)
                 dataloader = self.args_train['train_dataloader'][i]
@@ -72,10 +81,9 @@ class ServerTrain:
                 client_model_[i] = deepcopy(model)
         elif self.train_way == 3:
             # 本地训练+加权蒸馏
-            # n = len(self.args_train['server_model'])
             weight = torch.tensor([1/3, 1/3, 1/3])
             for i in self.args_train['client_idx']:
-                message = f'   -client {i}'
+                message = f' ---client {i}'
                 self.args_train['log'].info(message)
                 dataloader = self.args_train['train_dataloader'][i]
                 test_dataloader = self.args_train['train_test_dataloader'][i]
@@ -93,7 +101,7 @@ class ServerTrain:
         elif self.train_way == 4:
             # 本地训练+逐个蒸馏
             for i in self.args_train['client_idx']:
-                message = f'   -client {i}'
+                message = f' ---client {i}'
                 self.args_train['log'].info(message)
                 dataloader = self.args_train['train_dataloader'][i]
                 test_dataloader = self.args_train['train_test_dataloader'][i]
@@ -146,7 +154,7 @@ class ServerTrain:
                 device=self.args.device)
             acc_.append(acc)
             acc__.append(acc_train)
-            message = '    |{:^15}: {}, acc {:.3f}'.format(
+            message = '|{:^15}: {}, acc {:.3f}'.format(
                 'local epoch', epoch, acc)
             self.args_train['log'].info(message)
             loss_.extend(loss)
@@ -178,7 +186,7 @@ class ServerTrain:
                 device=self.args.device)
             acc_.append(acc)
             acc__.append(acc_train)
-            message = '    |{:^15}: {}, acc {:.3f}'.format(
+            message = '|{:^15}: {}, acc {:.3f}'.format(
                 'distill epoch', epoch, acc)
             self.args_train['log'].info(message)
         return model, loss_, acc_, acc__
@@ -209,7 +217,7 @@ class ServerTrain:
                     model=model,
                     dataloader=test_dataloader,
                     device=self.args.device)
-                message = '    |{:^15}: {}, acc {:.3f}'.format(
+                message = '|{:^15}: {}, acc {:.3f}'.format(
                     'distill epoch', epoch, acc)
                 self.args_train['log'].info(message)
                 _acc.append(acc)
@@ -231,7 +239,7 @@ def train_model(model, dataloader, device, LR):
     for data, target in dataloader:
         optimizer.zero_grad()
         output = trained_model(data.to(device))
-        loss = f.cross_entropy(output, target.to(device))
+        loss = ce_loss(output, target.to(device), device)
         loss.backward()
         optimizer.step()
         loss_.append(loss.item())
@@ -246,7 +254,7 @@ def train_model_disti_weighted(model, weight, alpha, T, dataloader, num_target, 
     optimizer = torch.optim.Adam(trained_model.parameters(),
                                  lr=LR,
                                  weight_decay=1e-3)
-    criterion = DistillKL(T, alpha)
+    criterion = DistillKL(T, alpha, device)
     loss_ = []
     for data, target in dataloader:
         data_device = data.to(device)
@@ -271,7 +279,7 @@ def train_model_disti_single(model, teacher_model, dataloader, alpha, T, device,
     trained_model.train()
     teacher_model = deepcopy(teacher_model).to(device)
     teacher_model.eval()
-    criterion = DistillKL(T, alpha)
+    criterion = DistillKL(T, alpha, device)
     optimizer = torch.optim.Adam(trained_model.parameters(),
                                  lr=LR,
                                  weight_decay=1e-3)
@@ -287,17 +295,32 @@ def train_model_disti_single(model, teacher_model, dataloader, alpha, T, device,
     return trained_model, loss_
 
 
+# def aggregate(model_list, weight):
+#     aggregated_model = deepcopy(model_list[0])
+#     parameters = deepcopy(model_list[0].state_dict())
+#     for key in parameters:
+#         print(type(parameters[key]), type(weight[0]))
+#         parameters[key] *= weight[0]
+#     for i, model in enumerate(model_list[1:]):
+#         for key in parameters:
+#             parameters[key] += model.state_dict()[key] * weight[i+1]
+#     aggregated_model.load_state_dict(parameters)
+#     return aggregated_model
+
 def aggregate(model_list, weight):
     aggregated_model = deepcopy(model_list[0])
     parameters = deepcopy(model_list[0].state_dict())
-    for key in parameters:
+    for i, key in enumerate(parameters):
+        if parameters[key].shape == torch.Size([]):
+            continue
         parameters[key] *= weight[0]
     for i, model in enumerate(model_list[1:]):
         for key in parameters:
+            if parameters[key].shape == torch.Size([]):
+                continue
             parameters[key] += model.state_dict()[key] * weight[i+1]
     aggregated_model.load_state_dict(parameters)
     return aggregated_model
-
 
 def server_communicate(server_model, weight_list):
     server_model_ = deepcopy(server_model)
