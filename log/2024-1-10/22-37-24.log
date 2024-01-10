@@ -1,0 +1,16 @@
+[2024-01-10 22:37:24] [INFO] device cuda is used.
+[2024-01-10 22:37:24] [INFO] cudnn is actived.
+[2024-01-10 22:37:25] [INFO] 
+   dataset   : mnist 
+ batch_size  :  160  
+ image_size  :  64   
+  dim_noise  :  100  
+     sgf     :  64   
+     scf     :  64   
+  epoch_gan  :  100  
+  epoch_cri  :   5   
+     lr      :0.0001 
+    beta1    :   0   
+    beta2    :  0.9  
+  lambda_gp  :  10   
+ img_channel :   1   

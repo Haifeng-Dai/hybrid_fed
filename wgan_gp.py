@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import torch
 import argparse
 import torchvision
@@ -34,18 +35,30 @@ parser.add_argument('--beta2', type=float, default=0.9,
                     help='beta2 for Adam, default=0.9')
 parser.add_argument('--lambda_gp', type=float, default=10,
                     help='lambda_gp, default=10')
+parser.add_argument('--num_fake_img', type=int, default=50,
+                    help='number of fake images to be generated, default=50')
 args = parser.parse_args()
 
-log = get_logger()
+t = time.localtime()
+log_path = f'./log/{t.tm_year}-{t.tm_mon}-{t.tm_mday}/'
+if not os.path.exists(log_path):
+    os.makedirs(log_path)
+log_path += f'{t.tm_hour}-{t.tm_min}-{t.tm_sec}.log'
+log = get_logger(log_path)
+
 if torch.cuda.is_available():
-    device = torch.device('cuda')
+    device = 'cuda'
+    log.info(f'device {device} is used.')
     if torch.backends.cudnn.is_available():
         torch.backends.cudnn.enabled = True
         torch.backends.cudnn.benchmark = True
+        log.info('cudnn is actived.')
 elif torch.backends.mps.is_available():
-    device = torch.device('mps')
+    device = 'mps'
+    log.info(f'device {device} is used.')
 else:
-    device = torch.device('cpu')
+    device = 'cpu'
+    log.info(f'device {device} is used.')
 
 img_dir = 'res/gan/img'
 os.makedirs(img_dir, exist_ok=True)
@@ -68,11 +81,28 @@ if args.dataset == 'mnist':
 #     transform=transform)
 # img_channel = 3
 
+message = f"\n\
+{'dataset':^13}:{args.dataset:^7}\n\
+{'batch_size':^13}:{args.batch_size:^7}\n\
+{'image_size':^13}:{args.image_size:^7}\n\
+{'dim_noise':^13}:{args.dim_noise:^7}\n\
+{'sgf':^13}:{args.sgf:^7}\n\
+{'scf':^13}:{args.scf:^7}\n\
+{'epoch_gan':^13}:{args.epoch_gan:^7}\n\
+{'epoch_cri':^13}:{args.epoch_cri:^7}\n\
+{'lr':^13}:{args.lr:^7}\n\
+{'beta1':^13}:{args.beta1:^7}\n\
+{'beta2':^13}:{args.beta2:^7}\n\
+{'lambda_gp':^13}:{args.lambda_gp:^7}\n\
+{'img_channel':^13}:{img_channel:^7}"
+log.info(message)
+
 # 加载数据集
 dataLoader = DataLoader(dataset=dataset,
                         batch_size=args.batch_size,
                         shuffle=True,
-                        num_workers=4)
+                        pin_memory=True,
+                        num_workers=8)
 
 # 实例模型
 net_generator = Generator(args.dim_noise, img_channel, args.sgf).to(device)
@@ -91,17 +121,15 @@ opt_critic = torch.optim.Adam(
 # 定义随机噪声
 fixed_noise = torch.randn(size=(25, args.dim_noise, 1, 1), device=device)
 len_dataloader = len(dataLoader)
-for epoch in range(args.epochs_gan):
+for epoch in range(args.epoch_gan):
     for batch_idx, (img, _) in enumerate(dataLoader):
         img = img.to(device)
-
         for _ in range(args.epoch_cri):
             noise = torch.randn(
                 size=(img.shape[0], args.dim_noise, 1, 1), device=device)
             fake_img = net_generator(noise)
             critic_real = net_critic(img)
             critic_fake = net_critic(fake_img)
-
             gp = gradient_penality(net_critic, img, fake_img, device)
             loss_critic = torch.mean(critic_fake) - torch.mean(critic_real) \
                 + args.lambda_gp * gp
@@ -115,9 +143,8 @@ for epoch in range(args.epochs_gan):
         loss_gen.backward()
         opt_gen.step()
 
-        if batch_idx % 10 == 0 and batch_idx > 0:
-            print(
-                f"Epoch[{epoch}/{args.epoch_gan}] Batch {batch_idx}/{len_dataloader} Loss D: {loss_critic:.4f}, Loss G: {loss_gen:.4f}")
+        message = f'Epoch[{epoch}/{args.epoch_gan}] Batch {batch_idx}/{len_dataloader} Loss D: {loss_critic:.2f}, Loss G: {loss_gen:.2f}'
+        log.info(message)
 
         if batch_idx % 100 == 0 and batch_idx > 0:
             net_generator.eval()
@@ -125,8 +152,12 @@ for epoch in range(args.epochs_gan):
             fake_img = net_generator(fixed_noise)
             torchvision.utils.save_image(
                 fake_img, f'{img_dir}/{epoch}-{batch_idx}.png', nrow=5, normalize=True)
+            message = 'fake images saved.'
+            log.info(message)
             net_generator.train()
             net_critic.train()
 
 torch.save(net_generator, f'{gan_dir}/generator.pth')
 torch.save(net_critic, f'{gan_dir}/critic.pth')
+message = 'model saved.'
+log.info(message)

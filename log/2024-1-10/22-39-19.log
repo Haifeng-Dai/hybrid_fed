@@ -1,0 +1,29 @@
+[2024-01-10 22:39:19] [INFO] device cuda is used.
+[2024-01-10 22:39:19] [INFO] cudnn is actived.
+[2024-01-10 22:39:19] [INFO] 
+   dataset   : mnist 
+ batch_size  :  160  
+ image_size  :  64   
+  dim_noise  :  100  
+     sgf     :  64   
+     scf     :  64   
+  epoch_gan  :  10   
+  epoch_cri  :   5   
+     lr      :0.0001 
+    beta1    :   0   
+    beta2    :  0.9  
+  lambda_gp  :  10   
+ img_channel :   1   
+[2024-01-10 22:39:33] [INFO] Epoch[0/10] Batch 0/375 Loss D: 57.14, Loss G: 1.70
+[2024-01-10 22:39:35] [INFO] Epoch[0/10] Batch 1/375 Loss D: 10.43, Loss G: 2.93
+[2024-01-10 22:39:37] [INFO] fake images saved.
+[2024-01-10 22:39:39] [INFO] Epoch[0/10] Batch 2/375 Loss D: -4.10, Loss G: 5.70
+[2024-01-10 22:39:39] [INFO] fake images saved.
+[2024-01-10 22:39:41] [INFO] Epoch[0/10] Batch 3/375 Loss D: -12.00, Loss G: 8.99
+[2024-01-10 22:39:41] [INFO] fake images saved.
+[2024-01-10 22:39:43] [INFO] Epoch[0/10] Batch 4/375 Loss D: -16.53, Loss G: 12.47
+[2024-01-10 22:39:43] [INFO] fake images saved.
+[2024-01-10 22:39:45] [INFO] Epoch[0/10] Batch 5/375 Loss D: -21.51, Loss G: 16.82
+[2024-01-10 22:39:45] [INFO] fake images saved.
+[2024-01-10 22:39:47] [INFO] Epoch[0/10] Batch 6/375 Loss D: -26.76, Loss G: 21.21
+[2024-01-10 22:39:47] [INFO] fake images saved.
