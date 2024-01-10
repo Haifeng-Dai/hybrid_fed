@@ -5,11 +5,47 @@ import torch
 import argparse
 import torchvision
 
-import matplotlib.pyplot as plt
-
 from copy import deepcopy
 from utils.train_util import *
 from utils.model_util import *
+
+
+def get_args():
+    # 获取输入参数
+    parser = argparse.ArgumentParser(description='save results.')
+    parser.add_argument('--dataset', type=str, default='mnist',
+                        help='the used dataset.')
+    parser.add_argument('--alpha', type=float, default=0.5,
+                        help='trade-off parameters of distillation.')
+    parser.add_argument('--T', type=int, default=2.0,
+                        help='temperature of distillation.')
+    parser.add_argument('--num_all_client', type=int,
+                        default=9, help='num of all client.')
+    parser.add_argument('--num_all_server', type=int,
+                        default=3, help='num of all server.')
+    parser.add_argument('--batch_size', type=int, default=200,
+                        help='batch size of trainning.')
+    parser.add_argument('--num_client_data', type=int,
+                        default=1000, help='number of client datas.')
+    parser.add_argument('--num_server_commu', type=int, default=1,
+                        help='number of server communications.')
+    parser.add_argument('--num_client_commu', type=int, default=1,
+                        help='number of clients communicate with servers.')
+    parser.add_argument('--num_client_train', type=int, default=1,
+                        help='number of client train in local data.')
+    parser.add_argument('--num_public_train', type=int, default=1,
+                        help='number of client distillation in public data.')
+    parser.add_argument('--model_select', type=int, default=1,
+                        help='select the model group.')
+    parser.add_argument('--algorithm', type=int, default=1,
+                        help='select the algorithm.')
+    # parser.add_argument('--graph', type=int, default=1,
+    #                     help='select the graph.')
+    parser.add_argument('--num_public_data', type=int, default=50,
+                        help='number of public data.')
+    parser.add_argument('--proportion', type=float, default=0.8,
+                        help='proportion of main target data.')
+    return parser.parse_args()
 
 
 def list_same_term(len_list, term=[]):
@@ -59,44 +95,6 @@ def save_file(args, save_data, log):
     torch.save(save_data, file_path)
 
 
-def get_args():
-    # 获取输入参数
-    parser = argparse.ArgumentParser(description='save results.')
-    parser.add_argument('--dataset', type=str, default='mnist',
-                        help='the used dataset.')
-    parser.add_argument('--alpha', type=float, default=0.5,
-                        help='trade-off parameters of distillation.')
-    parser.add_argument('--T', type=int, default=2.0,
-                        help='temperature of distillation.')
-    parser.add_argument('--num_all_client', type=int,
-                        default=9, help='num of all client.')
-    parser.add_argument('--num_all_server', type=int,
-                        default=3, help='num of all server.')
-    parser.add_argument('--batch_size', type=int, default=200,
-                        help='batch size of trainning.')
-    parser.add_argument('--num_client_data', type=int,
-                        default=1000, help='number of client datas.')
-    parser.add_argument('--num_server_commu', type=int, default=1,
-                        help='number of server communications.')
-    parser.add_argument('--num_client_commu', type=int, default=1,
-                        help='number of clients communicate with servers.')
-    parser.add_argument('--num_client_train', type=int, default=1,
-                        help='number of client train in local data.')
-    parser.add_argument('--num_public_train', type=int, default=1,
-                        help='number of client distillation in public data.')
-    parser.add_argument('--model_select', type=int, default=1,
-                        help='select the model group.')
-    parser.add_argument('--algorithm', type=int, default=1,
-                        help='select the algorithm.')
-    # parser.add_argument('--graph', type=int, default=1,
-    #                     help='select the graph.')
-    parser.add_argument('--num_public_data', type=int, default=50,
-                        help='number of public data.')
-    parser.add_argument('--proportion', type=float, default=0.8,
-                        help='proportion of main target data.')
-    return parser.parse_args()
-
-
 def aggregate(model_list, weight):
     aggregated_model = deepcopy(model_list[0])
     parameters = deepcopy(model_list[0].state_dict())
@@ -139,3 +137,61 @@ def intial_model(args, num_target, num_server_client, c, h, w):
     else:
         raise ValueError('model error.')
     return client_model, server_model
+
+
+def weights_init(m):
+    classname = m.__class__.__name__
+    if classname.find('Conv') != -1:
+        torch.nn.init.normal_(m.weight, 0.0, 0.02)
+    elif classname.find('BatchNorm') != -1:
+        torch.nn.init.normal_(m.weight, 1.0, 0.02)
+        torch.nn.init.zeros_(m.bias)
+
+
+def gradient_penality(D, real_samples, fake_samples, device):
+    # Calculates the gradient penalty loss for WGAN-GP
+    alpha = torch.rand((real_samples.shape[0], 1, 1, 1), device=device)
+    interpolates = (alpha * real_samples + ((1 - alpha)
+                    * fake_samples)).requires_grad_(True)
+    d_interpolates = D(interpolates)
+    fake = torch.ones_like(d_interpolates)
+    gradient = torch.autograd.grad(
+        outputs=d_interpolates,
+        inputs=interpolates,
+        grad_outputs=fake,
+        create_graph=True,
+        retain_graph=True,
+        only_inputs=True)[0]
+    gradient_ = gradient.view(gradient.shape[0], -1)
+    gradient_penalty = ((gradient_.norm(2, dim=1) - 1) ** 2).mean()
+    return gradient_penalty
+
+
+# def gradient_penality(critic, real, fake, device='cpu'):
+#     """
+#     :param critic: 判别器模型
+#     :param real: 真实样本
+#     :param fake: 生成的样本
+#     :param device: 设备CUP or GPU
+#     :return:
+#     """
+#     BATCH_SIZE, C, H, W = real.shape
+#     alpha = torch.randn(size=(BATCH_SIZE, 1, 1, 1)
+#                         ).repeat(1, C, H, W).to(device)
+#     print(alpha.shape)
+#     interpolated_images = real*alpha + fake*(1-alpha)
+
+#     # 计算判别器输出
+#     mixed_scores = critic(interpolated_images)
+#     # 求导
+#     gradient = torch.autograd.grad(
+#         inputs=interpolated_images,
+#         outputs=mixed_scores,
+#         grad_outputs=torch.ones_like(mixed_scores),
+#         create_graph=True,
+#         retain_graph=True
+#     )[0]
+#     gradient = gradient.view(gradient.shape[0], -1)
+#     gradient_norm = gradient.norm(2, dim=1)
+#     gradient_penality = torch.mean((gradient_norm - 1)**2)
+#     return gradient_penality

@@ -1,8 +1,6 @@
 import math
 import torch
 import torch.nn as nn
-from torch import nn
-from torch.nn import functional as F
 
 
 def conv_cal(c, kernel_size, stride=None, padding=0, operation='conv'):
@@ -128,3 +126,104 @@ class CNN(nn.Module):
         w_conv = conv_cal(w_conv, kernel_size=3)
         w_conv = conv_cal(w_conv, kernel_size=2, operation='pool')
         return h_conv, w_conv
+
+
+class Generator(torch.nn.Module):
+    def __init__(self, channels_noise, img_channel, num_feature):
+        super(Generator, self).__init__()
+        # self.conv1 =
+
+        self.gen = torch.nn.Sequential(
+            # imgsize: 4 x 4
+            self._block(in_channels=channels_noise,
+                        out_channels=num_feature * 16,
+                        kernel_size=(4, 4),
+                        stride=(1, 1),
+                        padding=0),
+            # imgsize: 8 x 8
+            self._block(in_channels=num_feature * 16,
+                        out_channels=num_feature * 8,
+                        kernel_size=(4, 4),
+                        stride=(2, 2),
+                        padding=1),
+            # imgsize: 16 x 16
+            self._block(in_channels=num_feature * 8,
+                        out_channels=num_feature * 4,
+                        kernel_size=(4, 4),
+                        stride=(2, 2),
+                        padding=1),
+            # imgsize: 32 x 32
+            self._block(in_channels=num_feature * 4,
+                        out_channels=num_feature * 2,
+                        kernel_size=(4, 4),
+                        stride=(2, 2),
+                        padding=1),
+            # imgsize: N x 3 x 64 x 64
+            torch.nn.ConvTranspose2d(
+                in_channels=num_feature * 2,
+                out_channels=img_channel,
+                kernel_size=(4, 4),
+                stride=(2, 2),
+                padding=(1, 1)),
+            torch.nn.Tanh())
+
+    def _block(self, in_channels, out_channels, kernel_size, stride, padding):
+        self.conv = torch.nn.Sequential(
+            torch.nn.ConvTranspose2d(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                stride=stride,
+                padding=padding,
+                bias=False),
+            torch.nn.BatchNorm2d(num_features=out_channels),
+            torch.nn.ReLU())
+        return self.conv
+
+    def forward(self, input):
+        x = self.gen(input)
+        return x
+
+
+class Critic(torch.nn.Module):
+    def __init__(self, img_channel, num_features):
+        super(Critic, self).__init__()
+        self.disc = torch.nn.Sequential(
+            torch.nn.Conv2d(
+                in_channels=img_channel, out_channels=num_features, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1)),
+            torch.nn.LeakyReLU(negative_slope=0.2, inplace=True),
+            self._block(in_channels=num_features, out_channels=num_features * 2, kernel_size=(4, 4), stride=(2, 2),
+                        padding=(1, 1)),
+            self._block(in_channels=num_features * 2, out_channels=num_features * 4, kernel_size=(4, 4), stride=(2, 2),
+                        padding=(1, 1)),
+            self._block(in_channels=num_features * 4, out_channels=num_features *
+                        8, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1)),
+            torch.nn.Conv2d(in_channels=num_features*8, out_channels=1, kernel_size=(4, 4), stride=(2, 2), padding=0))
+
+    def _block(self, in_channels, out_channels, kernel_size, stride, padding):
+        self.conv = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=False),
+            torch.nn.InstanceNorm2d(out_channels, affine=True),
+            torch.nn.LeakyReLU(negative_slope=0.2, inplace=True))
+        return self.conv
+
+    def forward(self, input):
+        x = self.disc(input)
+        return x
+
+
+if __name__ == '__main__':
+    G = Generator(1, 100, 64)
+    # G = Generator1(1)
+    D = Discriminator(1, 64)
+
+    noise = torch.randn(2, 100, 1, 1)
+    # print(noise.shape)
+    a = G(noise)
+    # print(a.shape)
+    # b = D(a)
+    # print(b.shape)
+    # print(b)
+    # c = G(torch.randn(2, 100, 1, 1))
+    # gp_a = compute_gradient_penalty(D, a, c)
+    # print(gp_a)

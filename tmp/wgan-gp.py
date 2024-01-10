@@ -78,12 +78,14 @@ def cal_gp(D, real_imgs, fake_imgs, cuda):  # 定义函数，计算梯度惩罚�
         r = r.cuda()  # r加载到GPU
     # 输入样本x，由真假样本按照比例产生，需要计算梯度
     x = (r * real_imgs + (1 - r) * fake_imgs).requires_grad_(True)
-    d = D(x)  # 判别网络D对输入样本x的判别结果D(x)
+    # print(x.shape)
+    d = D(x)  # 判别网络D对输入样本x的判别结果D(x) torch.Size([batch_size, 1])
+    # print(d)
     fake = torch.ones_like(d)  # 定义与d形状相同的张量，代表梯度计算时每一个元素的权重
     if cuda:  # 如果使用cuda
         fake = fake.cuda()  # fake加载到GPU
     g = torch.autograd.grad(  # 进行梯度计算
-        outputs=d,  # 计算梯度的函数d，即D(x)
+        outputs=d,  # 计算梯度的函数d，即D(x) torch.Size([batch_size, 1])
         inputs=x,  # 计算梯度的变量x
         grad_outputs=fake,  # 梯度计算权重
         create_graph=True,  # 创建计算图
@@ -96,7 +98,7 @@ def cal_gp(D, real_imgs, fake_imgs, cuda):  # 定义函数，计算梯度惩罚�
 if __name__ == "__main__":
     # 训练参数
     total_epochs = 100  # 训练轮次
-    batch_size = 64  # 批大小
+    batch_size = 160  # 批大小
     lr_D = 4e-3  # 判别网络D学习率
     lr_G = 1e-3  # 生成网络G学习率
     num_workers = 8  # 数据加载线程数
@@ -106,7 +108,7 @@ if __name__ == "__main__":
     a = 10  # 梯度惩罚项系数
     clip_value = 0.01  # 判别器参数限定范围
     dataset_dir = "./data/"  # 训练数据集路径
-    gen_images_dir = "./tmp/"  # 生成样例图片路径
+    gen_images_dir = "./img/wgan-gp/"  # 生成样例图片路径
     cuda = True if torch.cuda.is_available() else False  # 设置是否使用cuda
     os.makedirs(dataset_dir, exist_ok=True)  # 创建训练数据集路径
     os.makedirs(gen_images_dir, exist_ok=True)  # 创建样例图片路径
@@ -163,9 +165,9 @@ if __name__ == "__main__":
             if cuda:  # 如果使用cuda
                 z = z.cuda()  # 噪声z加载到GPU
             fake_imgs = G(z).detach()  # 噪声z输入生成网络G，得到生成图片，并阻止其反向梯度传播
-            print(fake_imgs.shape)
-            sys.exit()
+            # print(fake_imgs.shape)
             gp = cal_gp(D, real_imgs, fake_imgs, cuda)
+            # sys.exit()
             # 判别网络D的损失函数，相较于WGAN，增加了梯度惩罚项a*gp
             loss_D = -torch.mean(D(real_imgs)) + \
                 torch.mean(D(fake_imgs)) + a * gp
@@ -188,5 +190,5 @@ if __name__ == "__main__":
         pbar.close()  # 关闭当前epoch显示进度
         print("total_D_loss:%.4f,total_G_loss:%.4f" % (
             LD / len(dataloader), LG / len(dataloader)))  # 显示当前epoch训练完成后，判别网络D和生成网络G的总损失
-        # save_image(gen_imgs.data[:25], "%s/ep%d.png" % (gen_images_dir, (epoch + 1)), nrow=5,
-        #            normalize=True)  # 保存生成图片样例(5x5)
+        save_image(gen_imgs.data[:25], "%s/ep%d.png" % (gen_images_dir, (epoch + 1)), nrow=5,
+                   normalize=True)  # 保存生成图片样例(5x5)
