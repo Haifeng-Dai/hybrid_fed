@@ -1,0 +1,22 @@
+[2024-01-11 18:20:22] [INFO] device cuda is used.
+[2024-01-11 18:20:22] [INFO] cudnn is actived.
+[2024-01-11 18:20:22] [INFO] 
+   dataset   : mnist 
+ batch_size  :  160  
+ image_size  :  64   
+  dim_noise  :  100  
+     sgf     :  64   
+     scf     :  64   
+  epoch_gan  :  10   
+  epoch_cri  :   5   
+     lr      :0.0001 
+    beta1    :   0   
+    beta2    :  0.9  
+  lambda_gp  :  10   
+ img_channel :   1   
+[2024-01-11 18:20:55] [INFO] Epoch[0/10] Batch 0/375 Loss D: 38.05, Loss G: 1.97
+[2024-01-11 18:21:00] [INFO] Epoch[0/10] Batch 1/375 Loss D: 1.70, Loss G: 4.65
+[2024-01-11 18:21:04] [INFO] Epoch[0/10] Batch 2/375 Loss D: -8.95, Loss G: 8.20
+[2024-01-11 18:21:09] [INFO] Epoch[0/10] Batch 3/375 Loss D: -16.43, Loss G: 11.80
+[2024-01-11 18:21:13] [INFO] Epoch[0/10] Batch 4/375 Loss D: -20.47, Loss G: 15.47
+[2024-01-11 18:21:18] [INFO] Epoch[0/10] Batch 5/375 Loss D: -26.34, Loss G: 19.34

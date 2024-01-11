@@ -25,7 +25,6 @@ torch.set_printoptions(
     linewidth=1000,
     sci_mode=False)
 
-
 # %% 参数定义
 args = get_args()
 args.device = get_device(log)
