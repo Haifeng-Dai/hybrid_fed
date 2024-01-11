@@ -25,23 +25,10 @@ torch.set_printoptions(
     linewidth=1000,
     sci_mode=False)
 
-if torch.cuda.is_available():
-    device = 'cuda'
-    log.info(f'device {device} is used.')
-    if torch.backends.cudnn.is_available():
-        torch.backends.cudnn.enabled = True
-        torch.backends.cudnn.benchmark = True
-        log.info('cudnn is actived.')
-elif torch.backends.mps.is_available():
-    device = 'mps'
-    log.info(f'device {device} is used.')
-else:
-    device = 'cpu'
-    log.info(f'device {device} is used.')
 
 # %% 参数定义
 args = get_args()
-args.device = device
+args.device = get_device(log)
 
 server_client = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
 neighbor_server = [[1], [2], [0]]

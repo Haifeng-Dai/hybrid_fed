@@ -48,6 +48,23 @@ def get_args():
     return parser.parse_args()
 
 
+def get_device(log):
+    if torch.cuda.is_available():
+        device = 'cuda'
+        log.info(f'device {device} is used.')
+        if torch.backends.cudnn.is_available():
+            torch.backends.cudnn.enabled = True
+            torch.backends.cudnn.benchmark = True
+            log.info('cudnn is actived.')
+    elif torch.backends.mps.is_available():
+        device = 'mps'
+        log.info(f'device {device} is used.')
+    else:
+        device = 'cpu'
+        log.info(f'device {device} is used.')
+    return device
+
+
 def list_same_term(len_list, term=[]):
     # 返回一个全是空列表的列表
     list_return = []
