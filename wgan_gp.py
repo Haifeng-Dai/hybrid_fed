@@ -67,14 +67,13 @@ gan_dir = 'res/gan'
 # 下载数据集
 if args.dataset == 'mnist':
     img_channel = 1
-    size_img = [0.5 for _ in range(img_channel)]
     dataset = torchvision.datasets.MNIST(
         root='data',
         train=True,
         transform=torchvision.transforms.Compose([
             torchvision.transforms.Resize((args.image_size, args.image_size)),
             torchvision.transforms.ToTensor(),
-            torchvision.transforms.Normalize(mean=size_img, std=size_img)]),
+            torchvision.transforms.Normalize(mean=[0.5], std=[0.5])]),
         download=True)
 # dataset = torchvision.datasets.ImageFolder(
 #     root=r"E:\conda_3\PyCharm\Transer_Learning\WGAN\WGANCode\data",

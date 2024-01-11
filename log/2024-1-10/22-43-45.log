@@ -1,31 +1,3 @@
-[2024-01-10 22:35:57] [INFO] device cuda is used.
-[2024-01-10 22:35:57] [INFO] cudnn is actived.
-Traceback (most recent call last):
-  File "/home/dhf/git_res/hybrid_fed/wgan_gp.py", line 95, in <module>
-    {'img_channel':^13}:{args.img_channel:^7}"
-                         ^^^^^^^^^^^^^^^^
-AttributeError: 'Namespace' object has no attribute 'img_channel'
-[2024-01-10 22:37:24] [INFO] device cuda is used.
-[2024-01-10 22:37:24] [INFO] cudnn is actived.
-[2024-01-10 22:37:25] [INFO] 
-   dataset   : mnist 
- batch_size  :  160  
- image_size  :  64   
-  dim_noise  :  100  
-     sgf     :  64   
-     scf     :  64   
-  epoch_gan  :  100  
-  epoch_cri  :   5   
-     lr      :0.0001 
-    beta1    :   0   
-    beta2    :  0.9  
-  lambda_gp  :  10   
- img_channel :   1   
-Traceback (most recent call last):
-  File "/home/dhf/git_res/hybrid_fed/wgan_gp.py", line 122, in <module>
-    for epoch in range(args.epochs_gan):
-                       ^^^^^^^^^^^^^^^
-AttributeError: 'Namespace' object has no attribute 'epochs_gan'. Did you mean: 'epoch_gan'?
 [2024-01-10 22:43:45] [INFO] device cuda is used.
 [2024-01-10 22:43:45] [INFO] cudnn is actived.
 [2024-01-10 22:43:45] [INFO] 
