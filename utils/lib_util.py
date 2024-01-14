@@ -39,8 +39,8 @@ def get_args():
                         help='select the model group.')
     parser.add_argument('--algorithm', type=int, default=1,
                         help='select the algorithm.')
-    # parser.add_argument('--graph', type=int, default=1,
-    #                     help='select the graph.')
+    parser.add_argument('--num_workers', type=int, default=8,
+                        help='num_workers.')
     parser.add_argument('--num_public_data', type=int, default=50,
                         help='number of public data.')
     parser.add_argument('--proportion', type=float, default=0.8,

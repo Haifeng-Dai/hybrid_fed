@@ -4,6 +4,7 @@ import numpy
 import time
 
 from torch.utils.data import DataLoader
+from torch.utils.data.distributed import DistributedSampler
 
 from utils.model_util import *
 from utils.data_util import *
@@ -50,7 +51,8 @@ message = f"\n\
 {'num_all_server':^17}:{args.num_all_server:^7}\n\
 {'num_client_data':^17}:{args.num_client_data:^7}\n\
 {'num_public_data':^17}:{args.num_public_data:^7}\n\
-{'proportion':^17}:{args.proportion:^7}"
+{'proportion':^17}:{args.proportion:^7}\n\
+{'num_workers':^17}:{args.num_workers:^7}"
 log.info(message)
 
 # %% 原始数据处理
@@ -77,13 +79,14 @@ for i, dataset_ in enumerate(train_dataset_client):
         batch_size=args.batch_size,
         shuffle=True,
         pin_memory=True,
-        num_workers=4)
+        num_workers=args.num_workers,
+        sampler=DistributedSampler(dataset_train))
     validate_dataloader[i] = DataLoader(
         dataset=dataset_test,
         batch_size=args.batch_size,
         shuffle=True,
         pin_memory=True,
-        num_workers=4)
+        num_workers=args.num_workers)
 [public_dataset, test_dataset] = split_parts_random(
     test_dataset_o, [args.num_public_data, int(len(test_dataset_o)) - args.num_public_data])
 public_dataloader = DataLoader(
@@ -91,12 +94,13 @@ public_dataloader = DataLoader(
     batch_size=args.batch_size,
     shuffle=True,
     pin_memory=True,
-    num_workers=4)
+    num_workers=args.num_workers,
+    sampler=DistributedSampler(public_dataset))
 test_dataloader = DataLoader(
     dataset=test_dataset,
     batch_size=args.batch_size,
     pin_memory=True,
-    num_workers=4)
+    num_workers=args.num_workers)
 
 # %% 模型初始化
 client_model, server_model = intial_model(

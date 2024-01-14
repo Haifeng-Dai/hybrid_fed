@@ -1,0 +1,1 @@
+python multigpu.py 10 2
