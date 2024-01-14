@@ -4,7 +4,6 @@ import numpy
 import time
 
 from torch.utils.data import DataLoader
-from torch.utils.data.distributed import DistributedSampler
 
 from utils.model_util import *
 from utils.data_util import *
@@ -79,8 +78,7 @@ for i, dataset_ in enumerate(train_dataset_client):
         batch_size=args.batch_size,
         shuffle=True,
         pin_memory=True,
-        num_workers=args.num_workers,
-        sampler=DistributedSampler(dataset_train))
+        num_workers=args.num_workers)
     validate_dataloader[i] = DataLoader(
         dataset=dataset_test,
         batch_size=args.batch_size,
@@ -94,8 +92,7 @@ public_dataloader = DataLoader(
     batch_size=args.batch_size,
     shuffle=True,
     pin_memory=True,
-    num_workers=args.num_workers,
-    sampler=DistributedSampler(public_dataset))
+    num_workers=args.num_workers)
 test_dataloader = DataLoader(
     dataset=test_dataset,
     batch_size=args.batch_size,

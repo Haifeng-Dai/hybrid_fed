@@ -20,7 +20,7 @@ def weighted_distill(args, args_train):
             client_model[i], dataloader, validate_dataloader, args, args_train)
         args_train['client_loss'][i].extend(loss)
         args_train['client_accuracy'][i].extend(acc)
-        args_train['train_accuracy'][i].extend(acc_val)
+        args_train['validate_accuracy'][i].extend(acc_val)
         if args_train['epoch_server_commu'] != 0:
             model, loss, acc, acc_val = weighted_distill_train_loop(
                 model, weight, validate_dataloader, args, args_train)
@@ -44,7 +44,7 @@ def circulate_distill(args, args_train):
             client_model[i], dataloader, validate_dataloader, args, args_train)
         args_train['client_loss'][i].extend(loss)
         args_train['client_accuracy'][i].extend(acc)
-        args_train['train_accuracy'][i].extend(acc_val)
+        args_train['validate_accuracy'][i].extend(acc_val)
         if args_train['epoch_server_commu'] != 0:
             model, loss, acc, acc_val = circulate_distill_train_loop(
                 model, validate_dataloader, args, args_train)
@@ -115,8 +115,6 @@ class Trainer:
             self.trainer = circulate_distill
         elif args.algorithm == 2:
             self.trainer = regular
-        elif args.algorithm == 3:
-            self.trainer == regular
         else:
             raise ValueError('algorithm error.')
 

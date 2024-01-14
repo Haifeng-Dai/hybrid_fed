@@ -2,7 +2,7 @@
 
 dataset=mnist # (mnist cifar10 cifar100)
 alpha=0.1       # (0.0 0.2 0.4 0.6 0.8 1.0)
-T=4       # (2 4 6 8)
+T=10       # (2 4 6 8)
 num_all_client=9
 num_all_server=3
 batch_size=160
