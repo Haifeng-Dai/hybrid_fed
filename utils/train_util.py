@@ -231,6 +231,8 @@ def eval_model(model, dataloader, device):
     '''
     评估模型
     '''
+    # if isinstance(device, list):
+    #     device = 'cuda'
     model_copy = deepcopy(model).to(device)
     # model_copy.to(device)
     model_copy.eval()

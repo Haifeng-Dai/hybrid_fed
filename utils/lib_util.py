@@ -52,6 +52,9 @@ def get_device(log):
     if torch.cuda.is_available():
         device = 'cuda'
         log.info(f'device {device} is used.')
+        # num_device = torch.cuda.device_count()
+        # if num_device > 1:
+        #     device = [i for i in range(num_device)]
         if torch.backends.cudnn.is_available():
             torch.backends.cudnn.enabled = True
             torch.backends.cudnn.benchmark = True
