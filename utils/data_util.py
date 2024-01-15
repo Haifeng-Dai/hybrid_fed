@@ -3,9 +3,8 @@ import torchvision
 import random
 import numpy
 
-from torch.utils.data import DataLoader
-
 from utils.lib_util import *
+from torch.utils.data import DataLoader
 
 
 # def data_loader(dataset, batch_size, shuffle, ):
@@ -60,30 +59,43 @@ def get_dataset(dataset='mnist'):
     return train_dataset, test_dataset, c, h, w
 
 
-# def tensor_merge(tensor_list):
-#     if len(tensor_list) == 1:
-#         return tensor_list[0].unsqueeze(0)
-#     tensor = torch.stack((tensor_list[0], tensor_list[1]))
-#     for tensor_ in tensor_list[2:]:
-#         tensor = torch.cat((tensor, tensor_.unsqueeze(0)))
-#     return tensor
+def split_dataset(train_dataset_o, target_list, args):
+    TrainDatasetSplited = SplitData(train_dataset_o)
+    all_target = TrainDatasetSplited.targets
+    num_target = TrainDatasetSplited.num_target
 
-
-# def data_loader(dataset_list, batch_size, shuffle=False, device='cpu'):
-#     num_data = len(dataset_list)
-#     data = [dataset[0] for dataset in dataset_list]
-#     target = torch.tensor([dataset[1] for dataset in dataset_list])
-#     idxs = [i for i in range(num_data)]
-#     if shuffle:
-#         random.shuffle(idxs)
-#     num_dataloader = num_data // batch_size
-#     if num_data % batch_size:
-#         num_dataloader += 1
-#     for i in range(num_dataloader):
-#         idx = i * batch_size
-#         data_return = tensor_merge(data[idx: idx+batch_size])
-#         target_return = target[idx: idx+batch_size]
-#         yield (data_return.to(device), target_return.to(device))
+    # client_main_target = numpy.random.choice(
+    #     all_target, args.num_all_client, replace=False).tolist()
+    # train_dataset_client = TrainDatasetSplited.server_non_iid(
+    #     num_server=args.num_all_server,
+    #     num_server_client=num_server_client,
+    #     num_client_data=args.num_client_data,
+    #     client_main_target=client_main_target,
+    #     proportion=args.proportion)
+    train_dataset_client = TrainDatasetSplited.server_target_niid(
+        num_server=args.num_all_server,
+        num_server_client=args.num_all_client // args.num_all_server,
+        num_client_data=args.num_client_data,
+        target_list=target_list)
+    train_dataloader = list_same_term(args.num_all_client)
+    validate_dataloader = list_same_term(args.num_all_client)
+    for i, dataset_ in enumerate(train_dataset_client):
+        # print()
+        [dataset_train, dataset_test] = split_parts_random(
+            dataset_, [1000, 200])
+        train_dataloader[i] = DataLoader(
+            dataset=dataset_train,
+            batch_size=args.batch_size,
+            shuffle=True,
+            pin_memory=True,
+            num_workers=args.num_workers)
+        validate_dataloader[i] = DataLoader(
+            dataset=dataset_test,
+            batch_size=args.batch_size,
+            shuffle=True,
+            pin_memory=True,
+            num_workers=args.num_workers)
+    return num_target, train_dataloader, validate_dataloader
 
 
 class SplitData:
@@ -116,6 +128,8 @@ class SplitData:
             splited_data[key] = []
         for data in self.initial_dataset:
             splited_data[data[1]].append(data)
+        for key in splited_data.keys():
+            random.shuffle(splited_data[key])
         return splited_data
 
     def num_data_target(self):
@@ -248,22 +262,34 @@ class SplitData:
                 client_data.append(server_client_data[server][client])
         return client_data
 
-    def part_target(self, num_client, num_client_data, target_list):
-        client_data = list_same_term(num_client)
+    def server_target_niid(self, num_server, num_server_client, target_list, num_client_data):
+        server_data = list_same_term(num_server)
         splited_data = deepcopy(self.split_data())
-        for client in range(num_client):
-            idx = 0
-            len_target = len(target_list[client])
-            for target in target_list[client]:
-                num_target_data = int(num_client_data / len_target)
-                add_data = splited_data[target][idx: idx + num_target_data]
-                client_data[client].extend(add_data)
+        num_server_data = num_client_data * num_server_client
+        for server in range(num_server):
+            num_data_each_target = num_server_data // len(target_list[server])
+            # print(num_data_each_target)
+            for target in target_list[server]:
+                add_data = splited_data[target][
+                    : num_data_each_target]
+                server_data[server].extend(add_data)
                 splited_data[target] = splited_data[target][
-                    idx + num_target_data:]
+                    num_data_each_target:]
+        client_data = list_same_term(num_server * num_server_client)
+        client_idx = 0
+        for server in range(num_server):
+            random.shuffle(server_data[server])
+            for _ in range(num_server_client):
+                client_data[client_idx] = server_data[server][: num_client_data]
+                server_data[server] = server_data[server][num_client_data:]
+                client_idx += 1
         return client_data
 
 
 def split_parts_random(dataset, num_list):
+    '''
+    split dataset with the list of number of each sub-dataset
+    '''
     client_data = []
     dataset_copy = deepcopy([dataset[i] for i in range(len(dataset))])
     random.shuffle(dataset_copy)

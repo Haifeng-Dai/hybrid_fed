@@ -1,0 +1,37 @@
+[2024-01-15 22:05:00] [INFO] device cuda is used.
+[2024-01-15 22:05:00] [INFO] cudnn is actived.
+[2024-01-15 22:05:00] [INFO] 
+      alpha      :  0.3  
+        T        :  10   
+    algorithm    :   0   
+num_server_commu :  50   
+num_client_commu :   5   
+num_client_train :   5   
+num_public_train :   5   
+   batch_size    :  160  
+     dataset     : mnist 
+  model_select   :   1   
+ num_all_client  :   9   
+ num_all_server  :   3   
+ num_client_data : 1200  
+ num_public_data :  50   
+   proportion    :  0.8  
+   num_workers   :   8   
+[2024-01-15 22:06:01] [INFO] --------------------------------------------------
+[2024-01-15 22:06:01] [INFO] |epoch_server_commu: 0/50
+[2024-01-15 22:06:01] [INFO]  |epoch_client_commu: 0/5
+[2024-01-15 22:06:01] [INFO]   |server: 0
+[2024-01-15 22:06:01] [INFO]  ---client 0
+[2024-01-15 22:06:20] [INFO] |  local epoch  : 0, acc 0.105
+[2024-01-15 22:06:31] [INFO] |  local epoch  : 1, acc 0.098
+[2024-01-15 22:06:42] [INFO] |  local epoch  : 2, acc 0.210
+[2024-01-15 22:06:54] [INFO] |  local epoch  : 3, acc 0.201
+[2024-01-15 22:07:05] [INFO] |  local epoch  : 4, acc 0.301
+[2024-01-15 22:07:05] [INFO]  ---client 1
+[2024-01-15 22:07:17] [INFO] |  local epoch  : 0, acc 0.098
+[2024-01-15 22:07:29] [INFO] |  local epoch  : 1, acc 0.098
+[2024-01-15 22:07:40] [INFO] |  local epoch  : 2, acc 0.187
+[2024-01-15 22:07:52] [INFO] |  local epoch  : 3, acc 0.259
+[2024-01-15 22:08:03] [INFO] |  local epoch  : 4, acc 0.289
+[2024-01-15 22:08:03] [INFO]  ---client 2
+[2024-01-15 22:08:15] [INFO] |  local epoch  : 0, acc 0.098

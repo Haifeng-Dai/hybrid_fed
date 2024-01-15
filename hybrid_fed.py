@@ -56,35 +56,38 @@ log.info(message)
 
 # %% 原始数据处理
 train_dataset_o, test_dataset_o, c, h, w = get_dataset(args.dataset)
-TrainDatasetSplited = SplitData(train_dataset_o)
-all_target = TrainDatasetSplited.targets
-num_target = TrainDatasetSplited.num_target
+# TrainDatasetSplited = SplitData(train_dataset_o)
+# all_target = TrainDatasetSplited.targets
+# num_target = TrainDatasetSplited.num_target
 
-client_main_target = numpy.random.choice(
-    all_target, args.num_all_client, replace=False).tolist()
-train_dataset_client = TrainDatasetSplited.server_non_iid(
-    num_server=args.num_all_server,
-    num_server_client=num_server_client,
-    num_client_data=args.num_client_data,
-    client_main_target=client_main_target,
-    proportion=args.proportion)
-train_dataloader = list_same_term(args.num_all_client)
-validate_dataloader = list_same_term(args.num_all_client)
-for i, dataset_ in enumerate(train_dataset_client):
-    [dataset_train, dataset_test] = split_parts_random(
-        dataset_, [1000, 200])
-    train_dataloader[i] = DataLoader(
-        dataset=dataset_train,
-        batch_size=args.batch_size,
-        shuffle=True,
-        pin_memory=True,
-        num_workers=args.num_workers)
-    validate_dataloader[i] = DataLoader(
-        dataset=dataset_test,
-        batch_size=args.batch_size,
-        shuffle=True,
-        pin_memory=True,
-        num_workers=args.num_workers)
+# client_main_target = numpy.random.choice(
+#     all_target, args.num_all_client, replace=False).tolist()
+# train_dataset_client = TrainDatasetSplited.server_non_iid(
+#     num_server=args.num_all_server,
+#     num_server_client=num_server_client,
+#     num_client_data=args.num_client_data,
+#     client_main_target=client_main_target,
+#     proportion=args.proportion)
+# train_dataloader = list_same_term(args.num_all_client)
+# validate_dataloader = list_same_term(args.num_all_client)
+# for i, dataset_ in enumerate(train_dataset_client):
+#     [dataset_train, dataset_test] = split_parts_random(
+#         dataset_, [1000, 200])
+#     train_dataloader[i] = DataLoader(
+#         dataset=dataset_train,
+#         batch_size=args.batch_size,
+#         shuffle=True,
+#         pin_memory=True,
+#         num_workers=args.num_workers)
+#     validate_dataloader[i] = DataLoader(
+#         dataset=dataset_test,
+#         batch_size=args.batch_size,
+#         shuffle=True,
+#         pin_memory=True,
+#         num_workers=args.num_workers)
+target_list = [[0, 1, 2], [3, 4, 5], [6, 7, 8, 9]]
+num_target, train_dataloader, validate_dataloader = split_dataset(
+    train_dataset_o, target_list, args)
 [public_dataset, test_dataset] = split_parts_random(
     test_dataset_o, [args.num_public_data, int(len(test_dataset_o)) - args.num_public_data])
 public_dataloader = DataLoader(

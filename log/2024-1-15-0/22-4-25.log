@@ -1,0 +1,49 @@
+[2024-01-15 22:04:25] [INFO] device cuda is used.
+[2024-01-15 22:04:25] [INFO] cudnn is actived.
+[2024-01-15 22:04:25] [INFO] 
+      alpha      :  0.3  
+        T        :   2   
+    algorithm    :   0   
+num_server_commu :  50   
+num_client_commu :   5   
+num_client_train :   5   
+num_public_train :   5   
+   batch_size    :  160  
+     dataset     : mnist 
+  model_select   :   1   
+ num_all_client  :   9   
+ num_all_server  :   3   
+ num_client_data : 1200  
+ num_public_data :  50   
+   proportion    :  0.8  
+   num_workers   :   8   
+[2024-01-15 22:05:10] [INFO] --------------------------------------------------
+[2024-01-15 22:05:10] [INFO] |epoch_server_commu: 0/50
+[2024-01-15 22:05:10] [INFO]  |epoch_client_commu: 0/5
+[2024-01-15 22:05:10] [INFO]   |server: 0
+[2024-01-15 22:05:10] [INFO]  ---client 0
+[2024-01-15 22:05:23] [INFO] |  local epoch  : 0, acc 0.098
+[2024-01-15 22:05:30] [INFO] |  local epoch  : 1, acc 0.098
+[2024-01-15 22:05:37] [INFO] |  local epoch  : 2, acc 0.098
+[2024-01-15 22:05:43] [INFO] |  local epoch  : 3, acc 0.098
+[2024-01-15 22:05:51] [INFO] |  local epoch  : 4, acc 0.177
+[2024-01-15 22:05:51] [INFO]  ---client 1
+[2024-01-15 22:05:58] [INFO] |  local epoch  : 0, acc 0.098
+[2024-01-15 22:06:06] [INFO] |  local epoch  : 1, acc 0.098
+[2024-01-15 22:06:15] [INFO] |  local epoch  : 2, acc 0.098
+[2024-01-15 22:06:25] [INFO] |  local epoch  : 3, acc 0.098
+[2024-01-15 22:06:36] [INFO] |  local epoch  : 4, acc 0.211
+[2024-01-15 22:06:36] [INFO]  ---client 2
+[2024-01-15 22:06:47] [INFO] |  local epoch  : 0, acc 0.098
+[2024-01-15 22:06:58] [INFO] |  local epoch  : 1, acc 0.098
+[2024-01-15 22:07:09] [INFO] |  local epoch  : 2, acc 0.098
+[2024-01-15 22:07:20] [INFO] |  local epoch  : 3, acc 0.098
+[2024-01-15 22:07:31] [INFO] |  local epoch  : 4, acc 0.179
+[2024-01-15 22:07:35] [INFO] |servers comunicated: 0, server aggregated: 0, acc_server 0: 0.160.
+[2024-01-15 22:07:35] [INFO] --------------------------------------------------
+[2024-01-15 22:07:35] [INFO]   |server: 1
+[2024-01-15 22:07:36] [INFO]  ---client 3
+[2024-01-15 22:07:47] [INFO] |  local epoch  : 0, acc 0.098
+[2024-01-15 22:07:58] [INFO] |  local epoch  : 1, acc 0.098
+[2024-01-15 22:08:09] [INFO] |  local epoch  : 2, acc 0.098
+[2024-01-15 22:08:22] [INFO] |  local epoch  : 3, acc 0.098

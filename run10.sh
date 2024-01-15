@@ -1,8 +1,8 @@
 #!/bin/bash
 
 dataset=mnist # (mnist cifar10 cifar100)
-alpha=0.1       # (0.0 0.2 0.4 0.6 0.8 1.0)
-T=8       # (2 4 6 8)
+alpha=0.4       # (0.0 0.2 0.4 0.6 0.8 1.0)
+T=2       # (2 4 6 8)
 num_all_client=9
 num_all_server=3
 batch_size=160
@@ -20,7 +20,7 @@ proportion=0.8
 #     for T_ in ${T[@]}; do
 # for dataset_ in ${dataset[@]}; do
 #     for model_select_ in ${model_select[@]}; do
-python hybrid_fed.py \
+mpiexec -np 2 python hybrid_fed1.py \
     --dataset ${dataset} \
     --alpha ${alpha} \
     --T ${T} \
