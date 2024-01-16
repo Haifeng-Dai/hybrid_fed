@@ -34,6 +34,8 @@ class DistillKL(torch.nn.Module):
             (1 - self.alpha) * soft_loss * self.T**2 / logits_teacher.shape[0]
         return loss
 
+def selective_distill(data, args):
+    neigh = 1
 
 def train_model(model, dataloader, device, LR):
     # 训练模型

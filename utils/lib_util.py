@@ -99,8 +99,7 @@ def get_logger(filename, mode='w'):
 def save_file(args, save_data, log):
     # 保存数据
     save_path = f'./res/{args.dataset}_model_{args.model_select}_algo_{args.algorithm}/alpha_{args.alpha}_T_{args.T}/'
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+    os.makedirs(save_path, exist_ok=True)
     file_path = save_path+(
         f'server_commu_{args.num_server_commu}'
         f'_client_commu_{args.num_client_commu}'
@@ -171,8 +170,8 @@ def weights_init(m):
 def gradient_penality(D, real_samples, fake_samples, device):
     # Calculates the gradient penalty loss for WGAN-GP
     alpha = torch.rand((real_samples.shape[0], 1, 1, 1), device=device)
-    interpolates = (alpha * real_samples + ((1 - alpha)
-                    * fake_samples)).requires_grad_(True)
+    interpolates = (
+        alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
     d_interpolates = D(interpolates)
     fake = torch.ones_like(d_interpolates)
     gradient = torch.autograd.grad(

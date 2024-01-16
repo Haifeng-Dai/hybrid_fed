@@ -80,3 +80,52 @@ num_public_train :   5
 [2024-01-15 22:07:57] [INFO] |  local epoch  : 1, acc 0.096
 [2024-01-15 22:08:08] [INFO] |  local epoch  : 2, acc 0.096
 [2024-01-15 22:08:20] [INFO] |  local epoch  : 3, acc 0.096
+[2024-01-15 22:08:34] [INFO] |  local epoch  : 4, acc 0.133
+[2024-01-15 22:08:40] [INFO] |servers comunicated: 0, server aggregated: 0, acc_server 2: 0.181.
+[2024-01-15 22:08:40] [INFO] --------------------------------------------------
+[2024-01-15 22:08:40] [INFO]  |epoch_client_commu: 1/5
+[2024-01-15 22:08:40] [INFO]   |server: 0
+[2024-01-15 22:08:40] [INFO]  ---client 0
+[2024-01-15 22:08:55] [INFO] |  local epoch  : 0, acc 0.303
+[2024-01-15 22:09:08] [INFO] |  local epoch  : 1, acc 0.275
+[2024-01-15 22:09:21] [INFO] |  local epoch  : 2, acc 0.272
+[2024-01-15 22:09:34] [INFO] |  local epoch  : 3, acc 0.292
+[2024-01-15 22:09:48] [INFO] |  local epoch  : 4, acc 0.303
+[2024-01-15 22:09:48] [INFO]  ---client 1
+[2024-01-15 22:10:01] [INFO] |  local epoch  : 0, acc 0.283
+[2024-01-15 22:10:14] [INFO] |  local epoch  : 1, acc 0.300
+[2024-01-15 22:10:28] [INFO] |  local epoch  : 2, acc 0.302
+[2024-01-15 22:10:41] [INFO] |  local epoch  : 3, acc 0.302
+[2024-01-15 22:10:55] [INFO] |  local epoch  : 4, acc 0.305
+[2024-01-15 22:10:55] [INFO]  ---client 2
+[2024-01-15 22:11:08] [INFO] |  local epoch  : 0, acc 0.265
+[2024-01-15 22:11:22] [INFO] |  local epoch  : 1, acc 0.303
+[2024-01-15 22:11:35] [INFO] |  local epoch  : 2, acc 0.290
+[2024-01-15 22:11:49] [INFO] |  local epoch  : 3, acc 0.297
+[2024-01-15 22:12:03] [INFO] |  local epoch  : 4, acc 0.305
+[2024-01-15 22:12:08] [INFO] |servers comunicated: 0, server aggregated: 1, acc_server 0: 0.305.
+[2024-01-15 22:12:08] [INFO] --------------------------------------------------
+[2024-01-15 22:12:08] [INFO]   |server: 1
+[2024-01-15 22:12:09] [INFO]  ---client 3
+[2024-01-15 22:12:22] [INFO] |  local epoch  : 0, acc 0.100
+[2024-01-15 22:12:35] [INFO] |  local epoch  : 1, acc 0.196
+[2024-01-15 22:12:49] [INFO] |  local epoch  : 2, acc 0.222
+[2024-01-15 22:13:02] [INFO] |  local epoch  : 3, acc 0.198
+[2024-01-15 22:13:16] [INFO] |  local epoch  : 4, acc 0.255
+[2024-01-15 22:13:16] [INFO]  ---client 4
+[2024-01-15 22:13:28] [INFO] |  local epoch  : 0, acc 0.179
+[2024-01-15 22:13:42] [INFO] |  local epoch  : 1, acc 0.197
+[2024-01-15 22:13:56] [INFO] |  local epoch  : 2, acc 0.217
+[2024-01-15 22:14:08] [INFO] |  local epoch  : 3, acc 0.239
+[2024-01-15 22:14:22] [INFO] |  local epoch  : 4, acc 0.240
+[2024-01-15 22:14:22] [INFO]  ---client 5
+[2024-01-15 22:14:35] [INFO] |  local epoch  : 0, acc 0.154
+[2024-01-15 22:14:49] [INFO] |  local epoch  : 1, acc 0.214
+[2024-01-15 22:15:02] [INFO] |  local epoch  : 2, acc 0.229
+[2024-01-15 22:15:15] [INFO] |  local epoch  : 3, acc 0.239
+[2024-01-15 22:15:28] [INFO] |  local epoch  : 4, acc 0.244
+[2024-01-15 22:15:34] [INFO] |servers comunicated: 0, server aggregated: 1, acc_server 1: 0.250.
+[2024-01-15 22:15:34] [INFO] --------------------------------------------------
+[2024-01-15 22:15:34] [INFO]   |server: 2
+[2024-01-15 22:15:34] [INFO]  ---client 6
+[2024-01-15 22:15:48] [INFO] |  local epoch  : 0, acc 0.255
