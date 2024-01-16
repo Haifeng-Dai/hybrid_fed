@@ -210,7 +210,6 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = x.reshape(x.shape[0], -1)
         x = self.fc(x)
-
         return x
 
     def _make_layer(self, block, num_residual_blocks, intermediate_channels, stride):

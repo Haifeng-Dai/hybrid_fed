@@ -268,7 +268,6 @@ class SplitData:
         num_server_data = num_client_data * num_server_client
         for server in range(num_server):
             num_data_each_target = num_server_data // len(target_list[server])
-            # print(num_data_each_target)
             for target in target_list[server]:
                 add_data = splited_data[target][
                     : num_data_each_target]

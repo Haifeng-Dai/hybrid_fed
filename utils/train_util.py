@@ -1,5 +1,6 @@
 import torch
 from copy import deepcopy
+from torch.utils.data import DataLoader
 
 
 def ce_loss(output, target, device):
@@ -34,8 +35,101 @@ class DistillKL(torch.nn.Module):
             (1 - self.alpha) * soft_loss * self.T**2 / logits_teacher.shape[0]
         return loss
 
-def selective_distill(data, args):
-    neigh = 1
+
+def distill_public(args, args_train):
+    server_model = {}
+    for server in args_train['all_server']:
+        server_model[server] = args_train['server_model'][server].eval()
+    dataset_ = []
+    target_logits = {}
+    for i, (data, target) in enumerate(args_train['public_dataset']):
+        data_device = data.to(args.device)
+        data_ = torch.unsqueeze(data_device, dim=0)
+        logits = torch.zeros([1, 10]).to(args.device)
+        num_target_servers = 0
+        for server in args_train['all_server']:
+            if target in args_train['target_list'][server]:
+                logits += server_model[server](data_)
+                num_target_servers += 1
+        logits = logits / num_target_servers
+        dataset_.append((data, i))
+        target_logits[i] = (target, logits)
+    return dataset_, target_logits
+
+
+# def distill_train_loop(model, validate_dataloader, args, args_train):
+#     # 训练蒸馏模型, logits加权聚合
+#     loss_ = []
+#     acc_ = []
+#     acc__ = []
+#     for epoch in range(args.num_public_train):
+#         trained_model = deepcopy(model).to(args.device).train()
+#         # weight_device = weight.to(args.device)
+#         optimizer = torch.optim.Adam(trained_model.parameters(),
+#                                      lr=args_train['LR'],
+#                                      weight_decay=1e-3)
+#         criterion = DistillKL(args.T, args.alpha, args.device)
+#         dataset, target_logits = distill_public(args, args_train)
+#         dataloader = DataLoader(dataset=dataset,
+#                                 batch_size=16,
+#                                 shuffle=True,
+#                                 num_workers=8,
+#                                 pin_memory=True)
+#         for data, idxs in dataloader:
+#             batch_size = data.shape[0]
+#             targets = torch.zeros([batch_size], device=args.device)
+#             logits = torch.zeros([batch_size, args_train['num_target']])
+#             for i, idx in enumerate(idxs.tolist()):
+#                 (targets[i], logits[i]) = target_logits[idx]
+#             targets = targets.type(dtype=torch.int64)
+#             optimizer.zero_grad()
+#             output = trained_model(data.to(args.device))
+#             loss = criterion(
+#                 output, targets.to(args.device), logits.to(args.device))
+#             loss.backward()
+#             optimizer.step()
+#             loss_.append(loss.item())
+#         acc = eval_model(
+#             model=trained_model,
+#             dataloader=args_train['test_dataloader'],
+#             device=args.device)
+#         acc_val = eval_model(
+#             model=trained_model,
+#             dataloader=validate_dataloader,
+#             device=args.device)
+#         acc_.append(acc)
+#         acc__.append(acc_val)
+#         message = '|distill epoch: {}, acc: {:.3f}, acc_v: {:.3f}'.format(
+#             epoch, acc, acc_val)
+#         args_train['log'].info(message)
+#     return trained_model, loss_, acc_, acc__
+
+def distill_train_loop(model, validate_dataloader, args, args_train):
+    # 不进行蒸馏训练
+    loss_ = []
+    acc_ = []
+    acc__ = []
+    for epoch in range(args.num_client_train):
+        model, loss = train_model(
+            model=model,
+            dataloader=args_train['public_dataloader'],
+            device=args.device,
+            LR=args_train['LR'])
+        acc = eval_model(
+            model=model,
+            dataloader=args_train['test_dataloader'],
+            device=args.device)
+        acc_val = eval_model(
+            model=model,
+            dataloader=validate_dataloader,
+            device=args.device)
+        acc_.append(acc)
+        acc__.append(acc_val)
+        message = '|distill epoch: {}, acc: {:.3f}, acc_v: {:.3f}'.format(
+            epoch, acc, acc_val)
+        args_train['log'].info(message)
+        loss_.extend(loss)
+    return model, loss_, acc_, acc__
 
 def train_model(model, dataloader, device, LR):
     # 训练模型
@@ -76,8 +170,8 @@ def regular_loop(model, dataloader, validate_dataloader, args, args_train):
             device=args.device)
         acc_.append(acc)
         acc__.append(acc_val)
-        message = '|{:^15}: {}, acc {:.3f}'.format(
-            'local epoch', epoch, acc)
+        message = '|local epoch: {}, acc: {:.3f}, acc_v: {:.3f}'.format(
+            epoch, acc, acc_val)
         args_train['log'].info(message)
         loss_.extend(loss)
     return model, loss_, acc_, acc__
@@ -119,8 +213,8 @@ def weighted_distill_train_loop(model, weight, validate_dataloader, args, args_t
             device=args.device)
         acc_.append(acc)
         acc__.append(acc_val)
-        message = '|{:^15}: {}, acc {:.3f}'.format(
-            'distill epoch', epoch, acc)
+        message = '|distill epoch: {}, acc: {:.3f}, acc_v: {:.3f}'.format(
+            epoch, acc, acc_val)
         args_train['log'].info(message)
     return trained_model, loss_, acc_, acc__
 
@@ -158,8 +252,8 @@ def circulate_distill_train_loop(model, validate_dataloader, args, args_train):
                 model=trained_model,
                 dataloader=validate_dataloader,
                 device=args.device)
-            message = '|{:^15}: {}, acc {:.3f}'.format(
-                'distill epoch', epoch, acc)
+            message = '|distill epoch: {}, acc: {:.3f}, acc_v: {:.3f}'.format(
+            epoch, acc, acc_val)
             args_train['log'].info(message)
             _acc.append(acc)
             __acc.append(acc_val)

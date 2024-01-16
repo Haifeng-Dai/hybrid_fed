@@ -72,6 +72,28 @@ def regular(args, args_train):
         args_train['validate_accuracy'][i].extend(acc_val)
     return client_model_
 
+def distill(args, args_train):
+    # 本地训练+循环蒸馏
+    client_model = deepcopy(args_train['client_model'])
+    client_model_ = deepcopy(client_model)
+    for i in args_train['client_idx']:
+        message = f' ---client {i}'
+        args_train['log'].info(message)
+        dataloader = args_train['train_dataloader'][i]
+        validate_dataloader = args_train['validate_dataloader'][i]
+        model, loss, acc, acc_val = regular_loop(
+            client_model[i], dataloader, validate_dataloader, args, args_train)
+        args_train['client_loss'][i].extend(loss)
+        args_train['client_accuracy'][i].extend(acc)
+        args_train['validate_accuracy'][i].extend(acc_val)
+        if args_train['epoch_server_commu'] != 0:
+            model, loss, acc, acc_val = distill_train_loop(
+                model, validate_dataloader, args, args_train)
+            args_train['client_loss'][i].extend(loss)
+            args_train['client_accuracy'][i].extend(acc)
+            args_train['validate_accuracy'][i].extend(acc_val)
+        client_model_[i] = deepcopy(model)
+    return client_model_
 
 def aggregator(server, args, args_train):
     # 在单个服务器下客户端训练完成后更新该服务器下客户端的模型
@@ -115,6 +137,8 @@ class Trainer:
             self.trainer = circulate_distill
         elif args.algorithm == 2:
             self.trainer = regular
+        elif args.algorithm == 3:
+            self.trainer = distill
         else:
             raise ValueError('algorithm error.')
 
@@ -148,7 +172,7 @@ class Trainer:
                     self.args_train['client_model'] = deepcopy(client_model)
                     acc_server = aggregator(server, self.args, self.args_train)
                     message = '|servers comunicated: {}, server aggregated: {}, acc_server {}: {:.3f}.'.format(
-                        epoch_server_commu, epoch_client_commu, server, acc_server)
+                        epoch_server_commu+1, epoch_client_commu+1, server, acc_server)
                     self.args_train['log'].info(message)
                     self.args_train['log'].info('-'*50)
                     server_accuracy[server].append(acc_server)
