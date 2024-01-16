@@ -72,6 +72,7 @@ def regular(args, args_train):
         args_train['validate_accuracy'][i].extend(acc_val)
     return client_model_
 
+
 def distill(args, args_train):
     # 本地训练+循环蒸馏
     client_model = deepcopy(args_train['client_model'])
@@ -95,6 +96,7 @@ def distill(args, args_train):
         client_model_[i] = deepcopy(model)
     return client_model_
 
+
 def aggregator(server, args, args_train):
     # 在单个服务器下客户端训练完成后更新该服务器下客户端的模型
     server_model_ = [
@@ -114,8 +116,6 @@ def aggregator(server, args, args_train):
 
 
 def server_communicate(args, args_train):
-    if args.algorithm != 2:
-        return
     server_model_ = deepcopy(args_train['server_model'])
     for i, weight in enumerate(args_train['weight_list']):
         server_model_[i] = aggregate(args_train['server_model'], weight)
@@ -131,13 +131,14 @@ class Trainer:
         self.neighbor_server = neighbor_server
         self.args = args
         self.args_train = args_train
-        if args.algorithm == 0:
+        self.algorithm = args.algorithm
+        if self.algorithm == 0:
             self.trainer = weighted_distill
-        elif args.algorithm == 1:
+        elif self.algorithm == 1:
             self.trainer = circulate_distill
-        elif args.algorithm == 2:
+        elif self.algorithm == 2:
             self.trainer = regular
-        elif args.algorithm == 3:
+        elif self.algorithm == 3:
             self.trainer = distill
         else:
             raise ValueError('algorithm error.')
@@ -176,7 +177,8 @@ class Trainer:
                     self.args_train['log'].info(message)
                     self.args_train['log'].info('-'*50)
                     server_accuracy[server].append(acc_server)
-                server_communicate(self.args, self.args_train)
+                if self.algorithm == 2:
+                    server_communicate(self.args, self.args_train)
             message = '{:^50}'.format(
                 '********  servers comunicates  ********')
             self.args_train['log'].info(message)

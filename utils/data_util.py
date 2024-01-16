@@ -82,7 +82,7 @@ def split_dataset(train_dataset_o, target_list, args):
     for i, dataset_ in enumerate(train_dataset_client):
         # print()
         [dataset_train, dataset_test] = split_parts_random(
-            dataset_, [1000, 200])
+            dataset_, [2000, 200])
         train_dataloader[i] = DataLoader(
             dataset=dataset_train,
             batch_size=args.batch_size,

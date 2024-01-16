@@ -109,7 +109,7 @@ def distill_train_loop(model, validate_dataloader, args, args_train):
     loss_ = []
     acc_ = []
     acc__ = []
-    for epoch in range(args.num_client_train):
+    for epoch in range(args.num_public_train):
         model, loss = train_model(
             model=model,
             dataloader=args_train['public_dataloader'],

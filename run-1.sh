@@ -6,14 +6,14 @@ T=6       # (2 4 6 8)
 num_all_client=9
 num_all_server=3
 batch_size=160
-num_client_data=1200
-num_server_commu=3
+num_client_data=2200
+num_server_commu=30
 num_client_commu=3
 num_client_train=5
 num_public_train=20
 model_select=1 # (1 2 3)
 algorithm=3        # (0 1 2 3 4)
-num_public_data=1000
+num_public_data=500
 proportion=0.8
 
 # for alpha_ in ${alpha[@]}; do
