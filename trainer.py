@@ -125,6 +125,13 @@ def server_communicate(args, args_train):
                 args_train['server_model'][server])
     args_train['server_model'] = deepcopy(server_model_)
 
+def server_distill(args, args_train):
+    server_model = deepcopy(args_train['server_model'])
+    client_model = deepcopy(args_train['client_model'])
+    for epoch in range(args.num_public_train):
+        for data, target in args_train['public_dataloader']:
+            server_model[] = regular_loop()
+    return server_model, client_model
 
 class Trainer:
     def __init__(self, neighbor_server, args, args_train):
@@ -140,6 +147,8 @@ class Trainer:
             self.trainer = regular
         elif self.algorithm == 3:
             self.trainer = distill
+        elif self.algorithm == 4:
+            self.trainer = regular
         else:
             raise ValueError('algorithm error.')
 
@@ -179,6 +188,10 @@ class Trainer:
                     server_accuracy[server].append(acc_server)
                 if self.algorithm == 2:
                     server_communicate(self.args, self.args_train)
+                if self.algorithm == 4:
+                    server_model, client_model = server_distill(self.args, self.args_train)
+                    self.args_train['server_model'] = deepcopy(server_model)
+                    self.args_train['client_model'] = deepcopy(client_model)
             message = '{:^50}'.format(
                 '********  servers comunicates  ********')
             self.args_train['log'].info(message)
