@@ -4,7 +4,9 @@ import random
 import numpy
 
 from utils.lib_util import *
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
+from torchvision.datasets import MNIST, CIFAR10, CIFAR100
+from torchvision.transforms import ToTensor
 
 
 # def data_loader(dataset, batch_size, shuffle, ):
@@ -19,40 +21,32 @@ from torch.utils.data import DataLoader
 
 
 def get_dataset(dataset='mnist'):
-    '''
-    获取完整的原始数据集
-    '''
+    '''获取完整的原始数据集'''
     raw_data = './data/'
     if dataset == 'mnist':
-        train_dataset = torchvision.datasets.MNIST(
-            root=raw_data,
-            transform=torchvision.transforms.ToTensor(),
-            train=True,
-            download=True)
-        test_dataset = torchvision.datasets.MNIST(
-            root=raw_data,
-            transform=torchvision.transforms.ToTensor(),
-            train=False)
+        train_dataset = MNIST(root=raw_data,
+                              transform=ToTensor(),
+                              train=True,
+                              download=True)
+        test_dataset = MNIST(root=raw_data,
+                             transform=ToTensor(),
+                             train=False)
     elif dataset == 'cifar10':
-        train_dataset = torchvision.datasets.CIFAR10(
-            root=raw_data,
-            transform=torchvision.transforms.ToTensor(),
-            train=True,
-            download=True)
-        test_dataset = torchvision.datasets.CIFAR10(
-            root=raw_data,
-            transform=torchvision.transforms.ToTensor(),
-            train=False)
+        train_dataset = CIFAR10(root=raw_data,
+                                transform=ToTensor(),
+                                train=True,
+                                download=True)
+        test_dataset = CIFAR10(root=raw_data,
+                               transform=ToTensor(),
+                               train=False)
     elif dataset == 'cifar100':
-        train_dataset = torchvision.datasets.CIFAR100(
-            root=raw_data,
-            transform=torchvision.transforms.ToTensor(),
-            train=True,
-            download=True)
-        test_dataset = torchvision.datasets.CIFAR100(
-            root=raw_data,
-            transform=torchvision.transforms.ToTensor(),
-            train=False)
+        train_dataset = CIFAR100(root=raw_data,
+                                 transform=ToTensor(),
+                                 train=True,
+                                 download=True)
+        test_dataset = CIFAR100(root=raw_data,
+                                transform=ToTensor(),
+                                train=False)
     else:
         raise ValueError('dataset error.')
     [c, h, w] = train_dataset[0][0].shape
@@ -61,41 +55,74 @@ def get_dataset(dataset='mnist'):
 
 def split_dataset(train_dataset_o, target_list, args):
     TrainDatasetSplited = SplitData(train_dataset_o)
-    all_target = TrainDatasetSplited.targets
+    # all_target = TrainDatasetSplited.targets
     num_target = TrainDatasetSplited.num_target
-
-    # client_main_target = numpy.random.choice(
-    #     all_target, args.num_all_client, replace=False).tolist()
-    # train_dataset_client = TrainDatasetSplited.server_non_iid(
-    #     num_server=args.num_all_server,
-    #     num_server_client=num_server_client,
-    #     num_client_data=args.num_client_data,
-    #     client_main_target=client_main_target,
-    #     proportion=args.proportion)
     train_dataset_client = TrainDatasetSplited.server_target_niid(
         num_server=args.num_all_server,
         num_server_client=args.num_all_client // args.num_all_server,
         num_client_data=args.num_client_data,
         target_list=target_list)
-    train_dataloader = list_same_term(args.num_all_client)
-    validate_dataloader = list_same_term(args.num_all_client)
+    validate_dataloader = {}
+    validate_dataset = {}
+    dataset_train = {}
     for i, dataset_ in enumerate(train_dataset_client):
-        # print()
-        [dataset_train, dataset_test] = split_parts_random(
-            dataset_, [2000, 200])
-        train_dataloader[i] = DataLoader(
-            dataset=dataset_train,
-            batch_size=args.batch_size,
-            shuffle=True,
-            pin_memory=True,
-            num_workers=args.num_workers)
-        validate_dataloader[i] = DataLoader(
-            dataset=dataset_test,
-            batch_size=args.batch_size,
-            shuffle=True,
-            pin_memory=True,
-            num_workers=args.num_workers)
-    return num_target, train_dataloader, validate_dataloader
+        num_data = len(dataset_)
+        num_validate = num_data // 5
+        [dataset_train[i], validate_dataset[i]] = split_parts_random(
+            dataset_, [num_data-num_validate, num_validate])
+        validate_dataloader[i] = DataLoader(dataset=validate_dataset[i],
+                                            batch_size=32,
+                                            shuffle=True,
+                                            pin_memory=True,
+                                            num_workers=args.num_workers)
+    return num_target, dataset_train, validate_dataloader
+
+
+def non_iid(dataset: list | Dataset, alpha=100., num_client_data=1200, num_client=3):
+    '''根据Dirichlet分布分割数据集'''
+    alpha = float(alpha)
+    all_idx = []
+    all_data = []
+    all_target = []
+    for idx, (data, target) in enumerate(dataset):
+        all_idx.append(idx)
+        all_data.append(data)
+        all_target.append(target)
+    random.shuffle(all_idx)
+
+    targets = set(all_target)
+    num_targets = len(targets)
+    pro = torch.distributions.dirichlet.Dirichlet(
+        torch.full((num_targets,), alpha)).sample([num_client])
+    num = (pro * num_client_data).round().int()
+
+    idx_max = num.argmax(dim=1)
+    num_sum = num.sum(dim=1)
+    # print(num_sum)
+    target_data = {target: [] for target in targets}
+    for idx in all_idx:
+        target_data[all_target[idx]].append([all_data[idx], all_target[idx]])
+
+    data_client = {}
+    for client in range(num_client):
+        data_client[client] = []
+        err = num_sum[client] - num_client_data
+        if err:
+            num[client, idx_max[client]] -= err
+        #     print(client, err, num_sum[client], num[client, idx_max[client]])
+        # print(err, num.sum(dim=1))
+        idx_ = 0
+        for target_ in targets:
+            num_new_data = num[client, target_]
+            new_data = target_data[target_][:idx_+num_new_data]
+            data_client[client].extend(new_data)
+            target_data[target_] = target_data[target_][idx_+num_new_data:]
+    for client in range(num_client):
+        if len(data_client[client]) != num_client_data:
+            raise Warning(
+                f'number of data in client {client} less than {num_client_data}')
+
+    return data_client
 
 
 class SplitData:
@@ -301,9 +328,8 @@ def split_parts_random(dataset, num_list):
 
 # if __name__ == '__main__':
 
-#     dataset, _ = get_dataset()
-#     DataSplit = SplitData(dataset=dataset)
-#     splited_data = DataSplit.split_data()
-#     client_data = DataSplit.client_non_iid(2, 3, 100)
-#     print(type(client_data), len(client_data))
-#     print(type(client_data[0]), len(client_data[0]))
+    # dataset, _, _, _, _ = get_dataset()
+    # non_iid(dataset=dataset)
+    # a = torch.tensor([1])
+    # b = [1, 2, 3, 4]
+    # print(b[:0])

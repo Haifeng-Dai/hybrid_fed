@@ -4,6 +4,7 @@ import logging
 import torch
 import argparse
 import torchvision
+import numpy, random
 
 from copy import deepcopy
 from utils.train_util import *
@@ -45,7 +46,17 @@ def get_args():
                         help='number of public data.')
     parser.add_argument('--proportion', type=float, default=0.8,
                         help='proportion of main target data.')
+    parser.add_argument('--seed', type=int, default=10,
+                        help='randon seed.')
     return parser.parse_args()
+
+
+def setup_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    numpy.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
 
 
 def get_device(log):

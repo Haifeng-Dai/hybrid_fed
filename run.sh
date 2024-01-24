@@ -13,7 +13,7 @@ num_client_train=5
 num_public_train=20
 model_select=1 # (1 2 3)
 algorithm=3        # (0 1 2 3 4)
-num_public_data=500
+num_public_data=200
 proportion=0.8
 
 # for alpha_ in ${alpha[@]}; do

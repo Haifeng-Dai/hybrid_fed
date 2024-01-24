@@ -12,7 +12,7 @@ num_client_commu=5
 num_client_train=5
 num_public_train=5
 model_select=1 # (1 2 3)
-algorithm=2    # (0 1 2 3 4)
+algorithm=3    # (0 1 2 3 4)
 num_public_data=50
 proportion=0.8
 

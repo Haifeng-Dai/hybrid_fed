@@ -1,0 +1,66 @@
+[2024-01-17 15:15:36] [INFO] device cuda is used.
+[2024-01-17 15:15:36] [INFO] cudnn is actived.
+[2024-01-17 15:15:36] [INFO] 
+      alpha      :  0.5  
+        T        :   6   
+    algorithm    :   3   
+num_server_commu :  30   
+num_client_commu :   5   
+num_client_train :   5   
+num_public_train :   5   
+   batch_size    :  160  
+     dataset     : mnist 
+  model_select   :   1   
+ num_all_client  :   9   
+ num_all_server  :   3   
+ num_client_data : 1200  
+ num_public_data :  50   
+   proportion    :  0.8  
+   num_workers   :   8   
+[2024-01-17 15:15:40] [INFO] --------------------------------------------------
+[2024-01-17 15:15:40] [INFO] |epoch_server_commu: 0/30
+[2024-01-17 15:15:40] [INFO]  |epoch_client_commu: 0/5
+[2024-01-17 15:15:40] [INFO]   |server: 0
+[2024-01-17 15:15:40] [INFO]  ---client 0
+[2024-01-17 15:15:40] [INFO] |local epoch: 0, acc: 0.145, acc_v: 0.496
+[2024-01-17 15:15:41] [INFO] |local epoch: 1, acc: 0.124, acc_v: 0.417
+[2024-01-17 15:15:41] [INFO] |local epoch: 2, acc: 0.299, acc_v: 0.913
+[2024-01-17 15:15:42] [INFO] |local epoch: 3, acc: 0.288, acc_v: 0.871
+[2024-01-17 15:15:42] [INFO] |local epoch: 4, acc: 0.306, acc_v: 0.946
+[2024-01-17 15:15:42] [INFO]  ---client 1
+[2024-01-17 15:15:42] [INFO] |local epoch: 0, acc: 0.187, acc_v: 0.604
+[2024-01-17 15:15:43] [INFO] |local epoch: 1, acc: 0.185, acc_v: 0.608
+[2024-01-17 15:15:43] [INFO] |local epoch: 2, acc: 0.302, acc_v: 0.950
+[2024-01-17 15:15:43] [INFO] |local epoch: 3, acc: 0.298, acc_v: 0.946
+[2024-01-17 15:15:44] [INFO] |local epoch: 4, acc: 0.290, acc_v: 0.913
+[2024-01-17 15:15:44] [INFO]  ---client 2
+[2024-01-17 15:15:44] [INFO] |local epoch: 0, acc: 0.172, acc_v: 0.562
+[2024-01-17 15:15:45] [INFO] |local epoch: 1, acc: 0.161, acc_v: 0.513
+[2024-01-17 15:15:45] [INFO] |local epoch: 2, acc: 0.237, acc_v: 0.742
+[2024-01-17 15:15:45] [INFO] |local epoch: 3, acc: 0.305, acc_v: 0.958
+[2024-01-17 15:15:46] [INFO] |local epoch: 4, acc: 0.304, acc_v: 0.963
+[2024-01-17 15:15:46] [INFO] |servers comunicated: 0, server aggregated: 0, acc_server 0: 0.303.
+[2024-01-17 15:15:46] [INFO] --------------------------------------------------
+[2024-01-17 15:15:46] [INFO]   |server: 1
+[2024-01-17 15:15:46] [INFO]  ---client 3
+[2024-01-17 15:15:46] [INFO] |local epoch: 0, acc: 0.186, acc_v: 0.650
+[2024-01-17 15:15:47] [INFO] |local epoch: 1, acc: 0.197, acc_v: 0.704
+[2024-01-17 15:15:47] [INFO] |local epoch: 2, acc: 0.196, acc_v: 0.700
+[2024-01-17 15:15:47] [INFO] |local epoch: 3, acc: 0.240, acc_v: 0.838
+[2024-01-17 15:15:48] [INFO] |local epoch: 4, acc: 0.242, acc_v: 0.850
+[2024-01-17 15:15:48] [INFO]  ---client 4
+[2024-01-17 15:15:48] [INFO] |local epoch: 0, acc: 0.196, acc_v: 0.617
+[2024-01-17 15:15:48] [INFO] |local epoch: 1, acc: 0.190, acc_v: 0.588
+[2024-01-17 15:15:49] [INFO] |local epoch: 2, acc: 0.195, acc_v: 0.608
+[2024-01-17 15:15:49] [INFO] |local epoch: 3, acc: 0.180, acc_v: 0.683
+[2024-01-17 15:15:50] [INFO] |local epoch: 4, acc: 0.245, acc_v: 0.875
+[2024-01-17 15:15:50] [INFO]  ---client 5
+[2024-01-17 15:15:50] [INFO] |local epoch: 0, acc: 0.195, acc_v: 0.625
+[2024-01-17 15:15:50] [INFO] |local epoch: 1, acc: 0.196, acc_v: 0.633
+[2024-01-17 15:15:51] [INFO] |local epoch: 2, acc: 0.197, acc_v: 0.638
+[2024-01-17 15:15:51] [INFO] |local epoch: 3, acc: 0.241, acc_v: 0.821
+[2024-01-17 15:15:51] [INFO] |local epoch: 4, acc: 0.239, acc_v: 0.821
+[2024-01-17 15:15:52] [INFO] |servers comunicated: 0, server aggregated: 0, acc_server 1: 0.239.
+[2024-01-17 15:15:52] [INFO] --------------------------------------------------
+[2024-01-17 15:15:52] [INFO]   |server: 2
+[2024-01-17 15:15:52] [INFO]  ---client 6

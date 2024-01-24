@@ -27,6 +27,7 @@ torch.set_printoptions(
 
 # %% 参数定义
 args = get_args()
+setup_seed(args.seed)
 args.device = get_device(log)
 
 server_client = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
@@ -57,7 +58,7 @@ log.info(message)
 # %% 原始数据处理
 train_dataset_o, test_dataset_o, c, h, w = get_dataset(args.dataset)
 target_list = {0: [0, 1, 2], 1: [3, 4, 5], 2: [6, 7, 8, 9]}
-num_target, train_dataloader, validate_dataloader = split_dataset(
+num_target, dataset_train, validate_dataloader = split_dataset(
     train_dataset_o, target_list, args)
 [public_dataset, test_dataset] = split_parts_random(
     test_dataset_o, [args.num_public_data, int(len(test_dataset_o)) - args.num_public_data])
@@ -72,6 +73,24 @@ test_dataloader = DataLoader(
     batch_size=args.batch_size,
     pin_memory=True,
     num_workers=args.num_workers)
+train_dataloader = {}
+for client in all_client:
+    train_dataloader[client] = DataLoader(
+        dataset=dataset_train,
+        batch_size=args.batch_size,
+        shuffle=True,
+        pin_memory=True,
+        num_workers=args.num_workers)
+regular_dataset = deepcopy(dataset_train)
+regular_dataloader = {}
+for client in all_client:
+    regular_dataset[client].extend(public_dataset)
+    regular_dataloader[client] = DataLoader(
+        dataset=regular_dataset[client],
+        batch_size=args.batch_size,
+        shuffle=True,
+        pin_memory=True,
+        num_workers=args.num_workers)
 
 # %% 模型初始化
 client_model, server_model = intial_model(
@@ -99,7 +118,8 @@ keys = ['server_model',
         'all_server',
         'client_model',
         'target_list',
-        'public_dataset']
+        'public_dataset',
+        'regular_dataloader']
 values = [server_model,
           train_dataloader,
           test_dataloader,
@@ -116,7 +136,8 @@ values = [server_model,
           all_server,
           client_model,
           target_list,
-          public_dataset]
+          public_dataset,
+          regular_dataloader]
 args_train = dict(zip(keys, values))
 server_accuracy = Trainer(neighbor_server, args, args_train).train
 
